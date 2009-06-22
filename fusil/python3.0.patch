@@ -1,0 +1,192 @@
+diff -ur fusil.orig/doc/c_tools.rst fusil.patched/doc/c_tools.rst
+--- fusil.orig/doc/c_tools.rst	2008-09-12 01:43:29.000000000 +0200
++++ fusil.patched/doc/c_tools.rst	2008-12-20 13:55:16.000000000 +0100
+@@ -10,7 +10,7 @@
+    >>> quoteString('Hello World\n\0')
+    '"Hello World\\n\\0"'
+    >>> encodeUTF32("Hello")
+-   'H\x00\x00\x00e\x00\x00\x00l\x00\x00\x00l\x00\x00\x00o\x00\x00\x00'
++   b'H\x00\x00\x00e\x00\x00\x00l\x00\x00\x00l\x00\x00\x00o\x00\x00\x00'
+ 
+ encodeUTF32() use host endian.
+ 
+diff -ur fusil.orig/fusil/bits.py fusil.patched/fusil/bits.py
+--- fusil.orig/fusil/bits.py	2008-09-07 14:56:22.000000000 +0200
++++ fusil.patched/fusil/bits.py	2008-12-20 13:55:16.000000000 +0100
+@@ -64,19 +64,19 @@
+     r"""
+     Convert a bytes string into an unsigned integer.
+ 
+-    >>> chr(bytes2uint('*', BIG_ENDIAN))
++    >>> chr(bytes2uint(b'*', BIG_ENDIAN))
+     '*'
+-    >>> bytes2uint("\x00\x01\x02\x03", BIG_ENDIAN) == 0x10203
++    >>> bytes2uint(b"\x00\x01\x02\x03", BIG_ENDIAN) == 0x10203
+     True
+-    >>> bytes2uint("\x2a\x10", LITTLE_ENDIAN) == 0x102a
++    >>> bytes2uint(b"\x2a\x10", LITTLE_ENDIAN) == 0x102a
+     True
+-    >>> bytes2uint("\xff\x14\x2a\x10", BIG_ENDIAN) == 0xff142a10
++    >>> bytes2uint(b"\xff\x14\x2a\x10", BIG_ENDIAN) == 0xff142a10
+     True
+-    >>> bytes2uint("\x00\x01\x02\x03", LITTLE_ENDIAN) == 0x3020100
++    >>> bytes2uint(b"\x00\x01\x02\x03", LITTLE_ENDIAN) == 0x3020100
+     True
+-    >>> bytes2uint("\xff\x14\x2a\x10\xab\x00\xd9\x0e", BIG_ENDIAN) == 0xff142a10ab00d90e
++    >>> bytes2uint(b"\xff\x14\x2a\x10\xab\x00\xd9\x0e", BIG_ENDIAN) == 0xff142a10ab00d90e
+     True
+-    >>> bytes2uint("\xff\xff\xff\xff\xff\xff\xff\xff", BIG_ENDIAN) == (2**64-1)
++    >>> bytes2uint(b"\xff\xff\xff\xff\xff\xff\xff\xff", BIG_ENDIAN) == (2**64-1)
+     True
+     """
+     assert 1 <= len(data) <= 32   # arbitrary limit: 256 bits
+diff -ur fusil.orig/fusil/bytes_generator.py fusil.patched/fusil/bytes_generator.py
+--- fusil.orig/fusil/bytes_generator.py	2008-12-20 13:53:18.000000000 +0100
++++ fusil.patched/fusil/bytes_generator.py	2008-12-20 13:55:16.000000000 +0100
+@@ -19,7 +19,7 @@
+ from random import choice, randint
+ 
+ def createBytesSet(start, stop):
+-    return set(''.join(chr(code) for code in range(start, stop+1)))
++    return set(range(start, stop+1))
+ 
+ # ASCII codes 0..255
+ ASCII8 = createBytesSet(0, 255)
+@@ -34,12 +34,12 @@
+ PRINTABLE_ASCII = createBytesSet(32, 126)
+ 
+ # Letters and digits
+-UPPER_LETTERS = set('ABCDEFGHIJKLMNOPQRSTUVWXYZ')
+-LOWER_LETTERS = set('abcdefghijklmnopqrstuvwxyz')
++UPPER_LETTERS = set(b'ABCDEFGHIJKLMNOPQRSTUVWXYZ')
++LOWER_LETTERS = set(b'abcdefghijklmnopqrstuvwxyz')
+ LETTERS = UPPER_LETTERS | LOWER_LETTERS
+-DECIMAL_DIGITS = set('0123456789')
+-HEXADECIMAL_DIGITS = DECIMAL_DIGITS | set('abcdefABCDEF')
+-PUNCTUATION = set(' .,-;?!:(){}[]<>\'"/\\')
++DECIMAL_DIGITS = set(b'0123456789')
++HEXADECIMAL_DIGITS = DECIMAL_DIGITS | set(b'abcdefABCDEF')
++PUNCTUATION = set(b' .,-;?!:(){}[]<>\'"/\\')
+ 
+ class Generator:
+     def __init__(self, min_length, max_length):
+@@ -65,11 +65,11 @@
+     def _createValue(self, length):
+         bytes_list = list(self.bytes_set)
+         if len(bytes_list) != 1:
+-            return ''.join( choice(bytes_list) for index in range(length) )
++            return bytes( choice(bytes_list) for index in range(length) )
+         else:
+-            return bytes_list[0] * length
++            return bytes((bytes_list[0],)) * length
+ 
+ class LengthGenerator(BytesGenerator):
+     def __init__(self, min_length, max_length):
+-        BytesGenerator.__init__(self, min_length, max_length, set('A'))
++        BytesGenerator.__init__(self, min_length, max_length, set(b'A'))
+ 
+diff -ur fusil.orig/fusil/c_tools.py fusil.patched/fusil/c_tools.py
+--- fusil.orig/fusil/c_tools.py	2008-12-20 13:53:20.000000000 +0100
++++ fusil.patched/fusil/c_tools.py	2008-12-20 13:55:16.000000000 +0100
+@@ -18,7 +18,7 @@
+     data = []
+     for character in text:
+         data.append( pack('I', ord(character)) )
+-    return ''.join(data)
++    return b''.join(data)
+ 
+ def quoteString(text):
+     data = []
+diff -ur fusil.orig/fusil/file_watch.py fusil.patched/fusil/file_watch.py
+--- fusil.orig/fusil/file_watch.py	2008-12-20 13:53:24.000000000 +0100
++++ fusil.patched/fusil/file_watch.py	2008-12-20 13:55:16.000000000 +0100
+@@ -90,7 +90,7 @@
+             if isinstance(text, str):
+                 text = text.encode("ASCII")
+             regex = re.escape(text)
+-            regex = r'(?:^|\W)' + regex + r'(?:$|\W)'
++            regex = br'(?:^|\W)' + regex + br'(?:$|\W)'
+             match = re.compile(regex, re.IGNORECASE).search
+             yield (text, score, match)
+ 
+@@ -121,12 +121,12 @@
+     def splitlines(self, data):
+         lines = data.splitlines(1)
+         for index, line in enumerate(lines):
+-            if index == len(lines)-1 and line[-1] not in '\n\r':
++            if index == len(lines)-1 and line[-1] not in b'\n\r':
+                 self.buffer.append(line)
+                 return
+             if index == 0 and self.buffer:
+                 self.buffer.append(line)
+-                line = ''.join(self.buffer)
++                line = b''.join(self.buffer)
+                 self.buffer = []
+             yield line.rstrip()
+ 
+diff -ur fusil.orig/fusil/mangle_op.py fusil.patched/fusil/mangle_op.py
+--- fusil.orig/fusil/mangle_op.py	2008-07-10 01:39:14.000000000 +0200
++++ fusil.patched/fusil/mangle_op.py	2008-12-20 13:55:16.000000000 +0100
+@@ -2,22 +2,22 @@
+     values = (
+         # Special values in big endian
+         # SPECIAL_VALUES will contains value in big endian and little endian
+-        "\x00",
+-        "\x00\x00",
+-        "\x01",
+-        "\x00\x01",
+-        "\x7f",
+-        "\x7f\xff",
+-        "\x7f\xff\xff\xff",
+-        "\x80",
+-        "\x80\x00",
+-        "\x80\x00\x00\x00",
+-        "\xfe",
+-        "\xfe\xff",
+-        "\xfe\xff\xff\xff",
+-        "\xff",
+-        "\xff\xff",
+-        "\xff\xff\xff\xff",
++        b"\x00",
++        b"\x00\x00",
++        b"\x01",
++        b"\x00\x01",
++        b"\x7f",
++        b"\x7f\xff",
++        b"\x7f\xff\xff\xff",
++        b"\x80",
++        b"\x80\x00",
++        b"\x80\x00\x00\x00",
++        b"\xfe",
++        b"\xfe\xff",
++        b"\xfe\xff\xff\xff",
++        b"\xff",
++        b"\xff\xff",
++        b"\xff\xff\xff\xff",
+     )
+     result = []
+     for item in values:
+diff -ur fusil.orig/fusil/process/replay_python.py fusil.patched/fusil/process/replay_python.py
+--- fusil.orig/fusil/process/replay_python.py	2008-12-20 13:53:54.000000000 +0100
++++ fusil.patched/fusil/process/replay_python.py	2008-12-20 13:55:16.000000000 +0100
+@@ -40,9 +40,9 @@
+     cwd + u'b'
+     """
+     result = []
+-    if isinstance(value, str):
++    if isinstance(value, bytes):
+         pattern = cwd_bytes
+-        replace = 'cwd_bytes'
++        replace = b'cwd_bytes'
+     else:
+         pattern = cwd
+         replace = 'cwd'
+@@ -331,7 +331,7 @@
+ 
+         need_cwd_bytes = False
+         for value in itertools.chain(arguments, iter(env.values())):
+-            if not isinstance(value, str):
++            if not isinstance(value, bytes):
+                 continue
+             if cwd_bytes not in value:
+                 continue

@@ -1,0 +1,134 @@
+#!/usr/bin/env python
+"""
+Linux socket options fuzzer
+
+Vulnerabilities:
+"""
+
+from fusil.application import Application
+from fusil.c_tools import FuzzyFunctionC, CodeC, MIN_INT32, MAX_INT32
+from fusil.process.create import CreateProcess
+from fusil.process.watch import WatchProcess
+from fusil.project_agent import ProjectAgent
+from fusil.linux.syslog import Syslog
+from random import choice, randint
+
+class Fuzzer(Application):
+    NAME = "sopt"
+
+    def setupProject(self):
+        project = self.project
+        sopt = GenerateSOPT(project)
+        process = SoptProcess(project, name="sopt")
+        WatchProcess(process)
+        syslog = Syslog(project)
+        for log in syslog:
+            log.show_matching = True
+            log.show_not_matching = True
+
+class SoptProcess(CreateProcess):
+    def on_sopt_program(self, program_filename):
+        self.cmdline.arguments = [program_filename]
+        self.createProcess()
+
+class Main(FuzzyFunctionC):
+    def __init__(self):
+        FuzzyFunctionC.__init__(self, "main", type="int", random_bytes=400)
+        self.footer.append('return 0;')
+
+    def getnumber(self):
+        state = randint(0,15)
+        if state == 0:
+            return randint(MIN_INT32, MAX_INT32)
+        elif state == 1:
+            return (0xffffff00 | randint(0, 255))
+        elif state == 2:
+            return 0x8000
+        elif state == 3:
+            return 0xffff
+        elif state == 4:
+            return 0xffffffff
+        elif state == 5:
+            return 0x7fffffff
+        elif state == 6:
+            return -1
+        elif state == 7:
+            return 0x80000000    # sizeof int
+        else:
+            return 4
+
+    def getlevel(self, proto):
+        state = randint(0, 3)
+        if state == 0:
+            return "SOL_SOCKET"
+        elif state == 1:
+            return proto
+        else:
+            return randint(MIN_INT32, MAX_INT32)
+
+    def getarg(self, arg_index):
+        return "%sU" % self.getnumber()
+
+class GenerateSOPT(ProjectAgent):
+    def __init__(self, project):
+        ProjectAgent.__init__(self, project, "sopt")
+
+    def on_session_start(self):
+        # Create C source code
+        code = CodeC()
+        code.includes = [
+            "<stdio.h>",
+            "<stdlib.h>",
+            "<fcntl.h>",
+            "<unistd.h>",
+            "<sys/socket.h>",
+            "<netinet/in.h>",
+            "<arpa/inet.h>",
+        ]
+
+        main = Main()
+        code.addFunction(main)
+        main.variables = ["int fd, ret, foo", "char coin", "char gni[512]"]
+
+        proto = "IPPROTO_TCP"
+        state = randint(0,3)
+        if state == 0:
+            main.add('fd = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)')
+        elif state == 1:
+            main.add('fd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)')
+        elif state == 2:
+            main.add('fd = socket(AF_INET, SOCK_STREAM, IPPROTO_SCTP)')
+            proto = "IPPROTO_SCTP"
+        else:
+            main.add('fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)')
+            proto = "IPPROTO_UDP"
+
+        for i in xrange(0, randint(10, 200)):
+            arguments = ['fd', "(int)%s" % main.getlevel(proto), "(int)%d" % main.getnumber()]
+
+            state = randint(0,3)
+            if state == 0:
+                arguments.append("(void *)%d" % main.getnumber())
+            elif state == 1:
+                arguments.append("(void *)&coin")
+            elif state == 2:
+                arguments.append("(void *)&foo")
+            else:
+                arguments.append("(void *)gni")
+
+            arguments.append("(socklen_t)%d" % main.getnumber())
+            if randint(0, 2) == 0:
+                main.callFunction('setsockopt', arguments, 'ret')
+            else:
+                main.callFunction('setsockopt', arguments, 'ret')
+
+        main.add("close(fd)")
+        session = self.session()
+        c_filename = session.createFilename("sopt.c")
+        program_filename = session.createFilename("sopt")
+        code.compile(self, c_filename, program_filename, debug=False)
+        self.send('sopt_program', program_filename)
+
+if __name__ == "__main__":
+    Fuzzer().main()
+
