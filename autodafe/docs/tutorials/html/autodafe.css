@@ -1,0 +1,59 @@
+/* 
+ * CSS style inspired by Wiki
+ *
+ *
+ */
+
+body {	background-color: #FFFFFF ;
+	font-family: verdana,helvetica,arial,sans-serif;
+	font-size: 14px ;
+	color: #1f1f1f ;
+}
+
+
+a:link {
+        color: #3f3f3f;
+}
+a:visited {
+        color: #5f5f5f;
+}
+a:hover {
+        color: #000000;
+}
+
+
+.code { background-color: #f1f1f1 ;
+	border: 1px dashed #8a8a8a ;
+	padding: 4px ;
+	padding-left: 10px ;
+	monospace ;
+}
+
+.title { background-color: #1f1f1f ;
+	color: #ffffff ;
+	border: 1px solid #1f1f1f ;
+	padding: 4px ;
+	padding-left: 10px ;
+}
+
+.titleb { background-color: #1f1f1f ;
+	font-size: 20px ;
+	color: #ffffff ;
+	border: 1px solid #1f1f1f ; 
+	padding: 4px ;
+	padding-left: 10px ;
+}
+
+.titlebw { background-color: #ffffff ;
+	font-size: 20px ;
+//	border: 1px solid #1f1f1f ;
+	padding: 4px ;
+	padding-left: 10px ;
+}
+
+.titlew { background-color: #ffffff ;
+	font-size: 14px ;
+//	border: 1px solid #1f1f1f ;
+	padding: 4px ;
+	padding-left: 10px ;
+}

@@ -1,0 +1,16 @@
+/*--------------------------------------------------------------------------*
+ * xml autodafe's parser v.0.1 (c) Martin Vuagnoux - 2004-2006            *
+ * auto-generated script using PDML (Packet Details Markup Language) source *
+ *--------------------------------------------------------------------------*/
+
+block_begin("packet_1");
+hex(
+51 55 45 53 00 00 00 03    41 41 41 45 4e 44 0a 
+);
+block_end("packet_1");
+recv("packet_1");  /* tcp */
+
+block_begin("packet_2");
+block_end("packet_2");
+send("packet_2");  /* tcp */
+

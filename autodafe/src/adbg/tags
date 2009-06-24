@@ -1,0 +1,70 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.7	//
+DBG_MIN_ARGS	adbg.c	14;"	d	file:
+GDB_ADDR	gdb.c	57;"	d	file:
+GDB_ARGS	gdb.c	30;"	d	file:
+GDB_BUF_SIZE	gdb.c	29;"	d	file:
+GDB_FORMAT	gdb.c	59;"	d	file:
+GDB_LINE_AND	gdb.c	39;"	d	file:
+GDB_LINE_AND_S	gdb.c	50;"	d	file:
+GDB_LINE_BP	gdb.c	36;"	d	file:
+GDB_LINE_BP_S	gdb.c	47;"	d	file:
+GDB_LINE_DONE	gdb.c	35;"	d	file:
+GDB_LINE_DONE_S	gdb.c	46;"	d	file:
+GDB_LINE_ERROR	gdb.c	38;"	d	file:
+GDB_LINE_ERROR_S	gdb.c	49;"	d	file:
+GDB_LINE_EXIT	gdb.c	40;"	d	file:
+GDB_LINE_EXIT_S	gdb.c	51;"	d	file:
+GDB_LINE_PROMPT	gdb.c	33;"	d	file:
+GDB_LINE_PROMPT_S	gdb.c	44;"	d	file:
+GDB_LINE_RUNNING	gdb.c	37;"	d	file:
+GDB_LINE_RUNNING_S	gdb.c	48;"	d	file:
+GDB_LINE_SIGNAL	gdb.c	42;"	d	file:
+GDB_LINE_SIGNAL_S_1	gdb.c	54;"	d	file:
+GDB_LINE_SIGNAL_S_2	gdb.c	55;"	d	file:
+GDB_LINE_SIGSEGV	gdb.c	41;"	d	file:
+GDB_LINE_SIGSEGV_S_1	gdb.c	52;"	d	file:
+GDB_LINE_SIGSEGV_S_2	gdb.c	53;"	d	file:
+GDB_LINE_TILDA	gdb.c	34;"	d	file:
+GDB_LINE_TILDA_S	gdb.c	45;"	d	file:
+GDB_PID	gdb.c	31;"	d	file:
+GDB_STRING	gdb.c	58;"	d	file:
+_GNU_SOURCE	adbg.c	13;"	d	file:
+debug_	debug.c	/^void debug_(int level, char *file, int line, const char *func, const char *fmt, ...) {$/;"	f
+error_	debug.c	/^void error_(char *fmt, ...) {$/;"	f
+gdb_break	gdb.c	/^void gdb_break(config *conf, char *name, unsigned int esp, unsigned int type) {$/;"	f
+gdb_break_string	gdb.c	/^void gdb_break_string(config *conf, struct struct_bp *bp) {$/;"	f
+gdb_core	gdb.c	/^int gdb_core(config *conf) {$/;"	f
+gdb_event	gdb.c	/^int gdb_event(config *conf) {$/;"	f
+gdb_event_breakpoint	gdb.c	/^void gdb_event_breakpoint(config *conf) {$/;"	f
+gdb_event_sigsegv	gdb.c	/^void gdb_event_sigsegv(config *conf) {$/;"	f
+gdb_init	gdb.c	/^int gdb_init(config *conf) {$/;"	f
+gdb_look_for	gdb.c	/^char * gdb_look_for(config *conf, char * value) {$/;"	f
+gdb_loop	gdb.c	/^int gdb_loop(config *conf) {$/;"	f
+gdb_read_line	gdb.c	/^void gdb_read_line(config *conf) {$/;"	f
+gdb_type_line	gdb.c	/^int gdb_type_line(config *conf) {$/;"	f
+gdb_wait_for	gdb.c	/^void gdb_wait_for(config *conf, unsigned int type) {$/;"	f
+gdb_write_line	gdb.c	/^void gdb_write_line(config *conf, char *fmt, ...) {$/;"	f
+inet_connection	network.c	/^void inet_connection(config *conf) {$/;"	f
+inet_decode_msg	network.c	/^void inet_decode_msg(config *conf, unsigned int opcode) {$/;"	f
+inet_fetch_msg	network.c	/^unsigned int inet_fetch_msg(config *conf) {$/;"	f
+inet_read	network.c	/^void inet_read(config *conf, void *buffer, unsigned int size) {$/;"	f
+inet_send_msg	network.c	/^void inet_send_msg(config *conf, unsigned int type, unsigned id) {$/;"	f
+inet_wait_connection	network.c	/^void inet_wait_connection(config *conf) {$/;"	f
+inet_write	network.c	/^void inet_write(config *conf, void *buffer, unsigned int size) {$/;"	f
+init_configuration	adbg.c	/^void init_configuration(config *conf) {$/;"	f
+main	adbg.c	/^int main(int argc, char **argv) {$/;"	f
+malloc_	debug.c	/^void * malloc_(size_t size) {$/;"	f
+parsing_args	adbg.c	/^unsigned int parsing_args(int argc, char **argv, config *conf) {$/;"	f
+realloc_	debug.c	/^void *realloc_(void *ptr, size_t size) {$/;"	f
+sigint_handler	gdb.c	/^void sigint_handler(int sig) {$/;"	f
+the_conf	gdb.c	/^config *the_conf;$/;"	v
+this_is_the_end	gdb.c	/^void this_is_the_end(config *conf) {$/;"	f
+usage	adbg.c	/^void usage(char **argv, config *conf) {$/;"	f
+verbose_	debug.c	/^void verbose_(char *fmt, ...) {$/;"	f
+verbose__	debug.c	/^void verbose__(char *fmt, ...) {$/;"	f
+version	adbg.c	/^void version(char **argv) {$/;"	f

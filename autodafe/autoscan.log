@@ -1,0 +1,2 @@
+autoscan: warning: missing AC_PROG_AWK wanted by: 
+	tools/txt2ad.sh:27

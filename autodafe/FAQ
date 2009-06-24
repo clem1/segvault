@@ -1,0 +1,16 @@
+1. General Questions
+==========================================================================
+1.1 
+
+
+2. Compilation/Installation
+==========================================================================
+2.1-[?] The configure says: error: gdb needed.
+    [!] You need to have gdb >= 6.2 to compile le debugger/tracer adbg.
+
+2.2-[?] I tried to compile (make) but it doesn't work!
+    [!] You probably have a gcc version older than 3.3.4. This tool uses
+        new functionalities from gcc. So you need to uprgrade your gcc.
+
+2.3-[?] 
+    [!]

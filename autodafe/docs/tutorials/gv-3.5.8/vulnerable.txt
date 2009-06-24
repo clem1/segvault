@@ -1,0 +1,867 @@
+strcpy:C
+strcpy:\e(B
+strcpy:\e-A
+strcpy:\e-B
+strcpy:\e-C
+strcpy:\e-D
+strcpy:\e-L
+strcpy:\e-G
+strcpy:\e-F
+strcpy:\e-H
+strcpy:\e-M
+strcpy:\e-V
+strcpy:\e-T
+strcpy:\e-Y
+strcpy:\e-_
+strcpy:\e-b
+strcpy:\e-f
+strcpy:\e(J
+strcpy:\e)I
+strcpy:\e$(A
+strcpy:\e$)A
+strcpy:\e$(B
+strcpy:\e$)B
+strcpy:\e$(B
+strcpy:\e$)B
+strcpy:\e$(D
+strcpy:\e$)D
+strcpy:\e$(C
+strcpy:\e$)C
+strcpy:\e$(G
+strcpy:\e$)G
+strcpy:\e$(H
+strcpy:\e$)H
+strcpy:\e$(I
+strcpy:\e$)I
+strcpy:\e$(J
+strcpy:\e$)J
+strcpy:\e$(K
+strcpy:\e$)K
+strcpy:\e$(L
+strcpy:\e$)L
+strcpy:\e$(M
+strcpy:\e$)M
+strcpy:\e%G
+strcpy:\e%/1
+strcpy:\e%/1
+strcpy:\e%/2
+strcpy:\e$(0
+strcpy:\e$)0
+strcpy:\e$(1
+strcpy:\e$)1
+getenv:XLOCALEDIR
+sprintf:%s/%s
+strcpy:C
+getenv:XLOCALEDIR
+sprintf:%s/%s.dir
+strcpy:C/XLC_LOCALE
+sprintf:%s/%s
+strcpy:XLC_FONTSET
+strcpy:fs0
+strcpy:charset
+strcpy:name
+strcpy:ISO8859-1:GL
+strcpy:XLC_FONTSET
+strcpy:fs0
+strcpy:charset
+strcpy:name
+strcpy:fs0.charset.name
+strcpy:font
+strcpy:primary
+strcpy:ISO8859-1:GL
+strcpy:XLC_FONTSET
+strcpy:fs0
+strcpy:font
+strcpy:primary
+strcpy:fs0.font.primary
+strcpy:vertical_rotate
+strcpy:all
+strcpy:XLC_FONTSET
+strcpy:fs0
+strcpy:font
+strcpy:vertical_rotate
+strcpy:fs0.font.vertical_rotate
+strcpy:XLC_XLOCALE
+strcpy:encoding_name
+strcpy:STRING
+strcpy:XLC_XLOCALE
+strcpy:encoding_name
+strcpy:encoding_name
+strcpy:mb_cur_max
+strcpy:1
+strcpy:XLC_XLOCALE
+strcpy:mb_cur_max
+strcpy:mb_cur_max
+strcpy:state_depend_encoding
+strcpy:False
+strcpy:XLC_XLOCALE
+strcpy:state_depend_encoding
+strcpy:state_depend_encoding
+strcpy:wc_encoding_mask
+strcpy:30000000
+strcpy:XLC_XLOCALE
+strcpy:wc_encoding_mask
+strcpy:wc_encoding_mask
+strcpy:wc_shift_bits
+strcpy:7
+strcpy:XLC_XLOCALE
+strcpy:wc_shift_bits
+strcpy:wc_shift_bits
+strcpy:use_stdc_env
+strcpy:True
+strcpy:XLC_XLOCALE
+strcpy:use_stdc_env
+strcpy:use_stdc_env
+strcpy:force_convert_to_mb
+strcpy:True
+strcpy:XLC_XLOCALE
+strcpy:force_convert_to_mb
+strcpy:force_convert_to_mb
+strcpy:cs0
+strcpy:side
+strcpy:GL:Default
+strcpy:XLC_XLOCALE
+strcpy:cs0
+strcpy:side
+strcpy:cs0.side
+strcpy:length
+strcpy:1
+strcpy:XLC_XLOCALE
+strcpy:cs0
+strcpy:length
+strcpy:cs0.length
+strcpy:wc_encoding
+strcpy:00000000
+strcpy:XLC_XLOCALE
+strcpy:cs0
+strcpy:wc_encoding
+strcpy:cs0.wc_encoding
+strcpy:ct_encoding
+strcpy:ISO8859-1:GL
+strcpy:XLC_XLOCALE
+strcpy:cs0
+strcpy:ct_encoding
+strcpy:cs0.ct_encoding
+strcpy:cs1
+strcpy:side
+strcpy:GR:Default
+strcpy:XLC_XLOCALE
+strcpy:cs1
+strcpy:side
+strcpy:cs1.side
+strcpy:length
+strcpy:1
+strcpy:XLC_XLOCALE
+strcpy:cs1
+strcpy:length
+strcpy:cs1.length
+strcpy:wc_encoding
+strcpy:30000000
+strcpy:XLC_XLOCALE
+strcpy:cs1
+strcpy:wc_encoding
+strcpy:cs1.wc_encoding
+strcpy:ct_encoding
+strcpy:ISO8859-1:GR
+strcpy:XLC_XLOCALE
+strcpy:cs1
+strcpy:ct_encoding
+strcpy:cs1.ct_encoding
+strcpy:STRING
+sprintf:cs%d
+sprintf:%s.%s
+sprintf:%s.%s
+sprintf:%s.%s
+sprintf:%s.%s
+sprintf:%s.%s
+sprintf:%s.%s%d
+sprintf:%s.%s
+sprintf:%s.%s
+sprintf:%s.%s
+sprintf:%s.%s
+sprintf:cs%d
+sprintf:%s.%s
+sprintf:%s.%s
+sprintf:%s.%s
+sprintf:%s.%s
+sprintf:%s.%s
+sprintf:%s.%s%d
+sprintf:%s.%s
+sprintf:%s.%s
+sprintf:%s.%s
+sprintf:%s.%s
+sprintf:cs%d
+sprintf:%s.%s
+sprintf:%s.%s
+sprintf:%s.%s
+sprintf:%s.%s
+sprintf:%s.%s
+sprintf:csd%d
+sprintf:%s.%s
+sprintf:csd%d
+sprintf:%s.%s
+sprintf:conv%d
+sprintf:%s.%s
+sprintf:conv%d
+sprintf:%s.%s
+getenv:XUSERFILESEARCHPATH
+strcpy:US
+getenv:XFILESEARCHPATH
+strcpy:US
+strcpy:US
+getenv:HOME
+strcpy:
+strcat:/root
+strcat:/.gv
+strcpy:/root/.gv
+getenv:XUSERFILESEARCHPATH
+strcpy:/root/.gv
+sprintf:%s.%s
+sprintf:%s.%s
+sprintf:%s.%s
+sprintf:%s.%s
+sprintf:%s.%s
+sprintf:%s.%s
+strcpy:WM_DELETE_WINDOW
+sprintf:%s.%s
+sprintf:%s.%s
+strcpy:XDCCC_LINEAR_RGB_CORRECTION
+strcpy:XDCCC_LINEAR_RGB_MATRICES
+getenv:XCMSDB
+strcpy:gv 3.5.8
+strcpy:gv
+sprintf:%s.%s
+sprintf:%s.%s
+strcpy:gs
+sprintf:%s.%s
+sprintf:%s.%s
+strcpy:gs -dNODISPLAY -dQUIET -sPDFname=%s -sDSCname=%s pdf2dsc.ps -c quit
+sprintf:%s.%s
+sprintf:%s.%s
+strcpy:gs -dNODISPLAY -dQUIET  -dNOPAUSE -sPSFile=%s %s -c quit
+sprintf:%s.%s
+sprintf:%s.%s
+strcpy:-sDEVICE=x11
+sprintf:%s.%s
+sprintf:%s.%s
+strcpy:-dNOPLATFONTS -sDEVICE=x11alpha
+sprintf:%s.%s
+sprintf:%s.%s
+strcpy:
+sprintf:%s.%s
+sprintf:%s.%s
+sprintf:%s.%s
+sprintf:%s.%s
+sprintf:%s.%s
+sprintf:%s.%s
+strcpy:lpr
+sprintf:%s.%s
+sprintf:%s.%s
+strcpy:gzip -d -c %s > %s
+strcpy:/root/.gv
+sprintf:%s.%s
+sprintf:%s.%s
+strcpy:Letter,\t\t612\t792\t
+strcpy:\t\t\t# LetterSmall,\t612\t792\t
+strcpy:\t\t\tLegal,\t\t612\t1008\t
+strcpy:\t\t\tStatement,\t396\t612\t
+strcpy:\t\t\tTabloid,\t\t792\t1224\t
+strcpy:\t\t\tLedger,\t\t1224\t792\t
+strcpy:\t\t\tFolio,\t\t612\t936\t
+strcpy:\t\t\tQuarto,\t\t610\t780\t
+strcpy:\t\t\t# 7x9,\t\t504\t648\t
+strcpy:\t\t\t# 9x11,\t\t648\t792\t
+strcpy:\t\t\t# 9x12,\t\t648\t864\t
+strcpy:\t\t\t# 10x13,\t\t720\t936\t
+strcpy:\t\t\t10x14,\t\t720\t1008\t
+strcpy:\t\t\tExecutive,\t540\t720\t
+strcpy:\t\t\t# A0,\t\t2384\t3370\t
+strcpy:\t\t\t# A1,\t\t1684\t2384\t
+strcpy:\t\t\t# A2,\t\t1191\t1684\t
+strcpy:\t\t\tA3,\t\t842\t1191\t
+strcpy:\t\t\tA4,\t\t595\t842\t
+strcpy:\t\t\t# A4Small,\t595\t842\t
+strcpy:\t\t\tA5,\t\t420\t595\t
+strcpy:\t\t\t# A6,\t\t297\t420\t
+strcpy:\t\t\t# A7,\t\t210\t297\t
+strcpy:\t\t\t# A8,\t\t148\t210\t
+strcpy:\t\t\t# A9,\t\t105\t148\t
+strcpy:\t\t\t# A10,\t\t73\t105\t
+strcpy:\t\t\t# B0,\t\t2920\t4127\t
+strcpy:\t\t\t# B1,\t\t2064\t2920\t
+strcpy:\t\t\t# B2,\t\t1460\t2064\t
+strcpy:\t\t\t# B3,\t\t1032\t1460\t
+strcpy:\t\t\tB4,\t\t729\t1032\t
+strcpy:\t\t\tB5,\t\t516\t729\t
+strcpy:\t\t\t# B6,\t\t363\t516\t
+strcpy:\t\t\t# B7,\t\t258\t363\t
+strcpy:\t\t\t# B8,\t\t181\t258\t
+strcpy:\t\t\t# B9,\t\t127\t181\t
+strcpy:\t\t\t# B10,\t\t91\t127\t
+strcpy:\t\t\t# ISOB0,\t\t2835\t4008\t
+strcpy:\t\t\t# ISOB1,\t\t2004\t2835\t
+strcpy:\t\t\t# ISOB2,\t\t1417\t2004\t
+strcpy:\t\t\t# ISOB3,\t\t1001\t1417\t
+strcpy:\t\t\t# ISOB4,\t\t709\t1001\t
+strcpy:\t\t\t# ISOB5,\t\t499\t709\t
+strcpy:\t\t\t# ISOB6,\t\t354\t499\t
+strcpy:\t\t\t# ISOB7,\t\t249\t354\t
+strcpy:\t\t\t# ISOB8,\t\t176\t249\t
+strcpy:\t\t\t# ISOB9,\t\t125\t176\t
+strcpy:\t\t\t# ISOB10,\t88\t125\t
+strcpy:\t\t\t# C0,\t\t2599\t3676\t
+strcpy:\t\t\t# C1,\t\t1837\t2599\t
+strcpy:\t\t\t# C2,\t\t1298\t1837\t
+strcpy:\t\t\t# C3,\t\t918\t1296\t
+strcpy:\t\t\t# C4,\t\t649\t918\t
+strcpy:\t\t\t# C5,\t\t459\t649\t
+strcpy:\t\t\t# C6,\t\t323\t459\t
+strcpy:\t\t\t# C7,\t\t230\t323\t
+strcpy:\t\t\t# DL,\t\t312\t624
+strcpy:Letter,\t\t612\t792\t
+strcpy:\t\t\t# LetterSmall,\t612\t792\t
+strcpy:\t\t\tLegal,\t\t612\t1008\t
+strcpy:\t\t\tStatement,\t396\t612\t
+strcpy:\t\t\tTabloid,\t\t792\t1224\t
+strcpy:\t\t\tLedger,\t\t1224\t792\t
+strcpy:\t\t\tFolio,\t\t612\t936\t
+strcpy:\t\t\tQuarto,\t\t610\t780\t
+strcpy:\t\t\t# 7x9,\t\t504\t648\t
+strcpy:\t\t\t# 9x11,\t\t648\t792\t
+strcpy:\t\t\t# 9x12,\t\t648\t864\t
+strcpy:\t\t\t# 10x13,\t\t720\t936\t
+strcpy:\t\t\t10x14,\t\t720\t1008\t
+strcpy:\t\t\tExecutive,\t540\t720\t
+strcpy:\t\t\t# A0,\t\t2384\t3370\t
+strcpy:\t\t\t# A1,\t\t1684\t2384\t
+strcpy:\t\t\t# A2,\t\t1191\t1684\t
+strcpy:\t\t\tA3,\t\t842\t1191\t
+strcpy:\t\t\tA4,\t\t595\t842\t
+strcpy:\t\t\t# A4Small,\t595\t842\t
+strcpy:\t\t\tA5,\t\t420\t595\t
+strcpy:\t\t\t# A6,\t\t297\t420\t
+strcpy:\t\t\t# A7,\t\t210\t297\t
+strcpy:\t\t\t# A8,\t\t148\t210\t
+strcpy:\t\t\t# A9,\t\t105\t148\t
+strcpy:\t\t\t# A10,\t\t73\t105\t
+strcpy:\t\t\t# B0,\t\t2920\t4127\t
+strcpy:\t\t\t# B1,\t\t2064\t2920\t
+strcpy:\t\t\t# B2,\t\t1460\t2064\t
+strcpy:\t\t\t# B3,\t\t1032\t1460\t
+strcpy:\t\t\tB4,\t\t729\t1032\t
+strcpy:\t\t\tB5,\t\t516\t729\t
+strcpy:\t\t\t# B6,\t\t363\t516\t
+strcpy:\t\t\t# B7,\t\t258\t363\t
+strcpy:\t\t\t# B8,\t\t181\t258\t
+strcpy:\t\t\t# B9,\t\t127\t181\t
+strcpy:\t\t\t# B10,\t\t91\t127\t
+strcpy:\t\t\t# ISOB0,\t\t2835\t4008\t
+strcpy:\t\t\t# ISOB1,\t\t2004\t2835\t
+strcpy:\t\t\t# ISOB2,\t\t1417\t2004\t
+strcpy:\t\t\t# ISOB3,\t\t1001\t1417\t
+strcpy:\t\t\t# ISOB4,\t\t709\t1001\t
+strcpy:\t\t\t# ISOB5,\t\t499\t709\t
+strcpy:\t\t\t# ISOB6,\t\t354\t499\t
+strcpy:\t\t\t# ISOB7,\t\t249\t354\t
+strcpy:\t\t\t# ISOB8,\t\t176\t249\t
+strcpy:\t\t\t# ISOB9,\t\t125\t176\t
+strcpy:\t\t\t# ISOB10,\t88\t125\t
+strcpy:\t\t\t# C0,\t\t2599\t3676\t
+strcpy:\t\t\t# C1,\t\t1837\t2599\t
+strcpy:\t\t\t# C2,\t\t1298\t1837\t
+strcpy:\t\t\t# C3,\t\t918\t1296\t
+strcpy:\t\t\t# C4,\t\t649\t918\t
+strcpy:\t\t\t# C5,\t\t459\t649\t
+strcpy:\t\t\t# C6,\t\t323\t459\t
+strcpy:\t\t\t# C7,\t\t230\t323\t
+strcpy:\t\t\t# DL,\t\t312\t624
+strcpy:Letter
+strcpy:LetterSmall
+strcpy:Legal
+strcpy:Statement
+strcpy:Tabloid
+strcpy:Ledger
+strcpy:Folio
+strcpy:Quarto
+strcpy:7x9
+strcpy:9x11
+strcpy:9x12
+strcpy:10x13
+strcpy:10x14
+strcpy:Executive
+strcpy:A0
+strcpy:A1
+strcpy:A2
+strcpy:A3
+strcpy:A4
+strcpy:A4Small
+strcpy:A5
+strcpy:A6
+strcpy:A7
+strcpy:A8
+strcpy:A9
+strcpy:A10
+strcpy:B0
+strcpy:B1
+strcpy:B2
+strcpy:B3
+strcpy:B4
+strcpy:B5
+strcpy:B6
+strcpy:B7
+strcpy:B8
+strcpy:B9
+strcpy:B10
+strcpy:ISOB0
+strcpy:ISOB1
+strcpy:ISOB2
+strcpy:ISOB3
+strcpy:ISOB4
+strcpy:ISOB5
+strcpy:ISOB6
+strcpy:ISOB7
+strcpy:ISOB8
+strcpy:ISOB9
+strcpy:ISOB10
+strcpy:C0
+strcpy:C1
+strcpy:C2
+strcpy:C3
+strcpy:C4
+strcpy:C5
+strcpy:C6
+strcpy:C7
+strcpy:DL
+sprintf:%s.%s
+sprintf:%s.%s
+strcpy:2,\t2\t
+strcpy:\t\t\t4,\t4\t
+strcpy:\t\t\t8,\t8\t
+strcpy:\t\t\t16,\t16\t
+strcpy:\t\t\t32,\t32\t
+strcpy:\t\t\t64,\t64
+strcpy:2,\t2\t
+strcpy:\t\t\t4,\t4\t
+strcpy:\t\t\t8,\t8\t
+strcpy:\t\t\t16,\t16\t
+strcpy:\t\t\t32,\t32\t
+strcpy:\t\t\t64,\t64
+strcpy:2
+strcpy:4
+strcpy:8
+strcpy:16
+strcpy:32
+strcpy:64
+sprintf:%s.%s
+sprintf:%s.%s
+strcpy:redisplay\t
+strcpy:\t\t\t# update\t
+strcpy:\t\t\tstop\t\t
+strcpy:\t\t\tline\t\t
+strcpy:\t\t\ttoggle_current\t
+strcpy:\t\t\ttoggle_even\t
+strcpy:\t\t\ttoggle_odd\t
+strcpy:\t\t\tunmark\t\t
+strcpy:\t\t\tline\t\t
+strcpy:\t\t\tprint_all\t
+strcpy:\t\t\tprint_marked\t
+strcpy:\t\t\tsave_all\t
+strcpy:\t\t\tsave_marked
+strcpy:redisplay\t
+strcpy:\t\t\t# update\t
+strcpy:\t\t\tstop\t\t
+strcpy:\t\t\tline\t\t
+strcpy:\t\t\ttoggle_current\t
+strcpy:\t\t\ttoggle_even\t
+strcpy:\t\t\ttoggle_odd\t
+strcpy:\t\t\tunmark\t\t
+strcpy:\t\t\tline\t\t
+strcpy:\t\t\tprint_all\t
+strcpy:\t\t\tprint_marked\t
+strcpy:\t\t\tsave_all\t
+strcpy:\t\t\tsave_marked
+sprintf:%s.%s
+sprintf:%s.%s
+strcpy:Natural\tsize,\t1.000,\tscreen\t
+strcpy:\t\t\tPixel based,\t1.000,\tpixel\t
+strcpy:\t\t\t0.100,\t\t0.100\t\t
+strcpy:\t\t\t0.125,\t\t0.125\t\t
+strcpy:\t\t\t0.250,\t\t0.250\t\t
+strcpy:\t\t\t0.500,\t\t0.500\t\t
+strcpy:\t\t\t0.707,\t\t0.707\t\t
+strcpy:\t\t\t1.000,\t\t1.000\t\t
+strcpy:\t\t\t1.414,\t\t1.414\t\t
+strcpy:\t\t\t2.000,\t\t2.000\t\t
+strcpy:\t\t\t4.000,\t\t4.000\t\t
+strcpy:\t\t\t8.000,\t\t8.000\t\t
+strcpy:\t\t\t10.00,\t\t10.00
+strcpy:Natural\tsize,\t1.000,\tscreen\t
+strcpy:\t\t\tPixel based,\t1.000,\tpixel\t
+strcpy:\t\t\t0.100,\t\t0.100\t\t
+strcpy:\t\t\t0.125,\t\t0.125\t\t
+strcpy:\t\t\t0.250,\t\t0.250\t\t
+strcpy:\t\t\t0.500,\t\t0.500\t\t
+strcpy:\t\t\t0.707,\t\t0.707\t\t
+strcpy:\t\t\t1.000,\t\t1.000\t\t
+strcpy:\t\t\t1.414,\t\t1.414\t\t
+strcpy:\t\t\t2.000,\t\t2.000\t\t
+strcpy:\t\t\t4.000,\t\t4.000\t\t
+strcpy:\t\t\t8.000,\t\t8.000\t\t
+strcpy:\t\t\t10.00,\t\t10.00
+strcpy:Natural\tsize
+strcpy:Pixel based
+strcpy:0.100
+strcpy:0.125
+strcpy:0.250
+strcpy:0.500
+strcpy:0.707
+strcpy:1.000
+strcpy:1.414
+strcpy:2.000
+strcpy:4.000
+strcpy:8.000
+strcpy:10.00
+strcpy::0.0
+sprintf:screenSize_%s_%d_%d
+sprintf:%s.%s
+sprintf:%s.%s
+sprintf:%s.%s
+sprintf:%s.%s
+strcpy:RENDER
+getenv:XCURSOR_CORE
+getenv:XCURSOR_ANIM
+getenv:XCURSOR_SIZE
+getenv:XCURSOR_THEME
+getenv:XCURSOR_DITHER
+getenv:XCURSOR_THEME_CORE
+getenv:XCURSOR_DISCOVER
+getenv:XKEYSYMDB
+getenv:XF86BIGFONT_DISABLE
+strcpy:XFree86-Bigfont
+getenv:XLOCALEDIR
+sprintf:%s/%s
+sprintf:%s/locale.dir
+strcpy:C/XLC_LOCALE
+strcpy:/usr/X11R6/lib/X11/locale
+strcat:common/xomGeneric
+sprintf:fs%d.charset.name
+sprintf:fs%d.charset.udc_area
+sprintf:fs%d.font.primary
+sprintf:fs%d.font.substitute
+sprintf:fs%d.font
+sprintf:fs%d.font.vertical_map
+sprintf:fs%d.font.vertical_rotate
+sprintf:fs%d.charset.name
+sprintf:fs%d.charset
+strcpy:ISO8859-1
+strcpy:-*-*-*-R-*-*-*-120-*-*-*-*,*
+strcpy:-*-*-*-R-*-*-*-120-*-*-*-*
+strcpy:ISO8859-1
+strcpy:-misc-fixed-bold-r-normal--13-120-75-75-c-70-iso8859-1
+strcpy:-misc-fixed-bold-r-normal--13-120-75-75-c-70-iso8859-1
+strcpy:-misc-fixed-bold-r-normal--13-120-75-75-c-70-iso8859-1
+strcpy:-*-*-*-R-*-*-*-120-*-*-*-*
+strcpy:ISO8859-1
+strcpy:-misc-fixed-bold-r-normal--13-120-75-75-c-70-iso8859-1
+strcpy:-misc-fixed-bold-r-normal--13-120-75-75-c-70-iso8859-1
+sprintf:[ 0 ~%d %d 0 ]
+sprintf:%s-%s
+sprintf:%s-%s
+sprintf:%s-%s
+sprintf:%s-%s
+sprintf:%s-%s
+sprintf:%s-%s
+sprintf:%s-%s
+sprintf:%s-%s
+sprintf:%s-%s
+sprintf:%s-%s
+sprintf:%s-%s
+sprintf:%s-%s
+sprintf:%s-%s
+sprintf:%s-%s
+strcpy:-*-*-*-R-*-*-*-120-*-*-*-*,*
+strcpy:-misc-fixed-bold-r-normal--13-120-75-75-c-70-iso8859-1
+strcpy:File
+strcpy:Open ...
+strcpy:Reopen
+strcpy:Update
+strcpy:Print document ...
+strcpy:Print marked pages ...
+strcpy:Save document ...
+strcpy:Save marked pages ...
+strcpy:Copyright
+strcpy:Quit
+strcpy:State
+strcpy:Stop interpreter
+strcpy:Respect document structure
+strcpy:Ignore EOF comments
+strcpy:Antialias
+strcpy:Watch file
+strcpy:Automatic resizing
+strcpy:gv Options ...
+strcpy:Ghostscript Options ...
+strcpy:File Selection Options ...
+strcpy:Setup Options ...
+strcpy:Page
+strcpy:Next
+strcpy:Redisplay
+strcpy:Previous
+strcpy:Center
+strcpy:Toggle current mark
+strcpy:Toggle odd marks
+strcpy:Toggle even marks
+strcpy:Unmark all
+strcpy:orientationButton
+strcpy:Automatic
+strcpy:Portrait
+strcpy:Landscape
+strcpy:Upside-Down
+strcpy:Seascape
+strcpy:Swap Landscape
+strcpy:pagemediaButton
+strcpy: processing
+strcpy:scaleButton
+sprintf:%s.%s
+sprintf:%s.%s
+strcpy:>>
+strcpy:<<
+strcpy:
+strcpy:
+strcpy:
+strcpy:
+strcpy:Print Marked
+strcpy:Print All 
+strcpy:Save Marked
+strcpy:Save All
+strcpy:Open
+strcpy:autoResize
+strcpy:Redisplay
+strcpy:Variable Size
+strcpy:titleButton
+strcpy:dateButton
+sprintf:%d x %d
+strcpy:9999 x 9999
+strcpy:
+strcpy:newtoc
+strcpy:
+getenv:XCURSOR_PATH
+getenv:HOME
+getenv:HOME
+getenv:HOME
+strcpy:./hello.ps
+strcpy:./hello.ps
+strcpy:./hello.ps
+strcpy:./hello.ps
+strcpy:.ps
+strcpy:.ps
+strcpy:.ps
+strcpy:Letter
+strcpy:1
+sprintf:gv: %s
+strcpy:gv: hello.txt
+strcpy:hello.txt
+strcpy:hello.txt
+strcpy:hello.txt
+strcpy:Mon Apr 24 13:31:07 2006
+strcpy:Mon Apr 24 13:31:07 2006
+strcpy:Automatic
+sprintf:%*s
+sprintf:
+strcpy:1
+strcpy:p
+strcpy:gv
+strcpy:GV
+strcpy:WM_LOCALE_NAME
+strcpy:WM_CLIENT_LEADER
+getenv:HOME
+strcpy:WM_PROTOCOLS
+strcpy:fileSelPopup
+strcpy:/root/docs/projects/autodafe/current/docs/tutorials/gv-3.5.8
+strcpy:Rescan Directory
+strcpy:None
+strcpy:\t\t\t*.*ps* *.pdf*  no  .*
+strcpy:\t\t\t*.*ps*   no  .*
+strcpy:\t\t\t*.pdf*  no  .*
+strcpy:\t\t\tno  .*
+strcpy:Filters:
+strcpy:None
+strcpy:\t\t\t*.*ps* *.pdf*  no  .*
+strcpy:\t\t\t*.*ps*   no  .*
+strcpy:\t\t\t*.pdf*  no  .*
+strcpy:\t\t\tno  .*
+strcpy:Home
+strcpy:\t\t\tTmp
+strcpy:\t\t\t/usr/doc
+strcpy:\t\t\t/usr/local/doc
+strcpy:Directories
+strcpy:Home
+strcpy:\t\t\tTmp
+strcpy:\t\t\t/usr/doc
+strcpy:\t\t\t/usr/local/doc
+strcpy:Cancel
+strcpy:button2
+sprintf:%sframe
+sprintf:%stext
+strcpy:Ctrl<Key>A:\tbeginning-of-line() 
+strcpy:Ctrl<Key>B:\tbackward-character() 
+strcpy:Ctrl<Key>C:\tinsert-selection(CUT_BUFFER0) 
+strcpy:Ctrl<Key>D:\tdelete-next-character() 
+strcpy:Ctrl<Key>E:\tend-of-line() 
+strcpy:Ctrl<Key>F:\tforward-character() 
+strcpy:Ctrl<Key>G:     multiply(Reset) 
+strcpy:Ctrl<Key>H:\tdelete-previous-character() 
+strcpy:Ctrl<Key>J:\tnewline-and-indent() 
+strcpy:Ctrl<Key>K:\tkill-to-end-of-line() 
+strcpy:Ctrl<Key>L:\tredraw-display() 
+strcpy:Ctrl<Key>M:\tnewline() 
+strcpy:Ctrl<Key>N:\tnext-line() 
+strcpy:Ctrl<Key>O:\tnewline-and-backup() 
+strcpy:Ctrl<Key>P:\tprevious-line() 
+strcpy:Ctrl<Key>R:\tsearch(backward) 
+strcpy:Ctrl<Key>S:\tsearch(forward) 
+strcpy:Ctrl<Key>T:     transpose-characters() 
+strcpy:Ctrl<Key>U:\tmultiply(4) 
+strcpy:Ctrl<Key>V:\tnext-page() 
+strcpy:Ctrl<Key>W:\tkill-selection() 
+strcpy:Ctrl<Key>Y:\tinsert-selection(SECONDARY) 
+strcpy:Ctrl<Key>Z:\tscroll-one-line-up() 
+strcpy:
+strcpy:Meta<Key>B:\tbackward-word() 
+strcpy:Meta<Key>F:\tforward-word() 
+strcpy:Meta<Key>I:\tinsert-file() 
+strcpy:Meta<Key>K:\tkill-to-end-of-paragraph() 
+strcpy:Meta<Key>Q:     form-paragraph() 
+strcpy:Meta<Key>V:\tprevious-page() 
+strcpy:Meta<Key>Y:\tinsert-selection(PRIMARY, CUT_BUFFER0) 
+strcpy:Meta<Key>Z:\tscroll-one-line-down() 
+strcpy::Meta<Key>d:\tdelete-next-word() 
+strcpy::Meta<Key>D:\tkill-word() 
+strcpy::Meta<Key>h:\tdelete-previous-word() 
+strcpy::Meta<Key>H:\tbackward-kill-word() 
+strcpy::Meta<Key>\\<:\tbeginning-of-file() 
+strcpy::Meta<Key>\\>:\tend-of-file() 
+strcpy::Meta<Key>]:\tforward-paragraph() 
+strcpy::Meta<Key>[:\tbackward-paragraph() 
+strcpy:~Shift Meta<Key>Delete:\t\tdelete-previous-word() 
+strcpy: Shift Meta<Key>Delete:\t\tbackward-kill-word() 
+strcpy:~Shift Meta<Key>BackSpace:\tdelete-previous-word() 
+strcpy: Shift Meta<Key>BackSpace:\tbackward-kill-word() 
+strcpy:
+strcpy:<Key>Home:\tbeginning-of-file() 
+strcpy::<Key>KP_Home:\tbeginning-of-file() 
+strcpy:<Key>End:\tend-of-file() 
+strcpy::<Key>KP_End:\tend-of-file() 
+strcpy:<Key>Next:\tnext-page() 
+strcpy::<Key>KP_Next:\tnext-page() 
+strcpy:<Key>Prior:\tprevious-page() 
+strcpy::<Key>KP_Prior: previous-page() 
+strcpy:<Key>Right:\tforward-character() 
+strcpy::<Key>KP_Right: forward-character() 
+strcpy:<Key>Left:\tbackward-character() 
+strcpy::<Key>KP_Left:\tbackward-character() 
+strcpy:<Key>Down:\tnext-line() 
+strcpy::<Key>KP_Down:\tnext-line() 
+strcpy:<Key>Up:\tprevious-line() 
+strcpy::<Key>KP_Up:\tprevious-line() 
+strcpy:<Key>Delete:\tdelete-previous-character() 
+strcpy::<Key>KP_Delete: delete-previous-character() 
+strcpy:<Key>BackSpace:\tdelete-previous-character() 
+strcpy:<Key>Linefeed:\tnewline-and-indent() 
+strcpy:<Key>Return:\tnewline() 
+strcpy::<Key>KP_Enter:\tnewline() 
+strcpy:Ctrl<Key>backslash:\treconnect-im() 
+strcpy:<Key>Kanji:\treconnect-im()
+strcpy:<Key>:\t\tinsert-char() 
+strcpy:
+strcpy:<EnterWindow>:\tenter-window() 
+strcpy:<LeaveWindow>:\tleave-window() 
+strcpy:<FocusIn>:\tfocus-in() 
+strcpy:<FocusOut>:\tfocus-out() 
+strcpy:<Btn1Down>:\tselect-start() 
+strcpy:<Btn1Motion>:\textend-adjust() 
+strcpy:<Btn1Up>:\textend-end(PRIMARY, CUT_BUFFER0) 
+strcpy:<Btn2Down>:\tinsert-selection(PRIMARY, CUT_BUFFER0) 
+strcpy:<Btn3Down>:\textend-start() 
+strcpy:<Btn3Motion>:\textend-adjust() 
+strcpy:<Btn3Up>:\textend-end(PRIMARY, CUT_BUFFER0) 
+getenv:HOME
+strcpy:
+strcpy:FIGURE_WIDTH
+sprintf:%sframe
+sprintf:%stext
+strcpy:no .*
+sprintf:button%d
+sprintf:%sframe
+sprintf:%sclip
+sprintf:%saaa
+strcpy:
+strcpy:
+sprintf:%sscroll
+sprintf:%sframe
+sprintf:%sclip
+sprintf:%saaa
+strcpy:
+strcpy:
+sprintf:%sscroll
+sprintf:%sframe
+sprintf:%sclip
+sprintf:%saaa
+strcpy:
+strcpy:
+strcpy:fileSelPopup
+strcpy:GV
+strcpy:
+strcpy:
+strcpy:
+strcpy:
+strcpy:
+strcpy:
+strcpy:None
+strcpy:\t\t\t*.*ps* *.pdf*  no  .*
+strcpy:\t\t\t*.*ps*   no  .*
+strcpy:\t\t\t*.pdf*  no  .*
+strcpy:\t\t\tno  .*
+strcpy:Home
+strcpy:\t\t\tTmp
+strcpy:\t\t\t/usr/doc
+strcpy:\t\t\t/usr/local/doc
+strcpy:no .*
+strcpy:
+strcpy:1.000
+strcpy:Landscape
+strcpy:Letter
+sprintf:%ld %d %d %d %d %d %g %g %d %d %d %d
+strcpy:GHOSTVIEW
+sprintf:%s %d %d
+strcpy:GHOSTVIEW_COLORS
+strcpy:-sDEVICE=x11
+strcpy:
+sprintf:%d x %d
+strcpy:PAGE
+sprintf:%d x %d
+sprintf:%d x %d
+sprintf:%d x %d
+sprintf:%d x %d
+sprintf:%d x %d
+sprintf:%d x %d
+sprintf:%d x %d
+sprintf:%d x %d
+sprintf:%d x %d
+sprintf:%d x %d
+sprintf:%d x %d
+sprintf:%d x %d
+sprintf:%d x %d
+sprintf:%d x %d
+sprintf:%d x %d
+sprintf:%d x %d
+sprintf:%d x %d
+sprintf:%d x %d
+sprintf:%d x %d
+sprintf:%d x %d
+sprintf:%d x %d
+sprintf:%d x %d
+sprintf:%d x %d
+sprintf:%d x %d
+sprintf:%d x %d
+strcpy:shutdown
+strcpy:shutdown

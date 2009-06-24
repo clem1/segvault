@@ -1,0 +1,65 @@
+#                                               -*- Autoconf -*-
+# Process this file with autoconf to produce a configure script.
+
+AC_PREREQ(2.59)
+AC_INIT(autodafe, 0.1, autodafe@vuagnoux.com)
+AC_CONFIG_SRCDIR([src/adbg/conf.h])
+AC_CONFIG_HEADER([config.h])
+
+# Checks for programs.
+AC_PROG_CC
+AC_PROG_LEX
+AC_PROG_YACC
+
+
+# Check if gdb is present
+AC_CHECK_PROG(HAVE_GDB, gdb, "yes", "no")
+if test x$HAVE_GDB = xno ; then
+   AC_MSG_ERROR([gdb needed!])
+fi
+
+# Figure out where gdb lives
+AC_PATH_PROG(GDB,gdb)
+# autoheader tries to execute the 3rd string or something;  I get warnings when
+# it's defined.  So just leave it undefined.  --njn 2002-Apr-18
+AC_DEFINE_UNQUOTED(GDB_PATH, "$GDB", "")
+
+# Checks for libraries.
+# FIXME: Replace `main' with a function in `-lm':
+AC_CHECK_LIB([m], [main])
+# FIXME: Replace `main' with a function in `-lpthread':
+AC_CHECK_LIB([pthread], [main])
+# FIXME: Replace `main' with a function in `-lutil':
+AC_CHECK_LIB([util], [main])
+# FIXME: Replace `main' with a function in `-lxml2':
+AC_CHECK_LIB([xml2], [main])
+# FIXME: Replace `main' with a function in `-lz':
+AC_CHECK_LIB([z], [main])
+
+# Checks for header files.
+AC_HEADER_STDC
+AC_CHECK_HEADERS([stddef.h arpa/inet.h netdb.h netinet/in.h stdlib.h string.h strings.h sys/socket.h sys/time.h unistd.h])
+
+# Checks for typedefs, structures, and compiler characteristics.
+AC_C_CONST
+AC_TYPE_SIZE_T
+AC_HEADER_TIME
+
+# Checks for library functions.
+AC_FUNC_FORK
+AC_PROG_GCC_TRADITIONAL
+AC_FUNC_MALLOC
+AC_FUNC_MEMCMP
+AC_FUNC_REALLOC
+AC_FUNC_SELECT_ARGTYPES
+AC_TYPE_SIGNAL
+AC_FUNC_STAT
+AC_CHECK_FUNCS([bzero dup2 gethostbyname inet_ntoa memset select socket strchr strstr strtol strtoul])
+
+AC_CONFIG_FILES([Makefile:Makefile.in:boilerplate.mk
+		 src/Makefile:src/Makefile.in:boilerplate.mk
+	 	 src/adbg/Makefile
+                 src/adc/Makefile
+                 src/autodafe/Makefile
+                 src/pdml2ad/Makefile])
+AC_OUTPUT

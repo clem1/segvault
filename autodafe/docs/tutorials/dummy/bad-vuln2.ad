@@ -1,0 +1,19 @@
+/*--------------------------------------------------------------------------*
+ * xml autodafe's parser v.0.1 (c) Martin Vuagnoux - 2004                   *
+ * auto-generated script using PDML (Packet Details Markup Language) source *
+ *--------------------------------------------------------------------------*/
+
+block_begin("packet_1");
+
+ string("QUES");
+ block_size_b32("string_1"); /* big endian 32 bits size */
+
+ block_begin("string_1");
+  fuzz_string("AAA");
+
+ string("END");
+ hex(0a); /* \n */
+
+block_end("packet_1");
+send("packet_1");  /* tcp */
+

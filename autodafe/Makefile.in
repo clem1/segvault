@@ -1,0 +1,11 @@
+SUBDIRS = src
+
+all::
+
+install::
+	cd ./etc/generator; ./generator.sh /usr/local/etc
+
+clean::
+	rm -rf ./etc/generator/autodafe/*
+
+#followed by boilerplate.mk

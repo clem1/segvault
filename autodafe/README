@@ -1,0 +1,94 @@
+=============================================================================
+=============================================================================
+
+	                      * AUTODAFE *
+
+		           A fuzzing framework 
+
+   	            Copyright 2004-2006 Martin Vuagnoux 
+			  <autodafe@vuagnoux.com>
+
+			      Version 0.1
+
+=============================================================================
+=============================================================================
+First, I will cut and paste the introduction of ALoR & NaGA for ettercap:
+
+Aoccdrnig to rscheearch at an Elingsh uinervtisy, it deosn't mttaer in waht
+oredr the ltteers in a wrod are, the olny iprmoetnt tihng is taht the frist
+and lsat ltteer are in the rghit pclae. The rset can be a toatl mses  and
+you can sitll raed it wouthit a porbelm. Tihs is bcuseae we do not raed
+ervey lteter by it slef but the wrod as a wlohe and the biran fguiers it
+out aynawy.
+
+... so please excuse us for every typo in the documentation, man pages or 
+code, btw fixes and patches are welcome.
+
+=============================================================================
+			   WHAT IS THIS TOOL ?
+=============================================================================
+Autodafé (with accent) is a framework used to fuzz protocols and files. 
+It uses different tools to improve its ability to detect buffer overflows.
+
+It can fuzz:
+	- every tcp binary and ASCII protocol based
+	- every udp binary and ASCII protocol based
+	- every file (MS-WORD, PS, PDF, Etc.)
+
+It uses its own script language: ad. This language is block-based, so you can
+describe every protocols with it. See man adc(8).
+
+It knows virtually more than 530 protocols through the ethereal engine.
+(pdml2ad convert a ethereal dump in a ad script). See man pdml2ad(8).
+
+It can give weight to attacks through is debugger/tracer which listens to the 
+targeted software. When a vulnerable call is detected, the fuzzer will try to
+fuzz the entry with different strings/hex values. See man adbg(8) and 
+autodafe(8).
+
+The debugger/tracer (adbg) can be used alone to check the call of a software.
+Adbg uses the libraries of gdb to perfom its work. So it works on ld > 2.15
+too.
+
+=============================================================================
+			REQUIRED LIBRARIES/SOFTWARE
+=============================================================================
+MANDATORY: 
+
+  - libxml2 >= 2.6.13
+  - gdb >= 6.2
+  - ethereal >= 0.10.6 or wireshark 
+  - bison/yacc
+  - flex/lex
+  - gcc >= 3.3.4 (Important! new functionalities)
+
+=============================================================================
+			          LICENSE
+=============================================================================
+GNU GENERAL PUBLIC LICENSE. See COPYING for details.
+
+
+=============================================================================
+			          AUTHORS
+=============================================================================
+Martin Vuagnoux <autodafe@vuagnoux.com>
+
+
+=============================================================================
+			        INSTALLATION
+=============================================================================
+See INSTALL, but for impatient users:
+
+	1. make sure you have libxml2
+	2. make sure you have gdb
+	3. make sure you have gcc >= 3.3.4
+	4. ./configure
+	5. make
+	6. make install
+
+=============================================================================
+			        HOW TO USE IT
+=============================================================================
+
+See TUTORIALS.
+

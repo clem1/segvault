@@ -1,0 +1,163 @@
+<?xml version="1.0"?>
+<pdml version="0" creator="ethereal/0.10.6">
+<packet>
+  <proto name="geninfo" pos="0" showname="General information" size="81">
+    <field name="num" pos="0" show="1" showname="Number" value="1" size="81"/>
+    <field name="len" pos="0" show="81" showname="Packet Length" value="51" size="81"/>
+    <field name="caplen" pos="0" show="81" showname="Captured Length" value="51" size="81"/>
+    <field name="timestamp" pos="0" show="Sep 25, 2004 15:59:22.350469000" showname="Captured Time" value="1096131562.350469000" size="81"/>
+  </proto>
+  <proto name="frame" showname="Frame 1 (81 bytes on wire, 81 bytes captured)" size="81" pos="0">
+    <field name="frame.marked" showname="Frame is marked: False" hide="yes" size="0" pos="0" show="0"/>
+    <field name="frame.time" showname="Arrival Time: Sep 25, 2004 15:59:22.350469000" size="0" pos="0" show="Sep 25, 2004 15:59:22.350469000"/>
+    <field name="frame.time_delta" showname="Time delta from previous packet: 0.000000000 seconds" size="0" pos="0" show="0.000000000"/>
+    <field name="frame.time_relative" showname="Time since reference or first frame: 0.000000000 seconds" size="0" pos="0" show="0.000000000"/>
+    <field name="frame.number" showname="Frame Number: 1" size="0" pos="0" show="1"/>
+    <field name="frame.pkt_len" showname="Packet Length: 81 bytes" size="0" pos="0" show="81"/>
+    <field name="frame.cap_len" showname="Capture Length: 81 bytes" size="0" pos="0" show="81"/>
+  </proto>
+  <proto name="eth" showname="Ethernet II, Src: 00:00:00:00:00:00, Dst: 00:00:00:00:00:00" size="14" pos="0">
+    <field name="eth.dst" showname="Destination: 00:00:00:00:00:00 (00:00:00_00:00:00)" size="6" pos="0" show="00:00:00:00:00:00" value="000000000000"/>
+    <field name="eth.src" showname="Source: 00:00:00:00:00:00 (00:00:00_00:00:00)" size="6" pos="6" show="00:00:00:00:00:00" value="000000000000"/>
+    <field name="eth.addr" showname="Source or Destination Address: 00:00:00:00:00:00 (00:00:00_00:00:00)" hide="yes" size="6" pos="0" show="00:00:00:00:00:00" value="000000000000"/>
+    <field name="eth.addr" showname="Source or Destination Address: 00:00:00:00:00:00 (00:00:00_00:00:00)" hide="yes" size="6" pos="6" show="00:00:00:00:00:00" value="000000000000"/>
+    <field name="eth.type" showname="Type: IP (0x0800)" size="2" pos="12" show="0x0800" value="0800"/>
+  </proto>
+  <proto name="ip" showname="Internet Protocol, Src Addr: 127.0.0.1 (127.0.0.1), Dst Addr: 127.0.0.1 (127.0.0.1)" size="20" pos="14">
+    <field name="ip.version" showname="Version: 4" size="1" pos="14" show="4" value="45"/>
+    <field name="ip.hdr_len" showname="Header length: 20 bytes" size="1" pos="14" show="20" value="45"/>
+    <field name="ip.dsfield" showname="Differentiated Services Field: 0x00 (DSCP 0x00: Default; ECN: 0x00)" size="1" pos="15" show="0" value="00">
+      <field name="ip.dsfield.dscp" showname="0000 00.. = Differentiated Services Codepoint: Default (0x00)" size="1" pos="15" show="0x00" value="00"/>
+      <field name="ip.dsfield.ect" showname=".... ..0. = ECN-Capable Transport (ECT): 0" size="1" pos="15" show="0" value="00"/>
+      <field name="ip.dsfield.ce" showname=".... ...0 = ECN-CE: 0" size="1" pos="15" show="0" value="00"/>
+    </field>
+    <field name="ip.len" showname="Total Length: 67" size="2" pos="16" show="67" value="0043"/>
+    <field name="ip.id" showname="Identification: 0xaea5 (44709)" size="2" pos="18" show="0xaea5" value="aea5"/>
+    <field name="ip.flags" showname="Flags: 0x04 (Don&apos;t Fragment)" size="1" pos="20" show="0x04" value="40">
+      <field name="ip.flags.rb" showname="0... = Reserved bit: Not set" size="1" pos="20" show="0" value="40"/>
+      <field name="ip.flags.df" showname=".1.. = Don&apos;t fragment: Set" size="1" pos="20" show="1" value="40"/>
+      <field name="ip.flags.mf" showname="..0. = More fragments: Not set" size="1" pos="20" show="0" value="40"/>
+    </field>
+    <field name="ip.frag_offset" showname="Fragment offset: 0" size="2" pos="20" show="0" value="4000"/>
+    <field name="ip.ttl" showname="Time to live: 64" size="1" pos="22" show="64" value="40"/>
+    <field name="ip.proto" showname="Protocol: TCP (0x06)" size="1" pos="23" show="0x06" value="06"/>
+    <field name="ip.checksum" showname="Header checksum: 0x8e0d (correct)" size="2" pos="24" show="0x8e0d" value="8e0d"/>
+    <field name="ip.src" showname="Source: 127.0.0.1 (127.0.0.1)" size="4" pos="26" show="127.0.0.1" value="7f000001"/>
+    <field name="ip.addr" showname="Source or Destination Address: 127.0.0.1 (127.0.0.1)" hide="yes" size="4" pos="26" show="127.0.0.1" value="7f000001"/>
+    <field name="ip.dst" showname="Destination: 127.0.0.1 (127.0.0.1)" size="4" pos="30" show="127.0.0.1" value="7f000001"/>
+    <field name="ip.addr" showname="Source or Destination Address: 127.0.0.1 (127.0.0.1)" hide="yes" size="4" pos="30" show="127.0.0.1" value="7f000001"/>
+  </proto>
+  <proto name="tcp" showname="Transmission Control Protocol, Src Port: 33704 (33704), Dst Port: 303 (303), Seq: 0, Ack: 0, Len: 15" size="32" pos="34">
+    <field name="tcp.srcport" showname="Source port: 33704 (33704)" size="2" pos="34" show="33704" value="83a8"/>
+    <field name="tcp.dstport" showname="Destination port: 303 (303)" size="2" pos="36" show="303" value="012f"/>
+    <field name="tcp.port" showname="Source or Destination Port: 33704" hide="yes" size="2" pos="34" show="33704" value="83a8"/>
+    <field name="tcp.port" showname="Source or Destination Port: 303" hide="yes" size="2" pos="36" show="303" value="012f"/>
+    <field name="tcp.len" showname="TCP Segment Len: 15" hide="yes" size="4" pos="34" show="15" value="83a8012f"/>
+    <field name="tcp.seq" showname="Sequence number: 0    (relative sequence number)" size="4" pos="38" show="0" value="24e9d38b"/>
+    <field name="tcp.nxtseq" showname="Next sequence number: 15    (relative sequence number)" size="0" pos="34" show="15"/>
+    <field name="tcp.ack" showname="Acknowledgement number: 0    (relative ack number)" size="4" pos="42" show="0" value="24666469"/>
+    <field name="tcp.hdr_len" showname="Header length: 32 bytes" size="1" pos="46" show="32" value="80"/>
+    <field name="tcp.flags" showname="Flags: 0x0018 (PSH, ACK)" size="1" pos="47" show="0x18" value="18">
+      <field name="tcp.flags.cwr" showname="0... .... = Congestion Window Reduced (CWR): Not set" size="1" pos="47" show="0" value="18"/>
+      <field name="tcp.flags.ecn" showname=".0.. .... = ECN-Echo: Not set" size="1" pos="47" show="0" value="18"/>
+      <field name="tcp.flags.urg" showname="..0. .... = Urgent: Not set" size="1" pos="47" show="0" value="18"/>
+      <field name="tcp.flags.ack" showname="...1 .... = Acknowledgment: Set" size="1" pos="47" show="1" value="18"/>
+      <field name="tcp.flags.push" showname=".... 1... = Push: Set" size="1" pos="47" show="1" value="18"/>
+      <field name="tcp.flags.reset" showname=".... .0.. = Reset: Not set" size="1" pos="47" show="0" value="18"/>
+      <field name="tcp.flags.syn" showname=".... ..0. = Syn: Not set" size="1" pos="47" show="0" value="18"/>
+      <field name="tcp.flags.fin" showname=".... ...0 = Fin: Not set" size="1" pos="47" show="0" value="18"/>
+    </field>
+    <field name="tcp.window_size" showname="Window size: 32767" size="2" pos="48" show="32767" value="7fff"/>
+    <field name="tcp.checksum" showname="Checksum: 0x1cbb (correct)" size="2" pos="50" show="0x1cbb" value="1cbb"/>
+    <field show="Options: (12 bytes)" size="12" pos="54" value="0101080a0021868b00217d29">
+      <field show="NOP" size="1" pos="54" value="01"/>
+      <field show="NOP" size="1" pos="55" value="01"/>
+      <field name="tcp.options.time_stamp" showname="TCP Time Stamp Option: True" hide="yes" size="10" pos="56" show="1" value="080a0021868b00217d29"/>
+      <field show="Time stamp: tsval 2197131, tsecr 2194729" size="10" pos="56" value="080a0021868b00217d29"/>
+    </field>
+  </proto>
+  <field name="data" value="5155455300000003414141454e440a"/>
+</packet>
+
+<packet>
+  <proto name="geninfo" pos="0" showname="General information" size="66">
+    <field name="num" pos="0" show="2" showname="Number" value="2" size="66"/>
+    <field name="len" pos="0" show="66" showname="Packet Length" value="42" size="66"/>
+    <field name="caplen" pos="0" show="66" showname="Captured Length" value="42" size="66"/>
+    <field name="timestamp" pos="0" show="Sep 25, 2004 15:59:22.350509000" showname="Captured Time" value="1096131562.350509000" size="66"/>
+  </proto>
+  <proto name="frame" showname="Frame 2 (66 bytes on wire, 66 bytes captured)" size="66" pos="0">
+    <field name="frame.marked" showname="Frame is marked: False" hide="yes" size="0" pos="0" show="0"/>
+    <field name="frame.time" showname="Arrival Time: Sep 25, 2004 15:59:22.350509000" size="0" pos="0" show="Sep 25, 2004 15:59:22.350509000"/>
+    <field name="frame.time_delta" showname="Time delta from previous packet: 0.000040000 seconds" size="0" pos="0" show="0.000040000"/>
+    <field name="frame.time_relative" showname="Time since reference or first frame: 0.000040000 seconds" size="0" pos="0" show="0.000040000"/>
+    <field name="frame.number" showname="Frame Number: 2" size="0" pos="0" show="2"/>
+    <field name="frame.pkt_len" showname="Packet Length: 66 bytes" size="0" pos="0" show="66"/>
+    <field name="frame.cap_len" showname="Capture Length: 66 bytes" size="0" pos="0" show="66"/>
+  </proto>
+  <proto name="eth" showname="Ethernet II, Src: 00:00:00:00:00:00, Dst: 00:00:00:00:00:00" size="14" pos="0">
+    <field name="eth.dst" showname="Destination: 00:00:00:00:00:00 (00:00:00_00:00:00)" size="6" pos="0" show="00:00:00:00:00:00" value="000000000000"/>
+    <field name="eth.src" showname="Source: 00:00:00:00:00:00 (00:00:00_00:00:00)" size="6" pos="6" show="00:00:00:00:00:00" value="000000000000"/>
+    <field name="eth.addr" showname="Source or Destination Address: 00:00:00:00:00:00 (00:00:00_00:00:00)" hide="yes" size="6" pos="0" show="00:00:00:00:00:00" value="000000000000"/>
+    <field name="eth.addr" showname="Source or Destination Address: 00:00:00:00:00:00 (00:00:00_00:00:00)" hide="yes" size="6" pos="6" show="00:00:00:00:00:00" value="000000000000"/>
+    <field name="eth.type" showname="Type: IP (0x0800)" size="2" pos="12" show="0x0800" value="0800"/>
+  </proto>
+  <proto name="ip" showname="Internet Protocol, Src Addr: 127.0.0.1 (127.0.0.1), Dst Addr: 127.0.0.1 (127.0.0.1)" size="20" pos="14">
+    <field name="ip.version" showname="Version: 4" size="1" pos="14" show="4" value="45"/>
+    <field name="ip.hdr_len" showname="Header length: 20 bytes" size="1" pos="14" show="20" value="45"/>
+    <field name="ip.dsfield" showname="Differentiated Services Field: 0x00 (DSCP 0x00: Default; ECN: 0x00)" size="1" pos="15" show="0" value="00">
+      <field name="ip.dsfield.dscp" showname="0000 00.. = Differentiated Services Codepoint: Default (0x00)" size="1" pos="15" show="0x00" value="00"/>
+      <field name="ip.dsfield.ect" showname=".... ..0. = ECN-Capable Transport (ECT): 0" size="1" pos="15" show="0" value="00"/>
+      <field name="ip.dsfield.ce" showname=".... ...0 = ECN-CE: 0" size="1" pos="15" show="0" value="00"/>
+    </field>
+    <field name="ip.len" showname="Total Length: 52" size="2" pos="16" show="52" value="0034"/>
+    <field name="ip.id" showname="Identification: 0x1940 (6464)" size="2" pos="18" show="0x1940" value="1940"/>
+    <field name="ip.flags" showname="Flags: 0x04 (Don&apos;t Fragment)" size="1" pos="20" show="0x04" value="40">
+      <field name="ip.flags.rb" showname="0... = Reserved bit: Not set" size="1" pos="20" show="0" value="40"/>
+      <field name="ip.flags.df" showname=".1.. = Don&apos;t fragment: Set" size="1" pos="20" show="1" value="40"/>
+      <field name="ip.flags.mf" showname="..0. = More fragments: Not set" size="1" pos="20" show="0" value="40"/>
+    </field>
+    <field name="ip.frag_offset" showname="Fragment offset: 0" size="2" pos="20" show="0" value="4000"/>
+    <field name="ip.ttl" showname="Time to live: 64" size="1" pos="22" show="64" value="40"/>
+    <field name="ip.proto" showname="Protocol: TCP (0x06)" size="1" pos="23" show="0x06" value="06"/>
+    <field name="ip.checksum" showname="Header checksum: 0x2382 (correct)" size="2" pos="24" show="0x2382" value="2382"/>
+    <field name="ip.src" showname="Source: 127.0.0.1 (127.0.0.1)" size="4" pos="26" show="127.0.0.1" value="7f000001"/>
+    <field name="ip.addr" showname="Source or Destination Address: 127.0.0.1 (127.0.0.1)" hide="yes" size="4" pos="26" show="127.0.0.1" value="7f000001"/>
+    <field name="ip.dst" showname="Destination: 127.0.0.1 (127.0.0.1)" size="4" pos="30" show="127.0.0.1" value="7f000001"/>
+    <field name="ip.addr" showname="Source or Destination Address: 127.0.0.1 (127.0.0.1)" hide="yes" size="4" pos="30" show="127.0.0.1" value="7f000001"/>
+  </proto>
+  <proto name="tcp" showname="Transmission Control Protocol, Src Port: 303 (303), Dst Port: 33704 (33704), Seq: 0, Ack: 15, Len: 0" size="32" pos="34">
+    <field name="tcp.srcport" showname="Source port: 303 (303)" size="2" pos="34" show="303" value="012f"/>
+    <field name="tcp.dstport" showname="Destination port: 33704 (33704)" size="2" pos="36" show="33704" value="83a8"/>
+    <field name="tcp.port" showname="Source or Destination Port: 303" hide="yes" size="2" pos="34" show="303" value="012f"/>
+    <field name="tcp.port" showname="Source or Destination Port: 33704" hide="yes" size="2" pos="36" show="33704" value="83a8"/>
+    <field name="tcp.len" showname="TCP Segment Len: 0" hide="yes" size="4" pos="34" show="0" value="012f83a8"/>
+    <field name="tcp.seq" showname="Sequence number: 0    (relative sequence number)" size="4" pos="38" show="0" value="24666469"/>
+    <field name="tcp.ack" showname="Acknowledgement number: 15    (relative ack number)" size="4" pos="42" show="15" value="24e9d39a"/>
+    <field name="tcp.hdr_len" showname="Header length: 32 bytes" size="1" pos="46" show="32" value="80"/>
+    <field name="tcp.flags" showname="Flags: 0x0010 (ACK)" size="1" pos="47" show="0x10" value="10">
+      <field name="tcp.flags.cwr" showname="0... .... = Congestion Window Reduced (CWR): Not set" size="1" pos="47" show="0" value="10"/>
+      <field name="tcp.flags.ecn" showname=".0.. .... = ECN-Echo: Not set" size="1" pos="47" show="0" value="10"/>
+      <field name="tcp.flags.urg" showname="..0. .... = Urgent: Not set" size="1" pos="47" show="0" value="10"/>
+      <field name="tcp.flags.ack" showname="...1 .... = Acknowledgment: Set" size="1" pos="47" show="1" value="10"/>
+      <field name="tcp.flags.push" showname=".... 0... = Push: Not set" size="1" pos="47" show="0" value="10"/>
+      <field name="tcp.flags.reset" showname=".... .0.. = Reset: Not set" size="1" pos="47" show="0" value="10"/>
+      <field name="tcp.flags.syn" showname=".... ..0. = Syn: Not set" size="1" pos="47" show="0" value="10"/>
+      <field name="tcp.flags.fin" showname=".... ...0 = Fin: Not set" size="1" pos="47" show="0" value="10"/>
+    </field>
+    <field name="tcp.window_size" showname="Window size: 32767" size="2" pos="48" show="32767" value="7fff"/>
+    <field name="tcp.checksum" showname="Checksum: 0xe537 (correct)" size="2" pos="50" show="0xe537" value="e537"/>
+    <field show="Options: (12 bytes)" size="12" pos="54" value="0101080a0021868b0021868b">
+      <field show="NOP" size="1" pos="54" value="01"/>
+      <field show="NOP" size="1" pos="55" value="01"/>
+      <field name="tcp.options.time_stamp" showname="TCP Time Stamp Option: True" hide="yes" size="10" pos="56" show="1" value="080a0021868b0021868b"/>
+      <field show="Time stamp: tsval 2197131, tsecr 2197131" size="10" pos="56" value="080a0021868b0021868b"/>
+    </field>
+    <field show="SEQ/ACK analysis" size="0" pos="34" value="">
+      <field name="tcp.analysis.acks_frame" showname="This is an ACK to the segment in frame: 1" size="0" pos="34" show="1"/>
+      <field name="tcp.analysis.ack_rtt" showname="The RTT to ACK the segment was: 0.000040000 seconds" size="0" pos="34" show="0.000040000"/>
+    </field>
+  </proto>
+</packet>
+
+</pdml>

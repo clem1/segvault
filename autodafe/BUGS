@@ -1,0 +1,23 @@
+* 2004-09-25 Martin Vuagnoux <autodafe@vuagnoux.com> - pdml2ad
+  Some strings are not recognized (separated if there is only 
+  a \x0a (^M).
+
+
+* 2004-09-25 Martin Vuagnoux <autodafe@vuagnoux.com> - autodafe
+  If string(""); memory leak (two free are missing).
+
+
+* 2004-09-25 Martin Vuagnoux <autodafe@vuagnoux.com> - adbg
+  the arguments with "-a" are interpreted by getopt.
+
+  WORKAROUND: Launch the targeted software program independently
+              and attach to process with its PID.
+
+
+* 2004-09-28 Martin Vuagnoux <autodafe@vuagnoux.com> - adbg
+  there is two times "check the string" with the example
+  of ghostview... check why.
+
+* 2004-10-06 Martin Vuagnoux <autodafe@vuagnoux.com> - autodafe
+  The block_size_(dec/hex)_string computation has a bug. Functions
+  are removed.

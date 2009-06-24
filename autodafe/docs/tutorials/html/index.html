@@ -1,0 +1,961 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en" dir="ltr">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <meta name="keywords" content="Autodafe Autodafé Tutorial Tutorials Martin Vuagnoux" />
+  <title> Autodafe: Tutorial </title>
+  <link rel="stylesheet" type="text/css" href="autodafe.css" />
+</head>
+
+<body>
+
+<div class="titleb"> <center>TUTORIAL</center> </div>
+<br>
+<hr color="#1f1f1f" size="1">
+<br>
+
+<div class="titlebw"> 
+  <center>AUTODAFE</center>
+</div>
+<div class="titlew"> <center> A FUZZING FRAMEWORK</center> </div>
+<br>
+<br>
+<div class="titlew"> 
+  <center> &copy; Copyright 2004-2006 Martin Vuagnoux</center>
+  <center>autodafe@vuagnoux.com</center> 
+  <br>
+  <br>
+  <center> VERSION 0.1 </center>
+</div>
+
+<br>
+<hr color="#1f1f1f" size="1">
+<br>
+
+<div class="titleb"><center>TABLE OF CONTENT</center></div>
+<br>
+<a href="#introduction">1. INTRODUCTION</a><br>
+<a href="#installation">2. INSTALLATION</a><br>
+<a href="#fuzzing">3. FUZZING</a><br>
+<a href="#dummy">4. FIRST EXAMPLE: A DUMMY PROTOCOL</a><br>
+<a href="#realcase1">5. REAL CASE 1: GHOSTVIEW-3.5.8</a><br>
+<br>
+<a name="introduction"></a>
+<div class="titleb"><center>INTRODUCTION</center></div>
+<br>
+
+Welcome to the Autodaf&eacute;'s Tutorial. Here, you will learn how to
+use the Autodaf&eacute; framework. In particular we will see how to
+analyse the security of network based and file based software
+programs.
+
+First of all We recommend you to read the paper "Autodaf&eacute;: an
+Act of Software Torture" which explains the core technique of this
+fuzzer. You can download it on the web page <a
+href="http://autodafe.sourceforge.net/paper/autodafe.pdf">http://autodafe.sourceforge.net/paper/autodafe.pdf</a>
+or read the pdf file located at:
+
+<br>
+<br>
+<div class="code"><pre>
+/usr/local/autodafe-0.1/docs/autodafe.pdf
+</pre>
+</div>
+<br>
+... But we know, most of the time people just want to understand how
+to use a tool with clear and detailed examples. It is exactly what we
+will do in this document. First of all we will install the tool and
+play a little bit with a dummy example. Then we will attack real
+software programs.
+<br>
+<br>
+<a name="installation"></a>
+<div class="titleb"><center>INSTALLATION</center></div>
+<br>
+Autodafé needs tools and libraries:
+<UL>
+<LI>libxml2 >= 2.6.13 <a href="http://xmlsoft.org">(http://xmlsoft.org)</a>
+<LI>gdb >= 6.2 <a href="http://www.gnu.org/software/gdb">(http://www.gnu.org/software/gdb)</a>
+<LI>ethereal >= 0.10.6 <a href="http://www.ethereal.com">(http://www.ethereal.com)</a> or wireshark >= 0.99.2 <a href="http://www.wireshark.org">(http://www.wireshark.org)</a>
+<LI>bison/yacc</LI>
+<LI>flex/lex</LI>
+<LI>gcc >= 3.3.4</LI>
+<LI>ld >= 2.15.92</LI>
+</UL>
+Then the installation is the usual ./configure && make && make install
+way:
+<br>
+<br>
+<div class="code"><pre>
+#> cp autodafe-0.1.tar.gz /usr/local/src
+#> cd /usr/local/src
+#> tar zxvf autodafe-0.1.tar.gz
+#> mv ./autodafe-0.1 /usr/local/
+#> cd /usr/local/autodafe-0.1/
+#> ./configure
+#> make
+#> make install
+</pre>
+</div>
+<br>
+Because Autodafé needs to debug/trace targeted software programs, you
+may need to use the root account.
+<br>
+<br>
+Note that during the compilation, the fuzzing library is created and
+needs approximately 50MB of free space. The fuzzing library is
+installed by default in the directory:
+<br>
+<br>
+<div class="code"><pre>
+/usr/local/etc/autodafe/
+</pre>
+</div>
+<br>
+If something goes wrong, see the FAQ or contact the authors.
+<br>
+<br>
+<a name="fuzzing"></a>
+<div class="titleb"><center>FUZZING</center></div>
+<br>
+
+If you don't know anything about fuzzing, please read the paper
+"Autodafé: an Act of Software Torture" or look at the slides of the
+presentation given at the 22C3 (22nd Chaos Computer Club Congress) on
+the web page <a
+href="http://autodafe.sourceforge.net">(http://autodafe.sourceforge.net)</a>. Yes,
+we spend time to do something user friendly (it is a Macromedia Flash
+animation) so please, read it ;-). If you are too lazy (we can
+understand that) here is a very brief definition:
+
+<br><br>
+<em>Fuzzing is used to send malformed data to programs software in order
+to highlight vulnerabilities like buffer overflows.</em>
+<br><br>
+
+You can easily understand that it is not a simple as it seems, because
+software programs use protocols and do not accept random data. So
+sending just plenty of "AAAA.." (you know, the trivial `perl -e 'print
+"A"x303'`) is not always relevant to uncover buffer overflows. Let us
+have a dummy example to understand why Autodafé can be useful.
+
+<br>
+<br>
+<a name="dummy"></a>
+<div class="titleb"><center>FIRST EXAMPLE: A DUMMY PROTOCOL</center></div>
+<br>
+In this section, we will attack a dummy protocol to understand how
+Autodafé works. This protocol is inspired by a real one, which is used
+to remotely access to a computer. Yes, the flaw still exists ;-P
+<br><br>
+Anyway, first of all you need to create the dummy server. The source
+is in the directory: /usr/local/autodafe-0.1/docs/tutorials/dummy/
+<br>
+<br>
+<div class="code"><pre>
+#> cd /usr/local/autodafe-0.1/docs/tutorials/dummy/
+#> make
+</pre>
+</div>
+<br>
+You don't really need to read the source code. Most of the time,
+fuzzers are used against compiled software programs. Thus you normally
+don't have access to the source code. What you really need is to
+understand how the protocol works and that's the big deal with
+fuzzers.
+<br><br>
+vuln2 is a server tool which uses a protocol. In most fuzzers you need
+to describe the protocol, in order to send valid data (i.e. data
+accepted by the server). Autodafé helps you in this boring task:
+<br><br>
+<div class="title">PDML2AD</div>
+<br>
+
+The usual way to understand a protocol is to sniff the communication
+between the server and a client. To do that, you can use for example
+the sniffer ethereal <a
+href="http://www.ethereal.com">(http://www.ethereal.com)</a> or
+wireshark <a href="http://www.wireshark.org">(http://www.wireshark.org)</a> which
+uses its own protocol recognition engine called dissector. Ethereal
+already recognizes 750 protocols (version 0.10.14)! But in this case
+it's a dummy example so the protocol is obvioulsy not known by
+ethereal.
+
+<br><br>
+Let have a look to the file vuln2.pdml:
+<br>
+<br>
+<div class="code"><pre>
+#> cat ./vuln2.pdml
+</pre>
+</div>
+<br>  
+It is the PDML export version of the sniffed communication between the
+server and a client. In this case we consider that you sniffed the
+data between the server and a client and you saved the dump in the
+PDML format. It is a very useful format which is used by Autodafé to
+describe protocols.
+<br><br>
+To do that, use the tool pdml2ad which converts a pdml document to the
+Autodafé Protocol Description Script Langage. This script is very
+similar to the script used by Spike, one of the best fuzzer (thanks
+Dave Aitel). Let see how pdml2ad works:
+<br>
+<br>
+<div class="code"><pre>
+#> pdml2ad --help
+pdml2ad-v.0.1 - convert PDML file to Autodafe's script language
+pdml2ad-v.0.1 - (c) 2004-2006 Martin Vuagnoux &lt;autodafe@vuagnoux.com&gt;
+
+Usage: pdml2ad [OPTION...] &lt;FILE.pdml&gt; &lt;FILE.ad&gt;
+    -h, --help                display this help and exit.
+    -V, --version             output version information and exit.
+    -e, --no-ethereal-style   not using the ethereal hexadecimal style.
+    -p  --recover-protocol    try to recover the used protocol.
+    -s, --recover-strings     try to recover strings in packet.
+    -i, --invert-send-recv    some servers speak first, some clients speak first.
+    -v, --verbose             verbose output.
+    -d  --debug               use 2x or 3x for more debug info.
+
+
+FILE is a PDML-XML file (Packet Details Markup Language) generally exported
+by Ethereal.
+A file &lt;FILE.AD&gt; is created.
+</pre>
+</div>
+<br>  
+
+We know that dissector, the ethereal protocol recognition engine will
+not recognize this protocol, but we can use the option which tries to
+recover strings. It is always good to test it if the protocol is ASCII
+based.
+
+<br>
+<br>
+<div class="code"><pre>
+#> pdml2ad -v -s ./vuln2.pdml ./myvuln2.ad
+[*] parsing the file: ./vuln2.pdml
+#> cat ./myvuln2.ad
+/*--------------------------------------------------------------------------*
+ * xml autodafe's parser v.0.1 (c) Martin Vuagnoux - 2004-2006              *
+ * auto-generated script using PDML (Packet Details Markup Language) source *
+ *--------------------------------------------------------------------------*/
+
+block_begin("packet_1");
+  hex(
+  51 55 45 53 00 00 00 03    41 41 41 45 4e 44 0a
+  );
+block_end("packet_1");
+recv("packet_1");  /* tcp */
+
+block_begin("packet_2");
+block_end("packet_2");
+send("packet_2");  /* tcp */
+</pre>
+</div>
+<br>  
+We can see that it's not a string because there is values which do not
+correspond to ASCII characters. But the \x0a at the end can suggest
+that a part of the protocol is string based.
+<br><br>
+Because the protocol has not been recognized by ethereal we need to
+understand a little bit how the Autodafe Protocol Description Script
+Langage works. It is inspired by the Block-Based Description invented
+by Dave Aitel: We define blocks of data and length fields binded to
+blocks, which will be updated if more data are injected in a block.
+<br><br>
+The Autodafé Protocol Description Script Langage is defined by a few
+function:
+<br>
+<br>
+<div class="code"><pre>
+string("hello world"); /* just an ASCII string limited to 255 characters */
+
+hex(fa);   /* hexadecimal value with three possible notations */
+hex(\xfa); /* fa == \xfa == 0xfa */
+hex(0xfa); /* you can write up to 4GBytes of hex values */
+
+block_begin("my block"); /* start a block */
+block_end("my block");   /* close a block */
+
+block_size_b32("my block"); /* 32-bit big endian size of the block "my block" */
+block_crc32_b("my blcok");  /* 32-bit big endian crc32 of the block "my block" */
+
+send("my block"); /* send the block "my block" */
+
+/* when you want to fuzz a string, you replace the "string" with "fuzz_string"
+ * then, Autodafé will know which string you want to fuzz */
+fuzz_string("hello world");
+
+/* you can do the same thing with hexadecimal values */
+fuzz_hex(0x00 00 \x00 ff);
+</pre>
+</div>
+<br>  
+For the complete description of the Autodafe Script Language, look at
+the paper "Autodafé: an Act of Software Torture". This langage is very
+limited to be as simple as possible.
+<br><br>
+Let's go back to our example: in this case, the dummy protocol can be
+described by:
+<br>
+<br>
+<div class="code"><pre>
+QUES&lt;Size in big-endian 32 bit of block 1&gt;&lt;block 1&gt;END\n
+</pre>
+</div>
+<br>  
+The last block "packet_2" is useless because it is empty, we can
+remove it. Then we can finally describe the protocol with the Autodafé
+Script Language (see the file vuln2.ad or vuln2-orig.ad in the dummy
+directory).
+<br>
+<br>
+<div class="code"><pre>
+ #> cat ./vuln2.ad
+
+block_begin("packet_1");
+
+string("QUES");
+block_size_b32("string_1"); /* big endian 32 bits size */
+
+block_begin("string_1");
+  fuzz_string("AAA");
+block_end("string_1");
+
+string("END");
+hex(0a); /* \n */
+
+block_end("packet_1");
+send("packet_1");  /* tcp */
+</pre>
+</div>
+<br>
+You can see that we decide to fuzz the string "AAA". That's why the
+function "string" has been replaced by the function "fuzz_string". The
+other strings or values will not be substituted by the fuzzer.
+<br><br>
+Of course, when the protocol is recognized by ethereal (750 protocols
+with the version 0.10.14 of ethereal), the description is pratically
+automated. Let see the example of a SSH packet (the first one)
+recognized by ethereal and converted in the Autodafe Script Langage:
+<br>
+<br>
+<div class="code"><pre>
+block_begin("packet_1");
+  // name: ssh.protocol
+  // showname: Protocol: SSH-1.99-OpenSSH_4.2\n
+  // show: SSH-1.99-OpenSSH_4.2\x0a
+  // size: 21
+  string("SSH-1.99-OpenSSH_4.2");
+  hex(0a); /* \n */
+block_end("packet_1");
+send("packet_1"); /* tcp */
+</pre>
+</div>
+<br>  
+We will see in another tutorial the power of pdml2ad with known
+protocols. But for our first case, this description is largely enough.
+
+<br><br>
+<div class="title">ADC</div>
+<br>
+
+When you are using a script langage, you can easily make mistakes
+(especially syntax errors). To help you, the Autodafé Framework comes
+with a "compiler" called adc. Adc will check if the syntax of the
+Autodafé Script Langage is correct and convert the script (*.ad) into
+a binary file (*.adc) the Checked Autodafe Description Protocol Script
+Langage. Only binary checked files can be used by the fuzzer autodafe.
+<br><br>
+Let us compile the file vuln2.ad:
+<br>
+<br>
+<div class="code"><pre>
+#> adc ./vuln2.ad
+[!] block: "string_1" size: 3 (0x3)
+[!] block: "packet_1" size: 15 (0xf)
+</pre>
+</div>
+<br>
+Ok, everything is ok, you can see that a new file called "vuln2.adc"
+has been created. Just as an example, try to compile the malformed
+Autodafé Script Langage "bad-vuln2.ad" where the block "string_1" has
+not been closed.
+<br>
+<br>
+<div class="code"><pre>
+#> adc ./bad-vuln2.ad
+[YY-ERROR] block: "string_1" has not been ended
+[!] block: "string_1" size: 7 (0x7)
+[!] block: "packet_1" size: 15 (0xf)
+[YY-ERROR] at line[20]: See block(s) error(s) above
+</pre>
+</div>
+<br>
+Anyway, forget the bad example and go back to the good one
+"vuln2.adc". We have now a limited but enough description of the
+protocol. It's time to launch the targeted software program using the
+debugger/tracer adbg.
+
+<br><br>
+<div class="title">ADBG</div>
+<br>
+This tool is very powerful. It uses gdb to trace the software program
+in order to weight the attacks. It will check which vulnerable
+functions are called by the targeted program and give weight to every
+fuzzed variables like fuzz_string or fuzz_hex. Well, in our example we
+choose to fuzz only one variable but it's a dummy example ;-). Let's
+have a look of the adbg's help:
+<br>
+<br>
+<div class="code"><pre>
+#> adbg --help
+adbg-v.0.1 - debugger which listen the targeted software.
+adbg-v.0.1 - (c) 2004-2006 Martin Vuagnoux &lt;autodafe@vuagnoux.com&gt;
+
+Usage: adbg [OPTION...] [&lt;program&gt;] ["&lt;args&gt;"]
+
+  List of the basic functions:
+    -h, --help             display this help and exit.
+    -V, --version          output version information and exit.
+    -v, --verbose          verbose output (use twice for more verbose info).
+    -d  --debug            debug output (use 2x or 3x for more debug info).
+
+  List of the internal's debugger' s functions:
+    -G  --gdb-dump=FILE    copy the gdb's output in a file.
+    -s  --string-dump=FILE copy the vulnerables strings in a file.
+
+  List of the debugger's functions:
+    -p  --port=NUM         The listening TCP port of the debugger.
+    -P  --pid=NUM          the pid of the program you want to debug.
+    -i  --input=FILE       file which contains the strings used to break.
+
+The standard output give the informations.
+</pre>
+</div>
+<br>
+the targeted software program "vuln2" is quite simple, it just asks
+for a listening port number:
+<br>
+<br>
+<div class="code"><pre>
+#> ./vuln2
+./vuln2 &lt;listening_port&gt;
+</pre>
+</div>
+<br>
+The debugger adbg listen to a local port in order to communicate with
+the fuzzer autodafe. Here is a example how to start adbg:
+<br>
+<br>
+<div class="code"><pre>
+#> adbg -v -p 31337 ./vuln2 2000
+[*]-+-> breakpoint on: "strcpy"
+[*]-+-> breakpoint on: "strcat"
+[*]-+-> breakpoint on: "gets"
+...
+[*] waiting for a connection on port: 31337
+</pre>
+</div>
+<br>
+Here you can see what are the vulnerable function where the
+debugger/tracer will break. Feel free to add more. The public version
+of autodafe is intentionally limited to a few unsafe function :-) Now
+the debugger is waiting for a connection on port 31337. This connection
+will be initiated by the fuzzer autodafe, the fuzzer engine.
+
+<br><br>
+<div class="title">AUTODAFE</div>
+<br>
+Autodafe is the fuzz core engine. It will parse the Checked Protocol
+Description Script Langage (vuln2.adc) and will send the captured data
+to the targeted software. Let us have a look to the exact procedure:
+<OL>
+
+<LI>A partial description of the audited protocol is given to the
+fuzzer using a block-based protocol language. Every canonical element
+is considered as a marker. In our example, the string "AAA" is a
+marker.
+
+<LI>The fuzzer autodafe uses the description (contained in the file
+vuln2.adc) to simulate a normal (previously captured) communication
+with the targeted software program.
+
+<LI>The tracer adbg receives from the fuzzer autodafe a list of markers
+and runs the targeted software program. The markers are typically the
+string you want to test. In our example there is only one marker, the
+string "AAA".
+
+<LI>The tracer analyses the execution of the targeted software program
+in order to detect if unsafe functions use markers.
+
+<LI>If a marker is used by unsafe functions, the tracer gives a bigger
+weight to the marker and communicates its results to the fuzzer
+autodafe.
+
+<LI>According to the weight of markers, the fuzzer autodafe classify
+which markers should be tested. Markers which do not use vulnerable
+functions are not fuzzed during the first pass.
+
+<LI>If a fuzzed variable causes a buffer overflow, the tracer abbg
+gives to the auditor additional information about this vulnerability.
+
+</OL>
+Let's have a look to the autodafe's help:
+<br>
+<br>
+<div class="code"><pre>
+autodafe --help
+autodafe-v.0.1 - This is the Autodafe Fuzzer Engine
+autodafe-v.0.1 (c) 2004-2006 Martin Vuagnoux &lt;autodafe@vuagnoux.com&gt;
+
+Usage: autodafe [OPTION...] &lt;file.adc&gt;
+
+  List of the basic functions:
+    -h, --help          display this help and exit.
+    -V, --version       output version information and exit.
+    -v, --verbose       verbose output. Use twice for more verbose.
+    -d  --debug         print debug info. Use 2x or 3x for more debug info.
+
+  List of the autodafe's functions:
+    -t  --timeout=SEC   if no response, wait SEC seconds before go on.
+    -u  --udp           use an udp connection - default is tcp.
+    -f  --file=DIR      create multiple fuzzed files in directory DIR.
+    -r  --remote=HOST   mode *client*: HOST = hostname/ip address. 
+    -p  --port=PORT     mode *client*: PORT = port to connect to.
+                        mode *server*: PORT = listening port [-r not defined].
+    -D  --with-dbg=HOST debugger: HOST = hostname/ip of the debugger.
+    -P  --dbg-port=PORT debugger: PORT = listening port of the debugger.
+
+  List of the internal's autodafe's functions:
+    -b  --bruteforce    fuzz every fields.
+    -i  --invert        send() becomes recv() and recv() becomes send().
+    -w  --wait=SEC      wait SEC seconds before opening connection.
+
+&lt;file.adc&gt; is a type of file used by the fuzzer.
+The standard output gives the results of the fuzzing.
+</pre>
+</div>
+<br>
+In our case, we launch autodafe like this:
+<br>
+<br>
+<div class="code"><pre>
+#> autodafe -v -p 2000 -r localhost -P 31337 -D localhost ./vuln2.adc
+[*] Autodafe's debugger mode activated.
+[*] mode *client* - connection to localhost on port: 2000 (tcp)
+[*] parsing file: "./vuln2.adc"
+[*] debugger connected: localhost on port 31337
+[!] source: "/usr/local/etc/autodafe/string/string-1-x3"        (3 bytes)
+[!] source: "/usr/local/etc/autodafe/string/string-1-sp-x3"     (4 bytes)
+[!] source: "/usr/local/etc/autodafe/string/string-1-x4"        (4 bytes)
+[!] source: "/usr/local/etc/autodafe/string/string-1-sp-x4"     (5 bytes)
+[!] source: "/usr/local/etc/autodafe/string/string-1-x15"       (15 bytes)
+...
+[1] waiting 1 seconds before opening connection...
+[*] connected to: localhost on port: 2000
+[!] this fuzz is *NOT* relevant, we don't fuzz id: 0
+</pre>
+</div>
+<br>
+The debugger/tracer output is:
+<br>
+<br>
+<div class="code"><pre>
+[*] connection from: 127.0.0.1
+[*] fuzzer authenticated and connected. (v.0.1)
+[+]-+-> add monitored string: "AAA"
+[*] targeted software running... (analysis in progress)
+[*]-+-> breakpoint on: "printf"
+...
+</pre>
+</div>
+<br>
+
+Hmmm... Ok, there was only one marker (id 0) which is the string
+"AAA". The debugger/trace chooses to NOT fuzz the string because the
+string is not used by an unsafe function. Believe me, there is a flaw
+;-) so we will force autodafe to fuzz every marker by adding "-b" or
+"--bruteforce". The command for adbg is:
+
+<br>
+<br>
+<div class="code"><pre>
+#> adbg -v -p 31337 ./vuln2 2000
+</pre>
+</div>
+<br>
+
+To have more verbose information, we add -vv. Thus, the new command
+for autodafe is:
+
+<br>
+<br>
+<div class="code"><pre>
+#> autodafe -b -vv -p 2000 -r localhost -P 31337 -D localhost ./vuln2.adc
+[*] Autodafe's debugger mode activated.
+[*] mode *client* - connection to localhost on port: 2000 (tcp)
+[*] parsing file: "./vuln2.adc"
+[*] debugger connected: localhost on port 305
+[!] source: "/usr/local/etc/autodafe/string/string-1-x3"        (3 bytes)
+[!] source: "/usr/local/etc/autodafe/string/string-1-sp-x3"     (4 bytes)
+[!] source: "/usr/local/etc/autodafe/string/string-1-x4"        (4 bytes)
+[!] source: "/usr/local/etc/autodafe/string/string-1-sp-x4"     (5 bytes)
+[!] source: "/usr/local/etc/autodafe/string/string-1-x15"       (15 bytes)
+[!] source: "/usr/local/etc/autodafe/string/string-1-sp-x15"    (16 bytes)
+[!] source: "/usr/local/etc/autodafe/string/string-1-x16"       (16 bytes)
+...
+[*] computing the block's length.
+[1] waiting 1 seconds before opening connection...
+[*] connected to: localhost on port: 2000
++------------[send buffer (size: 00015)]----------+----------------+
+ 51 55 45 53 00 00 00 03   41 41 41 45 4e 44 0a    QUES....AAAEND.
++------------[send buffer (size: 00015)]----------+----------------+
+</pre>
+</div>
+<br>
+
+At this step, the fuzzer autodafe has just sent the original packet in
+order to let the debugger/tracer adbg to analyse the behavior of the
+targeted software program. You can recognize the protocol:
+<br>
+<br>
+<div class="code"><pre>
+QUES&lt;size of the string "AAA" in 32-bit big-endian&gt;"AAA"END
+</pre>
+</div>
+<br>
+<div class="code"><pre>
+[*] computing the block's length.
+[*] connected to: localhost on port: 2000
++------------[send buffer (size: 00015)]----------+----------------+
+ 51 55 45 53 00 00 00 03   41 41 41 45 4e 44 0a    QUES....AAAEND.
++------------[send buffer (size: 00015)]----------+----------------+
+</pre>
+</div>
+<br>
+You have probably remarked the strings above:
+<br>
+<br>
+<div class="code"><pre>
+[!] source: "/usr/local/etc/autodafe/string/string-1-x3"        (3 bytes)
+...
+[!] source: "/usr/local/etc/autodafe/string/string-1-x16"       (16 bytes)
+</pre>
+</div>
+<br>
+
+These files constitute the substituted fuzz library. Each fuzzed
+string (in our example "AAA") is successively replaced by the content
+of these files. The first file is called "string-1-x3" and contains
+the 3-byte string "AAA". I know, it's the same as the orginal, quite
+useless in this case.
+<br>
+<br>
+After a while, the string "AAA" is substituted by the 16-byte string
+"AAAAAAAAAAAAAAAA". You can see that the length value (5th byte to 9th
+byte) has correctly been modified. It takes the size 00 00 00 10, which
+is 16 in 32-bit big endian.
+
+<br>
+<br>
+<div class="code"><pre>
+[*] computing the block's length.
+[*] connected to: localhost on port: 2000
++------------[send buffer (size: 00028)]----------+----------------+
+ 51 55 45 53 00 00 00 10   41 41 41 41 41 41 41 41 QUES....AAAAAAAA
+ 41 41 41 41 41 41 41 41   45 4e 44 0a             AAAAAAAAEND.
++------------[send buffer (size: 00028)]----------+----------------+
+</pre>
+</div>
+<br>
+The interesting part come here. When the string is replaced by a
+255-byte string, the debugger is sending a message.
+<br>
+<br>
+<div class="code"><pre>
+[*] the debugger has something to say!
+[*] the debugger says: [***] Segmentation fault - signal [***]
++------------[send buffer (size: 00267)]----------+----------------+
+ 51 55 45 53 00 00 00 ff   41 41 41 41 41 41 41 41 QUES....AAAAAAAA
+ 41 41 41 41 41 41 41 41   41 41 41 41 41 41 41 41 AAAAAAAAAAAAAAAA
+ 41 41 41 41 41 41 41 41   41 41 41 41 41 41 41 41 AAAAAAAAAAAAAAAA
+ 41 41 41 41 41 41 41 41   41 41 41 41 41 41 41 41 AAAAAAAAAAAAAAAA
+ 41 41 41 41 41 41 41 41   41 41 41 41 41 41 41 41 AAAAAAAAAAAAAAAA
+ 41 41 41 41 41 41 41 41   41 41 41 41 41 41 41 41 AAAAAAAAAAAAAAAA
+ 41 41 41 41 41 41 41 41   41 41 41 41 41 41 41 41 AAAAAAAAAAAAAAAA
+ 41 41 41 41 41 41 41 41   41 41 41 41 41 41 41 41 AAAAAAAAAAAAAAAA
+ 41 41 41 41 41 41 41 41   41 41 41 41 41 41 41 41 AAAAAAAAAAAAAAAA
+ 41 41 41 41 41 41 41 41   41 41 41 41 41 41 41 41 AAAAAAAAAAAAAAAA
+ 41 41 41 41 41 41 41 41   41 41 41 41 41 41 41 41 AAAAAAAAAAAAAAAA
+ 41 41 41 41 41 41 41 41   41 41 41 41 41 41 41 41 AAAAAAAAAAAAAAAA
+ 41 41 41 41 41 41 41 41   41 41 41 41 41 41 41 41 AAAAAAAAAAAAAAAA
+ 41 41 41 41 41 41 41 41   41 41 41 41 41 41 41 41 AAAAAAAAAAAAAAAA
+ 41 41 41 41 41 41 41 41   41 41 41 41 41 41 41 41 AAAAAAAAAAAAAAAA
+ 41 41 41 41 41 41 41 41   41 41 41 41 41 41 41 41 AAAAAAAAAAAAAAAA
+ 41 41 41 41 41 41 41 45   4e 44 0a                AAAAAAAEND.
++------------[send buffer (size: 00267)]----------+----------------+
+</pre>
+</div>
+<br>
+Yepah!, you can confirm the message by looking at the adbg's output:
+<br>
+<br>
+<div class="code"><pre>
+[***] SEGMENTATION FAULT!
+[***] EIP: 0x41414141
+</pre>
+</div>
+<br>
+Hohooo.. a basic stack-based overflow! Well, this is the end of the
+first tutorial. I hope you understand much better how autodafe works
+now. But dummy examples are not very funny... Next, a real case ;^P
+<br>
+<br>
+<a name="realcase1"></a>
+<div class="titleb"><center>REAL CASE 1: GHOSTVIEW-3.5.8</center></div>
+<br>
+
+Autodafe is not only able to fuzz network protocols, it can fuzz
+files. For example it can be useful to test the security of the PDF,
+MS-Word, Postscript, JPEG, GIF TIFF, whatever readers. For this
+tutorial, we will concentrate our attack on a famous Postscript
+reader, installed by default in some current Linux distributions: gv
+version 3.5.8.
+<br><br>
+A format file is a protocol. For example, Postscript is an ASCII-based
+protocol. Let's have a look on it. All the files are in the directory:
+<br>
+<br>
+<div class="code"><pre>
+/usr/local/autodafe-0.1/docs/tutorials/gv-3.5.8/
+</pre>
+</div>
+<br>
+
+First of all, install the last version (3.5.8) of gv. You can find it
+here: <a href="http://wwwthep.physik.uni-mainz.de/~plass/gv/">http://wwwthep.physik.uni-mainz.de/~plass/gv/</a>.
+A local version of the vulnerable software program is present in the
+directory gv-3.5.8. To understand how Postscript works, let us
+generate a Postscript file:
+<br>
+<br>
+<div class="code"><pre>
+#> cd /usr/local/autodafe-0.1/docs/tutorials/gv-3.5.8/
+#> cat hello.txt
+Hello World!
+</pre>
+</div>
+<br>
+Now, we convert this text file into a Postscript file:
+
+<br>
+<br>
+<div class="code"><pre>
+#> a2ps hello.txt -o hello.ps
+[hello.txt (plain): 1 page on 1 sheet]
+[Total: 1 page on 1 sheet] saved into the file `hello.ps'
+#> cat ./hello.ps
+%!PS-Adobe-3.0
+%%Title: hello.txt
+%%For:
+%%Creator: a2ps version 4.13
+%%CreationDate: Mon Apr 24 13:31:07 2006
+%%BoundingBox: 24 24 588 768
+%%DocumentData: Clean7Bit
+%%Orientation: Landscape
+%%Pages: 1
+...
+%%Trailer
+end
+%%EOF
+</pre>
+</div>
+<br>
+If you don't have the tool a2ps, a Postscript version called
+hello-orig.ps is present in the gv-3.5.8 directory.
+<br><br>
+<div class="title">TXT2AD.SH</div>
+<br>
+As you can see, Postscript is ASCII-based, perfect for Autodafé. First
+of all we need to convert this file in the Autodafe Protocol
+Description Script Langage. Obviously we cannot use ethereal here, so
+we will use a simple bash-script called "txt2ad.sh". This script is
+located in the directory /usr/local/autodafe-0.1/tools/
+<br>
+<br>
+<div class="code"><pre>
+#> cp /usr/local/autodafe-0.1/tools/txt2ad.sh ./
+#> ./txt2ad.sh ./hello.ps > hello.ad
+#> cat ./hello.ad
+block_begin("1");
+string("%!PS-Adobe-3.0"); hex(0a);
+string("%%Title: hello.txt"); hex(0a);
+string("%%For: "); hex(0a);
+string("%%Creator: a2ps version 4.13"); hex(0a);
+string("%%CreationDate: Mon Apr 24 13:31:07 2006"); hex(0a);
+string("%%BoundingBox: 24 24 588 768"); hex(0a);
+string("%%DocumentData: Clean7Bit"); hex(0a);
+string("%%Orientation: Landscape"); hex(0a);
+string("%%Pages: 1"); hex(0a);
+...
+string("%%Trailer"); hex(0a);
+string("end"); hex(0a);
+string("%%EOF"); hex(0a);
+block_end("1");
+send("1");
+</pre>
+</div>
+<br>
+The script just add the string function for each line and convert the
+'\n' to hex(0a);. Now we need to isolate the markers able to be called
+by unsafe functions. But we don't know which strings are relevant to
+test. We can replace every "string" by "fuzz_string" and let the
+debugger/tracer adbg give weight to each markers. Another solution is
+to ask to the debugger/tracer adbg to give us the strings called by
+unsafe functions.
+<br><br>
+<div class="title">ADBG</div>
+<br>
+To do that, the debugger/tracer will analyse the targeted software
+program and give us all the strings used by these vulnerable
+functions:
+<br>
+<br>
+<div class="code"><pre>
+#> adbg -v -s vulnerable.txt ./gv ./hello.ps
+</pre>
+</div>
+<br>
+Close the application (X-window is needed in this case) and look at
+the strcpy calls:
+<br>
+<br>
+<div class="code"><pre>
+#> cat ./vulnerable.txt |grep strcpy
+strcpy:C
+strcpy:\e(B
+strcpy:\e-A
+strcpy:\e-B
+strcpy:\e-C
+strcpy:\e-D
+strcpy:\e-L
+...
+strcpy:shutdown
+</pre>
+</div>
+<br>
+Hmmm.. lof of calls ;-) Just for fun:
+<br>
+<br>
+<div class="code"><pre>
+#> cat ./vulnerable.txt |grep strcpy |wc -l
+685
+</pre>
+</div>
+<br>
+Now we will choose a marker which is controlled by the Postscript
+file. Let us check the markers in the hello.ad file. For example, the
+number of page given by the Postscript function "Pages:" at line 10:
+<br>
+<br>
+<div class="code"><pre>
+string("%%Pages: 1"); hex(0a);
+</pre>
+</div>
+<br>
+The string "1" seems to be a good candidate, because the string "1" is used by the function "strcpy":
+<br>
+<br>
+<div class="code"><pre>
+#> cat ./vulnerable.txt |grep "strcpy:1"
+strcpy:1
+strcpy:1
+strcpy:1
+...
+</pre>
+</div>
+<br>
+let us edit the hello.ad file and replace the line 10 with the line:
+<br>
+<br>
+<div class="code"><pre>
+string("%%Pages: "); fuzz_string("1"); hex(0a);
+</pre>
+</div>
+<br>
+Now the string "1" will be fuzzed by autodafe. This change is
+done in the file fuzz_hello.ad. 
+<br><br>
+<div class="title">ADC</div>
+<br>
+The next step is to compile the new file fuzz_hello.ad:
+<br><br><div class="code"><pre>
+#> adc ./fuzz_hello.ad
+[!] block: "1" size: 14077 (0x36fd)
+</pre></div><br>
+<br><br><div class="title">AUTODAFE</div><br>
+Remember that we are fuzzing files, it's not possible to create a
+connection to a server in this case. Autodafe will be used to create
+plenty of malformed Postscript files in a special directory. Then,
+these files will be opened successively with the targeted software
+program. Let us generate these files with autodafe:
+<br><br><div class="code"><pre>
+#> mkdir ./fuzz
+#> autodafe -v -f ./fuzz ./fuzz_hello.adc
+   [!] created file: "./fuzz/00000000"
+   ...
+   [!] created file: "./fuzz/00001740"
+</pre></div><br>
+As you can see, 1741 files were created by the fuzzer autodafe. To
+test them, try to open each file with the targeted software program
+gv. I will give you a hint, start directly with the file "00000034":
+<br><br><div class="code"><pre>
+#> cd ./fuzz
+#> head ./00000034
+%!PS-Adobe-3.0
+%%Title: hello.txt
+%%For: 
+%%Creator: a2ps version 4.13
+%%CreationDate: Mon Apr 24 13:31:07 2006
+%%BoundingBox: 24 24 588 768
+%%DocumentData: Clean7Bit
+%%Orientation: Landscape
+%%Pages:  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa[...]aaaaaaaaaaaaaa
+%%PageOrder: Ascend
+</pre></div><br>
+Here you can see the string substituted by autodafe. Quite easy isn't
+it? Now prepare for a Segmentation Fault :-)
+<br><br><div class="code"><pre>
+#> ulimit -c unlimited
+#> gv ./00000034
+Segmentation fault (core dumped)
+</pre></div><br>
+Hohooo... Now check exactly what is the state of the registers to know
+what kind of buffer overflow we uncovered:
+<br><br><div class="code"><pre>
+#> gdb -q -c ./core
+(no debugging symbols found)
+Using host libthread_db library "/lib/tls/libthread_db.so.1".
+Core was generated by `gv 00000034'.
+Program terminated with signal 11, Segmentation fault.
+#0  0x61616161 in ?? ()
+(gdb) p $eip
+$1 = (void (*)()) 0x61616161
+(gdb) 
+</pre></div><br>
+The register EIP has been replaces by 0x61616161 which is "aaaa".
+It's a basic Stack based buffer overflow. As an exercise, try to
+uncover other buffer overflows with different markers. There is
+hundreds of Heap based, Stack based and Format String based buffer
+overflows. Next time you will open a Postscript file, be careful ;-)
+This conclude the second tutorial.
+
+[EOF]
+
+
+</body>
+
+

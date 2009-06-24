@@ -1,0 +1,5 @@
+* do the man pages for autodafe, abdg, adc and pdml2ad.
+
+* add the adbg windows version to the project.
+
+* add the format and double free detection to the public version.
