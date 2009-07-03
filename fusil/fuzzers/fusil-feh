@@ -1,0 +1,55 @@
+#!/usr/bin/env python
+"""
+feh fuzzer
+"""
+
+MAX_FILESIZE = 32*1024
+PROGRAM = 'feh'
+MANGLE = "fixed"
+
+from fusil.application import Application
+from optparse import OptionGroup
+from fusil.process.mangle import MangleProcess
+from fusil.process.watch import WatchProcess
+from fusil.process.stdout import WatchStdout
+from fusil.mangle import MangleFile as FehMangle
+
+class Fuzzer(Application):
+    NAME = "feh"
+    USAGE = "%prog [options] image"
+    NB_ARGUMENTS = 1
+
+    def createFuzzerOptions(self, parser):
+        options = OptionGroup(parser, "feh fuzzer")
+        options.add_option("--max-filesize", help="Maximum file size in bytes (default: %s)" % MAX_FILESIZE,
+            type="int", default=MAX_FILESIZE)
+        return options
+
+    def setupProject(self):
+        project = self.project
+
+        orig_filename = self.arguments[0]
+        mangle = FehMangle(project, orig_filename)
+        mangle.max_size = self.options.max_filesize
+        mangle.config.min_op = 1
+        mangle.config.max_op = 10
+        mangle.config.change_size = True
+
+        COMMAND = ['feh', '-l', '<feh>']
+        process = MangleProcess(project, COMMAND, "<feh>", timeout=60.0)
+        process.env.copy('HOME')
+        process.env.copy('DISPLAY')
+
+        WatchProcess(process, exitcode_score=-0.25)
+
+        stdout = WatchStdout(process)
+        stdout.max_nb_line = None
+        stdout.show_matching = True
+        stdout.addRegex(r"The file may be corrupted", -0.50)
+        stdout.addRegex(r"libpng error: ADAT: unknown critical chunk", -0.50)
+        stdout.addRegex(r"libpng error:", -0.50)
+        stdout.addRegex(r"libpng warning:", -0.50)
+
+if __name__ == "__main__":
+    Fuzzer().main()
+
