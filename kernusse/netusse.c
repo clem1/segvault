@@ -9,6 +9,8 @@
 #include <sys/syscall.h>
 #include <sys/mman.h>
 #include <stdlib.h>
+#include <unistd.h>
+#include <time.h>
 #include <signal.h>
 #include <getopt.h>
 #include <string.h>
@@ -162,7 +164,7 @@ static void dump(unsigned char * data, unsigned int len)
     return;
 }
 
-void soopt(int s)
+void ssoptusse(int s)
 {
 	unsigned int optval;
 	int optlen, optname, level, ret, on = rand() % 2, tout = 50;
@@ -212,7 +214,7 @@ void soopt(int s)
     while(ret == -1 && tout--);
 }
 
-void gsn(int s)
+void getsocknamusse(int s)
 {
     char    buf[2048], pbuf[2048];
     int     len = 0, ret;
@@ -245,7 +247,7 @@ void gsn(int s)
     }
 }
 
-void gpn(int s)
+void getpeernamusse(int s)
 {
     char    buf[2048], pbuf[2048];
     int     len = 0, ret;
@@ -256,7 +258,7 @@ void gpn(int s)
     for ( len = 0 ; len < 50 ; len++ )
     {
         ret = getpeername(s, (struct sockaddr *)&buf, &len);
-        if ( ret >= 0 )
+        if ( ret >= 0 && memcmp(&buf, &pbuf, (len > 2048) ? 2048 : len) != 0 )
         {
             kernop(s);
             getpeername(s, (struct sockaddr *)&pbuf, &len);
@@ -277,7 +279,7 @@ void gpn(int s)
     }
 }
 
-void goof(int s)
+void gsoptusse(int s)
 {
 	char buf[2048], pbuf[2048], rbuf[2048];
 	int optname, level, ret, len, tout;
@@ -389,9 +391,31 @@ void connectusse(int fd)
         if ( b != NULL && len < 0xFFFFF)
             fuzzer(b, len);
         ret = connect(fd, (struct sockaddr *)&b, len);
-        free(b); b = NULL;
+        if ( b ) free(b); b = NULL;
     }
     while (ret < 0 && tout--);
+}
+
+void sendtousse(int fd)
+{
+    char    *addr, *msg;
+    size_t  alen, mlen;
+    int     flags = 0;
+
+    alen = evilint();
+    addr = malloc(alen);
+    if ( addr != NULL && alen < 0xFFFFF)
+        fuzzer(addr, alen);
+
+    mlen = evilint();
+    msg = malloc(mlen);
+    if ( msg != NULL && mlen < 0xFFFFF)
+        fuzzer(msg, mlen);
+
+    sendto(fd, msg, mlen, flags, (struct sockaddr *)addr, (socklen_t)alen);
+
+    if ( addr ) free(addr);
+    if ( msg ) free(msg);
 }
 
 void sendmsgusse(int fd)
@@ -753,16 +777,18 @@ int main(int ac, char **av)
             connectusse(s);
         else
             bindusse(s);
+
 		for (i = 0; i < opts; i++)
 		{
-			soopt(s);
-			goof(s);
+			ssoptusse(s);
+			gsoptusse(s);
             sendmsgusse(s);
+            sendtousse(s);
             usleep(500);
 		}
         splicusse(s);
-        gsn(s);
-        //gpn(s);
+        getsocknamusse(s);
+        getpeernamusse(s);
         mmapusse(s);
         printf(".");fflush(stdout);
 		close(s);
@@ -770,7 +796,7 @@ int main(int ac, char **av)
 #ifdef __LINUX__
         if ( linux_hasoopsed() )
         {
-            printf("\ndude, check your kernel! It has oopsed\n");
+            printf("\ndude, check your kernel!! It's fucked\n");
             getchar();
         }
 #endif
