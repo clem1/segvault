@@ -88,7 +88,7 @@ static void kernop(int fd)
     {
         switch ( rand() % 2 )
         {
-            case 0:
+            case 55:
 #ifdef __LINUX__
                 o = randcalls[rand() % sizeof(randcalls)/sizeof(randcalls[0])];
 #else
@@ -96,6 +96,7 @@ static void kernop(int fd)
 #endif
                 ret = syscall(o);
                 break;
+            case 0:
             case 1:
                 len = (rand() % 2) ? sizeof(int) : sizeof(buf);
                 ret = getsockopt(fd, randsopts[rand() % sizeof(randsopts)/sizeof(randsopts[0])], rand() % 130, &buf, &len);
