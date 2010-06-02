@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from os import path
-from application import Application as BaseApplication
+from app_unix import Application as BaseApplication
 from array import array
 from mangle_php import *
 from time import sleep

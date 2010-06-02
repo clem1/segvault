@@ -4,73 +4,23 @@
 #
 #
 from random import randint, choice as random_choice
-import sys, pickle
+import sys, pickle, mangle
 from array import array
-
 
 # global
 MAX_ARRAY_SIZE = 5
 MAX_VARNAME_SIZE = 5
-MAX_STRING_SIZE = 0xFFFF
-MAX_OPERATION = 2
 MAX_VAR_INIT = 2
 MAX_FUNCS = 10
 MAX_ARGS  = 10
 phpfuncs = "phpfuncs.pkl"   # php functions to fuzz
 funcs = {}
 
-# from haypo's mangle.py
-SPECIAL_VALUES = [
-        0x7FFFFFFF,
-        -1,
-        0xFFFFFFFF,
-        0x80000000,
-        255,
-        0,
-        128,
-        -0xFFFFFFFF,
-        -128,
-        0xFFFFFFFFF,
-        0xFFFFFFFFFF,
-        -50,
-        5000000000000,
-        0.50,
-        ]
-
 VARS = "abcde"
-
-PROTOS = ['bcmath', 'ctype', 'dom', 'ext_skel', 'ftp', 'hash', 'intl', 'mbstring', 'mysqli', 'openssl', 'pdo_dblib', 'pdo_odbc', 'phar', 'recode', 'simplexml', 'sockets', 'standard', 'sysvshm', 'xml', 'xsl', 'bz2', 'curl', 'enchant', 'ext_skel_win32.php', 'gd', 'iconv', 'json', 'mcrypt', 'mysqlnd', 'pcntl', 'pdo_firebird', 'pdo_pgsql', 'posix', 'reflection', 'skeleton', 'spl', 'sybase_ct', 'tidy', 'xmlreader', 'zip', 'calendar', 'date', 'ereg', 'fileinfo', 'gettext', 'imap', 'ldap', 'mssql', 'oci8', 'pcre', 'pdo_mysql', 'pdo_sqlite', 'pspell', 'session', 'snmp', 'sqlite', 'sysvmsg', 'tokenizer', 'xmlrpc', 'zlib', 'com_dotnet', 'dba', 'exif', 'filter', 'gmp', 'interbase', 'libxml', 'mysql', 'odbc', 'pdo', 'pdo_oci', 'pgsql', 'readline', 'shmop', 'soap', 'sqlite3', 'sysvsem', 'wddx', 'xmlwriter']
 
 def _varname():
     """return a dummy var name"""
     return random_choice(VARS)
-
-def _string():
-    """return a random string"""
-    string = '"'
-    if randint(0, 5) > 3:
-        string += random_choice(PROTOS) + "://"
-    if randint(0, 5) > 3:
-        string += "/"
-    size = randint(15, MAX_STRING_SIZE)
-    #for i in range(size):
-    #   string += chr(randint(48, 122))
-    string += "A" * (size - 15)
-    string += '%s%jn%qu%s%S%s%s%n%s%n%555555n%x%x%x%x%x%n%n%n%n%x%x'
-    string += '"'
-    return string
-
-def _integer():
-    """return a random integer"""
-    what = randint(0, 1)
-    if what == 0:
-        return randint(0, 0xFFFFFFFF)
-    else:
-        return -randint(0, 0xFFFFFFFF)
-
-def _evil():
-    """return an evil thing"""
-    return random_choice(SPECIAL_VALUES)
 
 def _var():
     """return random var"""
@@ -84,28 +34,15 @@ def _array():
     """return random name"""
     return "@" + _varname()
 
-def _opp():
-    """return random opp"""
-    opps = [ '+', '-', '*', '/', '%' ]
-    nbop = randint(0, MAX_OPERATION)
-    op = ""
-    for i in range(nbop):
-        op += str(_integer()) + random_choice(opps)
-    op += str(_integer())
-    return op
-
 def _phpvalue(names = [ "$CACAPHP" ]):
     """return a php value or a varname"""
     what = randint(0, 10)
     if what == 0:
         # string
-        return _string()
-    elif what == 1:
+        return mangle.string()
+    elif what == 1 or what == 2:
         # integer
-        return _integer()
-    elif what == 2:
-        # evil
-        return _evil()
+        return mangle.integer()
     elif what == 3:
         # var
         return _var()
@@ -121,7 +58,7 @@ def _phpvalue(names = [ "$CACAPHP" ]):
     elif what == 8:
         # big string
         return """str_repeat("A", 16000000)"""
-    return _string()
+    return mangle.string()
 
 def _args(nb):
     """return a string to put into a func()"""
