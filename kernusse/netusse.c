@@ -369,14 +369,15 @@ static void fuzzer(char *mm, size_t mm_size)
  */
 void bindusse(int fd)
 {
-    int     ret, tout = 5, len;
+    size_t  len;
+    int     ret, tout = 5;
     char    *b;
 
     do
     {
         len = evilint();
         b = malloc(len);
-        if ( b != NULL && len < 0xFFFFF)
+        if ( b != NULL && len < 0xFFFFF )
             fuzzer(b, len);
         ret = bind(fd, (struct sockaddr *)&b, len);
         if (ret && (rand() % 2))
@@ -388,14 +389,15 @@ void bindusse(int fd)
 
 void connectusse(int fd)
 {
-    int     ret, tout = 5, len;
+    int     ret, tout = 5;
+    size_t  len;
     char    *b;
 
     do
     {
         len = evilint();
         b = malloc(len);
-        if ( b != NULL && len < 0xFFFFF)
+        if ( b != NULL && len < 0xFFFFF )
             fuzzer(b, len);
         ret = connect(fd, (struct sockaddr *)&b, len);
         if ( b ) free(b); b = NULL;
@@ -411,12 +413,12 @@ void sendtousse(int fd)
 
     alen = evilint();
     addr = malloc(alen);
-    if ( addr != NULL && alen < 0xFFFFF)
+    if ( addr != NULL && alen < 0xFFFFF )
         fuzzer(addr, alen);
 
     mlen = evilint();
     msg = malloc(mlen);
-    if ( msg != NULL && mlen < 0xFFFFF)
+    if ( msg != NULL && mlen < 0xFFFFF )
         fuzzer(msg, mlen);
 
     sendto(fd, msg, mlen, flags, (struct sockaddr *)addr, (socklen_t)alen);
@@ -790,7 +792,7 @@ int main(int ac, char **av)
 
 	while (occ)
 	{
-        switch ((snum = rand() % 20))
+        switch ((snum = rand() % 30))
         {
             case 0:
                 s = socket(AF_INET6, SOCK_STREAM, IPPROTO_TCP);
@@ -869,9 +871,18 @@ int main(int ac, char **av)
                 break;
 #endif
             default:
-                domain = domains[rand() % (sizeof(domains)/sizeof(domains[0]))];
-                proto = protos[rand() % (sizeof(protos)/sizeof(protos[0]))];
-                type = types[rand() % (sizeof(types)/sizeof(types[0]))];
+                if (rand() % 10 == 0)
+                {
+                    domain = rand() % 255;
+                    proto  = rand() % 255;
+                    type   = rand() % 255;
+                }
+                else
+                {
+                    domain = domains[rand() % (sizeof(domains)/sizeof(domains[0]))];
+                    proto = protos[rand() % (sizeof(protos)/sizeof(protos[0]))];
+                    type = types[rand() % (sizeof(types)/sizeof(types[0]))];
+                }
                 s = socket(domain, type, proto);
                 break;
         }
