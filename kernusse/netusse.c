@@ -14,12 +14,16 @@
 #include <signal.h>
 #include <getopt.h>
 #include <string.h>
-#include <sys/klog.h>
 #define _GNU_SOURCE
 #include <fcntl.h>
 #include <net/if_arp.h>
+#ifdef __linux__
+#include <sys/klog.h>
 #include <linux/atalk.h>
 #include <linux/in.h>
+#else
+#include <netinet/in.h>
+#endif
 
 #define SEED_FILE "/tmp/netusse.seed"
 
@@ -44,6 +48,7 @@ struct sockaddr_llc {
 
 int snum = -1;
 
+#ifdef __linux__
 /**
  * see if linux kernel has oopsed :)
  */
@@ -63,6 +68,7 @@ static int linux_hasoopsed()
 
     return 0;
 }
+#endif
 
 static void kernop(int fd)
 {
@@ -419,6 +425,7 @@ void sendtousse(int fd)
     if ( msg ) free(msg);
 }
 
+#ifdef __linux__
 void sendmsgusse(int fd)
 {
 	struct msghdr   msg;
@@ -529,6 +536,7 @@ void splicusse(int fd)
 
     splice(fd, offin, fdout, offout, len, flags);
 }
+#endif
 
 void mmapusse(int fd)
 {
@@ -585,7 +593,9 @@ int main(int ac, char **av)
     const int types[] = {
         SOCK_DGRAM,
         SOCK_STREAM,
+#ifdef SOCK_PACKET
         SOCK_PACKET,
+#endif
         SOCK_SEQPACKET,
         SOCK_RDM,
     };
@@ -599,55 +609,137 @@ int main(int ac, char **av)
         IPPROTO_PUP,
         IPPROTO_UDP,
         IPPROTO_IDP,
+#ifdef IPPROTO_DCCP
         IPPROTO_DCCP,
+#endif
         IPPROTO_RSVP,
         IPPROTO_GRE,
         IPPROTO_IPV6,
         IPPROTO_ESP,
         IPPROTO_AH,
+#ifdef IPPROTO_BEETPH
         IPPROTO_BEETPH,
+#endif
         IPPROTO_PIM,
+#ifdef IPPROTO_COMP
         IPPROTO_COMP,
+#endif
+#ifdef IPPROTO_SCTP
         IPPROTO_SCTP,
+#endif
+#ifdef IPPROTO_UDPLITE
         IPPROTO_UDPLITE,
+#endif
     };
     const int domains[] = {
+#ifdef         AF_UNSPEC
         AF_UNSPEC,
+#endif
+#ifdef         AF_UNIX
         AF_UNIX,
+#endif
+#ifdef         AF_LOCAL
         AF_LOCAL,
+#endif
+#ifdef         AF_INET
         AF_INET,
+#endif
+#ifdef         AF_AX25
         AF_AX25,
+#endif
+#ifdef         AF_IPX
         AF_IPX,
+#endif
+#ifdef AF_APPLETALK
         AF_APPLETALK,
+#endif
+#ifdef         AF_NETROM
         AF_NETROM,
+#endif
+#ifdef         AF_BRIDGE
         AF_BRIDGE,
+#endif
+#ifdef         AF_ATMPVC
         AF_ATMPVC,
+#endif
+#ifdef        AF_X25
         AF_X25,
+#endif
+#ifdef        AF_INET6
         AF_INET6,
+#endif
+#ifdef        AF_ROSE
         AF_ROSE,
+#endif
+#ifdef        AF_DECnet
         AF_DECnet,
+#endif
+#ifdef        AF_NETBEUI
         AF_NETBEUI,
+#endif
+#ifdef        AF_SECURITY
         AF_SECURITY,
+#endif
+#ifdef        AF_KEY
         AF_KEY,
+#endif
+#ifdef        AF_NETLINK
         AF_NETLINK,
+#endif
+#ifdef        AF_ROUTE
         AF_ROUTE,
+#endif
+#ifdef        AF_PACKET
         AF_PACKET,
+#endif
+#ifdef        AF_ASH
         AF_ASH,
+#endif
+#ifdef        AF_ECONET
         AF_ECONET,
+#endif
+#ifdef        AF_ATMSVC
         AF_ATMSVC,
+#endif
+#ifdef        AF_RDS
         AF_RDS,
+#endif
+#ifdef        AF_SNA
         AF_SNA,
+#endif
+#ifdef        AF_IRDA
         AF_IRDA,
+#endif
+#ifdef        AF_PPPOX
         AF_PPPOX,
+#endif
+#ifdef        AF_WANPIPE
         AF_WANPIPE,
+#endif
+#ifdef        AF_LLC
         AF_LLC,
+#endif
+#ifdef        AF_CAN
         AF_CAN,
+#endif
+#ifdef        AF_TIPC
         AF_TIPC,
+#endif
+#ifdef        AF_BLUETOOTH
         AF_BLUETOOTH,
+#endif
+#ifdef        AF_IUCV
         AF_IUCV,
+#endif
+#ifdef        AF_RXRPC
         AF_RXRPC,
+#endif
+#ifdef        AF_ISDN
         AF_ISDN,
+#endif
+#ifdef        AF_PHONET
         AF_PHONET
+#endif
     };
 
 	seed = getpid() ^ time(NULL);
@@ -712,6 +804,7 @@ int main(int ac, char **av)
             case 3:
                 s = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
                 break;
+#ifdef __linux__
             case 4:
             {
                 struct sockaddr_at sat;
@@ -741,9 +834,12 @@ int main(int ac, char **av)
                 sendto(s, "COIN", 4, 0, (struct sockaddr *) &sllc, sizeof(sllc));
                 break;
             }
+#endif
+#ifdef IPPROTO_SCTP
             case 8:
                 s = socket(PF_INET, SOCK_STREAM, IPPROTO_SCTP);
                 break;
+#endif
             case 9:
                 s = socket(AF_UNIX, SOCK_STREAM, IPPROTO_TCP);
                 break;
@@ -753,12 +849,15 @@ int main(int ac, char **av)
             case 11:
                 s = socket(AF_IPX, SOCK_DGRAM, IPPROTO_UDP);
                 break;
+#ifdef __linux__
             case 12:
                 s = socket(AF_ATMPVC, SOCK_DGRAM, 0);
                 break;
             case 13:
                 s = socket(AF_X25, SOCK_SEQPACKET, 0);
                 break;
+#endif
+#ifdef AF_PACKET
             case 14:
                 s = socket(AF_PACKET, SOCK_DGRAM, 0);
                 break;
@@ -768,6 +867,7 @@ int main(int ac, char **av)
             case 16:
                 s = socket(AF_PACKET, SOCK_SEQPACKET, 0);
                 break;
+#endif
             default:
                 domain = domains[rand() % (sizeof(domains)/sizeof(domains[0]))];
                 proto = protos[rand() % (sizeof(protos)/sizeof(protos[0]))];
@@ -792,11 +892,16 @@ int main(int ac, char **av)
 		{
 			ssoptusse(s);
 			gsoptusse(s);
+#ifdef __linux__
             sendmsgusse(s);
+#endif
             sendtousse(s);
-            usleep(500);
+            //usleep(500);
 		}
+#ifdef __linux__
         splicusse(s);
+#endif
+        sendtousse(s);
         getsocknamusse(s);
         getpeernamusse(s);
         mmapusse(s);
