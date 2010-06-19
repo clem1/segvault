@@ -23,6 +23,7 @@
 #include <linux/in.h>
 #else
 #include <netinet/in.h>
+#include <sys/uio.h>
 #endif
 
 #define SEED_FILE "/tmp/netusse.seed"
@@ -359,7 +360,26 @@ static void fuzzer(char *mm, size_t mm_size)
     size_t i;
 
     for ( i = 0 ; i < mm_size ; i++ )
-        mm[i] = rand() & 255;
+    {
+        if ( rand() % 10 == 0 && i < mm_size - 2 )
+        {
+            mm[i++] = '%';
+            switch (rand() % 2)
+            {
+                case 0:
+                    mm[i] = 'n';
+                    break;
+                case 1:
+                    mm[i] = 'x';
+                    break;
+                default:
+                    mm[i] = 'u';
+                    break;
+            }
+        }
+        else
+            mm[i] = rand() & 255;
+    }
 
     return;
 }
@@ -427,7 +447,38 @@ void sendtousse(int fd)
     if ( msg ) free(msg);
 }
 
-#ifdef __linux__
+#if defined(__NetBSD__) || defined(__OpenBSD__)
+void sendmsgusse(int fd)
+{
+    char name[1024], ctrl[1024], base[1024];
+    struct iovec iov;
+    struct msghdr msg;
+    int i;
+
+    for ( i = 0 ; i < 50 ; i++ )
+    {
+        fuzzer(name, 1024);
+        fuzzer(base, 1024);
+        fuzzer(ctrl, 1024);
+        msg.msg_name    = name;
+        msg.msg_namelen = evilint();
+        msg.msg_iovlen  = evilint();
+        msg.msg_flags   = rand() & 255;
+        if ( rand() % 3 )
+        {
+            msg.msg_iov   = &iov;
+            iov.iov_base  = base;
+            iov.iov_len   = evilint();
+        }
+        else
+            msg.msg_iov = NULL;
+        msg.msg_control = ctrl;
+        msg.msg_controllen = evilint();
+        sendmsg(fd, &msg, 0);
+    }
+    return;
+}
+#elif defined(__linux__)
 void sendmsgusse(int fd)
 {
 	struct msghdr   msg;
@@ -903,9 +954,7 @@ int main(int ac, char **av)
 		{
 			ssoptusse(s);
 			gsoptusse(s);
-#ifdef __linux__
             sendmsgusse(s);
-#endif
             sendtousse(s);
             //usleep(500);
 		}
