@@ -1,6 +1,10 @@
 /*
  * netusse.c - fucking kernel net stacks fuzzer
  *
+ * TODO:
+ *  - recvfrom()
+ *  - recvmsg()
+ *  - 
  * Copyright (c) Clément Lecigne, 2006-2009
  */
 #include <stdio.h>
@@ -26,7 +30,9 @@
 #include <sys/uio.h>
 #endif
 
-#define SEED_FILE "/tmp/netusse.seed"
+#define DEBUG_SENDMSG 1
+
+#define SEED_FILE "netusse.seed"
 
 #ifndef LLC_SAP_NULL
 #define LLC_SAP_NULL 0x00
@@ -447,7 +453,7 @@ void sendtousse(int fd)
     if ( msg ) free(msg);
 }
 
-#if defined(__NetBSD__) || defined(__OpenBSD__)
+#if defined(__NetBSD__) || defined(__OpenBSD__) || defined(__FreeBSD__)
 void sendmsgusse(int fd)
 {
     char name[1024], ctrl[1024], base[1024];
@@ -474,6 +480,10 @@ void sendmsgusse(int fd)
             msg.msg_iov = NULL;
         msg.msg_control = ctrl;
         msg.msg_controllen = evilint();
+#ifdef DEBUG_SENDMSG
+        printf("sendmsg(%d, {nl = %x, iol = %x, ctl = %x}, 0);\n", fd, msg.msg_namelen, msg.msg_iovlen, msg.msg_controllen);
+        getchar();
+#endif
         sendmsg(fd, &msg, 0);
     }
     return;
