@@ -4,7 +4,7 @@
  * TODO:
  *  - recvfrom()
  *  - recvmsg()
- *  - 
+ *
  * Copyright (c) Clément Lecigne, 2006-2009
  */
 #include <stdio.h>
@@ -30,7 +30,7 @@
 #include <sys/uio.h>
 #endif
 
-#define DEBUG_SENDMSG 1
+//#define DEBUG_SENDMSG 1
 
 #define SEED_FILE "netusse.seed"
 
@@ -117,6 +117,42 @@ static void kernop(int fd)
         }
     }
     while ( ret < 0 );
+}
+
+/**
+ * return a random file descriptor
+ */
+static int getfd(void)
+{
+    int fd, flags;
+
+    do {
+        switch (rand() % 5)
+        {
+            case 0:
+                fd = open("/etc/passwd", O_RDONLY);
+                break;
+            case 1:
+                fd = socket(AF_INET6, SOCK_STREAM, IPPROTO_TCP);
+                break;
+            case 2:
+                fd = open("/dev/random", O_RDONLY);
+                break;
+            case 3:
+                fd = open("/tmp/fusse", O_CREAT|O_RDWR, 0666);
+                break;
+            case 4:
+                fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+                break;
+            default:
+                fd = open("/proc/self/maps", O_RDONLY);
+                break;
+        }
+    }
+    while (fd < 0);
+    flags = fcntl(fd, F_GETFL, 0);
+    fcntl(fd, F_SETFL, flags | O_NONBLOCK);
+    return fd;
 }
 
 static int evilint(void)
@@ -452,6 +488,52 @@ void sendtousse(int fd)
     if ( addr ) free(addr);
     if ( msg ) free(msg);
 }
+
+#if defined(__linux__)
+void sendfilusse(int fd)
+{
+    int i;
+
+    for ( i = 0 ; i < 50 ; i++ )
+    {
+        off_t   offset;
+        size_t  size;
+        int     ifd, ofd;
+
+        offset = evilint();
+        size = evilint();
+        ifd = evilint();
+        ofd = evilint();
+
+        switch (rand() % 5)
+        {
+            case 0:
+                ifd = fd;
+                break;
+            case 1:
+                ofd = fd;
+                break;
+            case 2:
+                ifd = ofd = fd;
+                break;
+            case 3:
+                ifd = fd;
+                ofd = getfd();
+                break;
+            case 4:
+                ofd = fd;
+                ifd = getfd();
+                break;
+        }
+
+        sendfile(ifd, ofd, &offset, size);
+        if ( ifd != fd )
+            close(ifd);
+        if ( ofd != fd )
+            close(ofd);
+    }
+}
+#endif
 
 #if defined(__NetBSD__) || defined(__OpenBSD__) || defined(__FreeBSD__)
 void sendmsgusse(int fd)
@@ -966,6 +1048,9 @@ int main(int ac, char **av)
 			gsoptusse(s);
             sendmsgusse(s);
             sendtousse(s);
+#if defined(__linux__)
+            sendfilusse(s);
+#endif
             //usleep(500);
 		}
 #ifdef __linux__
