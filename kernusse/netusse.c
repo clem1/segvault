@@ -25,6 +25,7 @@
 #include <sys/klog.h>
 #include <linux/atalk.h>
 #include <linux/in.h>
+#include <linux/can.h>
 #else
 #include <netinet/in.h>
 #include <sys/uio.h>
@@ -259,6 +260,15 @@ void ssoptusse(int s)
 		else
 			optname = evilint();
 
+#if defined(__FreeBSD__)
+        /*
+		 * anti well know FreeBSD mbufs exhaustion.
+		 */
+		if (optname == 182 || optname == 202 || optname == 254 || optname == 91 || optname == 25 || optname == IPV6_IPSEC_POLICY || 
+				optname == IPV6_FW_ADD || optname == IPV6_FW_FLUSH
+				|| optname == IPV6_FW_DEL || optname == IPV6_FW_ZERO)
+			continue;
+#endif
 		ret = setsockopt(s, level, optname, (void *)optval, optlen);
 	}
     while(ret == -1 && tout--);
@@ -280,11 +290,11 @@ void getsocknamusse(int s)
         {
             kernop(s);
             getsockname(s, (struct sockaddr *)&pbuf, &len);
-            if ( memcmp(&buf, &pbuf, (len > 2048) ? 2048 : len) != 0 )
+            if ( memcmp(&buf, &pbuf, (len < 0 || len > 2048) ? 2048 : len) != 0 )
             {
                 printf("\nPOSSIBLE LEAK WITH :\n");
                 printf("\tgetsockname(sock (%d), buf, &%d)\n", snum, len);
-                len = (len > 2048) ? 2048 : len;
+                len = (len < 0 || len > 2048) ? 2048 : len;
                 printf("FIRST CALL:\n");
                 dump(buf, len);
                 printf("SECOND CALL:\n");
@@ -308,15 +318,15 @@ void getpeernamusse(int s)
     for ( len = 0 ; len < 50 ; len++ )
     {
         ret = getpeername(s, (struct sockaddr *)&buf, &len);
-        if ( ret >= 0 && memcmp(&buf, &pbuf, (len > 2048) ? 2048 : len) != 0 )
+        if ( ret >= 0 && memcmp(&buf, &pbuf, (len < 0 || len > 2048) ? 2048 : len) != 0 )
         {
             kernop(s);
             getpeername(s, (struct sockaddr *)&pbuf, &len);
-            if ( memcmp(&buf, &pbuf, (len > 2048) ? 2048 : len) != 0 )
+            if ( memcmp(&buf, &pbuf, (len < 0 || len > 2048) ? 2048 : len) != 0 )
             {
                 printf("\nPOSSIBLE LEAK WITH :\n");
                 printf("\tgetpeername(sock (%d), buf, &%d)\n", snum, len);
-                len = (len > 2048) ? 2048 : len;
+                len = (len < 0 || len > 2048) ? 2048 : len;
                 printf("FIRST CALL:\n");
                 dump(buf, len);
                 printf("SECOND CALL:\n");
@@ -365,6 +375,15 @@ void gsoptusse(int s)
             level = evilint();
             break;
 		}
+#if defined(__FreeBSD__)
+        /*
+		 * anti well know FreeBSD mbufs exhaustion.
+		 */
+		if (optname == 182 || optname == 202 || optname == 254 || optname == 91 || optname == 25 || optname == IPV6_IPSEC_POLICY || 
+				optname == IPV6_FW_ADD || optname == IPV6_FW_FLUSH
+				|| optname == IPV6_FW_DEL || optname == IPV6_FW_ZERO)
+			continue;
+#endif
 		ret = getsockopt(s, level, optname, &buf, &len);
 		tout--;
 	}
@@ -382,11 +401,11 @@ void gsoptusse(int s)
 
     getsockopt(s, level, optname, &pbuf, &len);
 
-    if ( memcmp(&buf, &pbuf, (len > 2048) ? 2048 : len) != 0 && memcmp(&pbuf, &rbuf, (len > 2048) ? 2048 : len) != 0 )
+    if ( memcmp(&buf, &pbuf, (len < 0 || len > 2048) ? 2048 : len) != 0 && memcmp(&pbuf, &rbuf, (len > 2048) ? 2048 : len) != 0 )
     {
         printf("\nPOSSIBLE LEAK WITH :\n");
 		printf("\tgetsockopt(sock (%d), %d, %u, buf, &%d)\n", snum, level, optname, len);
-        len = (len > 2048) ? 2048 : len;
+        len = (len < 0 || len > 2048) ? 2048 : len;
         printf("FIRST CALL:\n");
         dump(buf, len);
         printf("SECOND CALL:\n");
@@ -718,6 +737,7 @@ void mmapusse(int fd)
     if ( raddr != MAP_FAILED )
     {
         printf("\nmmap(%p, %u, %d, %d, %d (snum = %d), %d); -> %p\n", addr, len, prot, flags, fd, snum, off, raddr);
+        munmap(addr, len);
     }
 }
 
@@ -1011,6 +1031,13 @@ int main(int ac, char **av)
                 break;
             case 16:
                 s = socket(AF_PACKET, SOCK_SEQPACKET, 0);
+                break;
+#endif
+#ifdef PF_CAN
+            case 17:
+            case 18:
+            case 19:
+                s = socket(PF_CAN, SOCK_DGRAM, CAN_BCM);
                 break;
 #endif
             default:

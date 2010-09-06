@@ -8,7 +8,7 @@ rx_exactly = re.compile(".*expects exactly (\d+) parameter")
 rx_least = re.compile(".*at least (\d+) parameter")
 
 phpfuncs = {}
-ff = open("phpfuncs", "r")
+ff = open("php533funcs", "r")
 for funcs in ff.readlines():
     print funcs[:-1]
     pf = open("caca.php", "w")
