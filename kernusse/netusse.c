@@ -56,6 +56,39 @@ struct sockaddr_llc {
 
 int snum = -1;
 
+static void fuzzer(char *mm, size_t mm_size)
+{
+    size_t i;
+
+    for ( i = 0 ; i < mm_size ; i++ )
+    {
+        if ( rand() % 10 == 0 && i < mm_size - 2 )
+        {
+            mm[i++] = '%';
+            switch (rand() % 2)
+            {
+                case 0:
+                    mm[i] = 'n';
+                    break;
+                case 1:
+                    mm[i] = 'x';
+                    break;
+                default:
+                    mm[i] = 'u';
+                    break;
+            }
+        }
+        else
+        {
+            mm[i] = rand() & 255;
+            if (rand() % 2)
+                mm[i] |= 0x80;
+        }
+    }
+
+    return;
+}
+
 #ifdef __linux__
 /**
  * see if linux kernel has oopsed :)
@@ -274,6 +307,64 @@ void ssoptusse(int s)
     while(ret == -1 && tout--);
 }
 
+void ioctlusse(int s)
+{
+    int          req, i, n, ret;
+    char         *iav[6];
+    unsigned int tout = 20;
+
+    do
+    {
+        switch (rand() % 3)
+        {
+            case 0:
+            case 1:
+                req = rand() & 255;
+                break;
+            case 2:
+                req = rand();
+                break;
+        }
+
+        n = rand() % 7;
+        for (i = 0; i < n; i++)
+        {
+            int len = rand() % 255;
+            iav[i] = malloc(len);
+            fuzzer(iav[i], len);
+        }
+
+        switch (n)
+        {
+            case 0:
+                ret = ioctl(s, req);
+                break;
+            case 1:
+                ret = ioctl(s, req, iav[0]);
+                break;
+            case 2:
+                ret = ioctl(s, req, iav[0], iav[1]);
+                break;
+            case 3:
+                ret = ioctl(s, req, iav[0], iav[1], iav[2]);
+                break;
+            case 4:
+                ret = ioctl(s, req, iav[0], iav[1], iav[2], iav[3]);
+                break;
+            case 5:
+                ret = ioctl(s, req, iav[0], iav[1], iav[2], iav[3], iav[4]);
+                break;
+            case 6:
+                ret = ioctl(s, req, iav[0], iav[1], iav[2], iav[3], iav[4], iav[5]);
+                break;
+        }
+
+        for (i = 0; i < n; i++)
+            free(iav[i]);
+    }
+    while (ret == -1 && tout--);
+}
+
 void getsocknamusse(int s)
 {
     char    buf[2048], pbuf[2048];
@@ -416,34 +507,6 @@ void gsoptusse(int s)
 	return;
 }
 
-static void fuzzer(char *mm, size_t mm_size)
-{
-    size_t i;
-
-    for ( i = 0 ; i < mm_size ; i++ )
-    {
-        if ( rand() % 10 == 0 && i < mm_size - 2 )
-        {
-            mm[i++] = '%';
-            switch (rand() % 2)
-            {
-                case 0:
-                    mm[i] = 'n';
-                    break;
-                case 1:
-                    mm[i] = 'x';
-                    break;
-                default:
-                    mm[i] = 'u';
-                    break;
-            }
-        }
-        else
-            mm[i] = rand() & 255;
-    }
-
-    return;
-}
 
 /**
  * fucking bindusse #@!
@@ -595,12 +658,12 @@ void sendmsgusse(int fd)
 	struct msghdr   msg;
 	struct cmsghdr  *cmsg = NULL;
 	struct iovec    iov;
-    char            *b;
+    char            *b = NULL;
     int             i, flags;
 
     for ( i = 0 ; i < 50 ; i++ )
     {
-        msg.msg_controllen = (rand() % 2) ? evilint() : 0;
+        msg.msg_controllen = (rand() % 50) ? rand() & 0xFFFF : 0;
         if (msg.msg_controllen)
         {
             if (msg.msg_controllen < sizeof (struct cmsghdr))
@@ -609,9 +672,13 @@ void sendmsgusse(int fd)
                 cmsg = (struct cmsghdr *)malloc(msg.msg_controllen);
             if (cmsg == NULL) goto nocmsghdr;
             msg.msg_control = cmsg;
-            cmsg->cmsg_level = (rand() % 2) ? IPPROTO_IP : evilint();
-            cmsg->cmsg_type = (rand() % 2) ? rand() % 255 : evilint();
-            cmsg->cmsg_len = (rand() % 2) ? msg.msg_controllen : evilint();
+            fuzzer(cmsg, msg.msg_controllen);
+            if ( rand()%10 == 0)
+            {
+                cmsg->cmsg_level = (rand() % 2) ? IPPROTO_IP : evilint();
+                cmsg->cmsg_type = (rand() % 2) ? rand() % 255 : evilint();
+                cmsg->cmsg_len = (rand() % 2) ? msg.msg_controllen : evilint();
+            }
         }
         else
         {
@@ -624,7 +691,7 @@ nocmsghdr:
         msg.msg_iov = ((rand() % 5) == 0) ? (void*)evilint() : &iov;
         if (rand() % 10)
         {
-            msg.msg_namelen = evilint() & 50;
+            msg.msg_namelen = evilint() & 4096;
             b = malloc(msg.msg_namelen);
             if ( b != NULL && msg.msg_namelen < 0xFFFFF)
                 fuzzer(b, msg.msg_namelen);
@@ -642,6 +709,10 @@ nocmsghdr:
 
         msg.msg_flags = evilint();
         sendmsg(fd, &msg, MSG_DONTWAIT);
+        free(cmsg);
+        cmsg = NULL;
+        free(b);
+        b = NULL;
     }
 }
 
@@ -1073,6 +1144,7 @@ int main(int ac, char **av)
 		{
 			ssoptusse(s);
 			gsoptusse(s);
+            ioctlusse(s);
             sendmsgusse(s);
             sendtousse(s);
 #if defined(__linux__)
