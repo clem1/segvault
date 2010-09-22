@@ -10,7 +10,7 @@ HOST = '127.0.0.1'
 PORT = 8080
 NB_FILES = 9
 ROWS = 3
-MAX_MEMORY = 300*1024*1024
+MAX_MEMORY = 550*1024*1024
 HTML_REFRESH_TIMEOUT = 2.0
 
 from fusil.application import Application
@@ -29,11 +29,13 @@ from time import time
 from fusil.x11 import sendKey, getDisplay, findWindowByNameRegex
 from Xlib.keysymdef.miscellany import XK_F5
 import re
-from os.path import basename
+from os.path import basename, exists, dirname
 from os import getenv
+from mimetypes import guess_type
 
 IMAGE_TEMPLATE = '<img src="%(url)s" alt="%(text)s">'
 EMBEDED_TEMPLATE = '<embed src="%(url)s" name="%(text)s" type="%(mime)%s"></embed>'
+IFRAME_TEMPLATE = '<iframe src="%(url)s" name="%(text)s" width="150px" height="150px"></iframe>'
 
 FILE_EXTENSIONS = {
     # Imaged
@@ -47,6 +49,11 @@ FILE_EXTENSIONS = {
     # Embeded
     '.svg': ('image/svg+xml', EMBEDED_TEMPLATE),
     '.swf': ('application/x-shockwave-flash', EMBEDED_TEMPLATE),
+
+    # XML
+    '.xml': ('text/xml', IFRAME_TEMPLATE),
+    '.html': ('text/html', IFRAME_TEMPLATE),
+    '.rdf': ('text/xml', IFRAME_TEMPLATE),
 }
 
 class Fuzzer(Application):
@@ -99,13 +106,14 @@ class Fuzzer(Application):
         if self.options.test:
             DummyMangle(project, orig_filename, nb_file=self.options.nb_files)
         else:
-            AutoMangle(project, orig_filename, nb_file=self.options.nb_files)
-        FuzzyHttpServer(project, self.options, filename_ext, rows=self.options.rows)
+            man = AutoMangle(project, orig_filename, nb_file=self.options.nb_files)
+            #man.aggressivity = 0.25
+        FuzzyHttpServer(project, self.options, orig_filename, filename_ext, rows=self.options.rows)
 
         if self.options.iceweasel:
             regex = r"Iceweasel$"
         else:
-            regex = r"Mozilla Firefox$"
+            regex = r"Namoroka"
         FirefoxWindow(project, regex)
 
 class FirefoxProcess(CreateProcess):
@@ -145,10 +153,12 @@ class HtmlPage:
         return ''.join(html)
 
 class FuzzyHttpServer(HttpServer):
-    def __init__(self, project, options, filename_ext, rows=5):
+    def __init__(self, project, options, filename, filename_ext, rows=5):
         HttpServer.__init__(self, project, options.port)
         self.options = options
-
+        self.directory = dirname(filename)
+        if not self.directory:
+            self.directory = "."
         if filename_ext:
             ext = filename_ext.lower()
         else:
@@ -187,6 +197,8 @@ class FuzzyHttpServer(HttpServer):
             filename = self.filenames[file_index]
             data = open(filename, 'rb').read()
             self.serveData(client, 200, "OK", data=data, content_type=self.content_type)
+        elif exists(self.directory + "/" + url):
+            self.serveData(client, 200, "OK", data=open(self.directory + "/" + url, 'rb').read(), content_type=guess_type(url)[0])
         elif url == "index.html":
             self.createHomepage(client)
         else:
