@@ -3,6 +3,8 @@ from random import randint, choice
 from fusil.mangle_op import SPECIAL_VALUES, MAX_INCR
 from array import array
 from fusil.tools import minmax
+from untidy import xmlFuzzer
+
 
 class MangleConfig:
     def __init__(self, min_op=1, max_op=100, operations=None):
@@ -114,4 +116,18 @@ class MangleFile(MangleAgent):
         count = Mangle(self.config, data).run()
         self.info("Mangle operation: %s" % count)
         return data
+
+class MangleXML(MangleAgent):
+    """
+    Inject errors in a valid XML file.
+    """
+    def __init__(self):
+        self.xmliter = None
+
+    def mangleData(self, data):
+        if not self.xmliter:
+            xf = xmlFuzzer()
+            xf.setRepetitions([3,30,60,1024,4096])
+            self.xmliter = xf.fuzz(data)
+        return self.xmliter.next()
 

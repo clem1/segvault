@@ -34,7 +34,7 @@ from os import getenv
 from mimetypes import guess_type
 
 IMAGE_TEMPLATE = '<img src="%(url)s" alt="%(text)s">'
-EMBEDED_TEMPLATE = '<embed src="%(url)s" name="%(text)s" type="%(mime)%s"></embed>'
+EMBEDED_TEMPLATE = '<embed src="%(url)s" name="%(text)s" type="%(mime)s"></embed>'
 IFRAME_TEMPLATE = '<iframe src="%(url)s" name="%(text)s" width="150px" height="150px"></iframe>'
 
 FILE_EXTENSIONS = {
@@ -106,7 +106,7 @@ class Fuzzer(Application):
         if self.options.test:
             DummyMangle(project, orig_filename, nb_file=self.options.nb_files)
         else:
-            man = AutoMangle(project, orig_filename, nb_file=self.options.nb_files)
+            man = AutoMangle(project, orig_filename, nb_file=self.options.nb_files, ext=filename_ext)
             #man.aggressivity = 0.25
         FuzzyHttpServer(project, self.options, orig_filename, filename_ext, rows=self.options.rows)
 
@@ -217,7 +217,7 @@ class FuzzyHttpServer(HttpServer):
         page = HtmlPage()
         page.title = 'Fusil HTTP server'
         page.body = '<h1>Fuzzing</h1>\n'
-        page.body += '<table border="1">\n'
+        #page.body += '<table border="1">\n'
         tr_open = False
         count = len(self.filenames)
         session_index = self.project().session_index
@@ -238,11 +238,11 @@ class FuzzyHttpServer(HttpServer):
                 'url': url,
                 'text': "[%s]" % url,
                 'mime': self.content_type}
-            page.body += '    <td%s>%s</td>\n' % (span, content)
-        page.body += '  </tr>\n'
-        page.body += '</table>\n'
-        page.body += '<p>Created: %s</p>\n' % datetime.now()
-        page.body += '<p>Session: %s</p>\n' % self.project().session_index
+            page.body += '    %s\n' % (content)
+        #page.body += '  </tr>\n'
+        #page.body += '</table>\n'
+        #page.body += '<p>Created: %s</p>\n' % datetime.now()
+        #page.body += '<p>Session: %s</p>\n' % self.project().session_index
 
         # Write the HTML in a file
         page = str(page)

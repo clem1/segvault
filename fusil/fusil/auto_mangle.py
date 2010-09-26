@@ -1,13 +1,18 @@
-from fusil.mangle import MangleFile
+from fusil.mangle import MangleFile, MangleXML
 from fusil.tools import minmax
+from array import array
 
 class AutoMangle(MangleFile):
     def __init__(self, project, *args, **kw):
-        MangleFile.__init__(self, project, *args, **kw)
+        MangleFile.__init__(self, project, args[0], int(kw['nb_file']))
         self.hard_max_op = 10000
         self.hard_min_op = 0
         self.aggressivity = None
         self.fixed_size_factor = 1.0
+        if kw.has_key('ext') and kw['ext'] in ('.xml', '.svg', '.rdf'):
+            self.xml = MangleXML()
+        else:
+            self.xml = None
 
     def on_session_start(self):
         pass
@@ -40,5 +45,7 @@ class AutoMangle(MangleFile):
 
     def mangleData(self, data, file_index):
         self.setupConf(data)
+        if self.xml:
+            return array('B', self.xml.mangleData(data.tostring()))
         return MangleFile.mangleData(self, data, file_index)
 

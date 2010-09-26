@@ -20,141 +20,170 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 '''
 import re
+import random
+
+EVIL_INT = [ "0", "-1", "-255", "-4096", "-" + str(0xFFFFFFFF), str(0xFFFFFFFF), str(0x80000000), str(0x7FFFFFFF), str(0xFFFFFFFFFFFFFFFFFFFFFFF) ]
 
 class fuzzingFunctions:
-	'''
-	This class has a collection of fuzzing funcions for xml tags, text and attrs.
-	
-	@author: Andres Riancho ( andres.riancho@gmail.com )
-	'''
-	def __init__(self):
-		self._ffTestList = [ self.ff0 ]
-		
-	def _getTestFuzzFunctions( self ):
-		'''
-		@return: A list of fuzzing functions for testing.
-		'''
-		return self._ffTestList
-		
-	def _getFuzzFunctions( self ):
-		'''
-		@return: A list of fuzzing functions.
-		'''
-		res = []
-		i = 0
-		try:
-			while True:
-				# pure python love :P
-				res.append( getattr( self, 'ff'+str(i) ) )
-				i += 1
-		except:
-			# I dont care
-			pass
-			
-		return res
+    '''
+    This class has a collection of fuzzing funcions for xml tags, text and attrs.
+    
+    @author: Andres Riancho ( andres.riancho@gmail.com )
+    '''
+    def __init__(self):
+        self._ffTestList = [ self.ff0 ]
+
+    def _getTestFuzzFunctions( self ):
+        '''
+        @return: A list of fuzzing functions for testing.
+        '''
+        return self._ffTestList
+
+    def _getFuzzFunctions( self ):
+        '''
+        @return: A list of fuzzing functions.
+        '''
+        res = []
+        i = 0
+        try:
+            while True:
+                # pure python love :P
+                res.append( getattr( self, 'ff'+str(i) ) )
+                i += 1
+        except:
+            # I dont care
+            pass
+
+        return res
 
 ###############################################
-#																									    #
-#				These are the fuzzing functions, the Core.				#
-#																						    			#
+#                                                                                                       #
+#               These are the fuzzing functions, the Core.              #
+#                                                                                                       #
 ###############################################
 
-	def ff0( self, xmlItem, repetitions=[] ):
-		'''
-		Return the item without changes
-		'''
-		return [xmlItem,]
+    def ff0( self, xmlItem, repetitions=[] ):
+        '''
+        Return the item without changes
+        '''
+        return [xmlItem,]
 
 ######################################
-#																					#
-#				This set of ff's break the XML sintax		#
-#																					#
-######################################	
-	
-	def ff1( self, xmlItem, repetitions=[] ):
-		'''
-		Matches the opening <, replace with '>'*repetitions
-		'''
-		result = []
-		p = re.compile('^<')
-		for rep in repetitions:
-			if p.match( xmlItem ):
-				fuzzedItem = p.sub('>'*rep , xmlItem )
-				result.append( fuzzedItem )
-		return result
-	
-	def ff2( self, xmlItem, repetitions=[] ):
-		'''
-		If repetitions=2 and xmlItem='<foo>'
-		this ff returns '<foo><<>>'
-		'''
-		result = []
-		for rep in repetitions:
-			fuzzedItem = xmlItem
-			for i in range( rep ):
-				fuzzedItem += '<'
-			for i in range( rep ):
-				fuzzedItem += '>'
-			result.append( fuzzedItem )
-		return result
-		
-	def ff3( self, xmlItem, repetitions=0 ):
-		result = []
-		for rep in repetitions:
-			fuzzedItem = xmlItem
-			fuzzedItem += 'A'*rep
-			result.append( fuzzedItem )
-		return result
+#                                                                                   #
+#               This set of ff's break the XML sintax       #
+#                                                                                   #
+######################################  
+    def ff1( self, xmlItem, repetitions=[] ):
+        '''
+        Matches the opening <, replace with '>'*repetitions
+        '''
+        result = []
+        p = re.compile('^<')
+        for rep in repetitions:
+            if p.match( xmlItem ):
+                fuzzedItem = p.sub('>'*rep , xmlItem )
+                result.append( fuzzedItem )
+        return result
 
-	def ff4( self, xmlItem, repetitions=[] ):
-		result = []
-		for rep in repetitions:
-			result.append(xmlItem*rep)
-		return result
-		
-	def ff5( self, xmlItem, repetitions=0 ):
-		return ['',]
+    def ff2( self, xmlItem, repetitions=[] ):
+        '''
+        If repetitions=2 and xmlItem='<foo>'
+        this ff returns '<foo><<>>'
+        '''
+        result = []
+        for rep in repetitions:
+            fuzzedItem = xmlItem
+            for i in range( rep ):
+                fuzzedItem += '<'
+            for i in range( rep ):
+                fuzzedItem += '>'
+            result.append( fuzzedItem )
+        return result
+
+    def ff3( self, xmlItem, repetitions=0 ):
+        result = []
+        for rep in repetitions:
+            fuzzedItem = xmlItem
+            fuzzedItem += 'A'*rep
+            result.append( fuzzedItem )
+        return result
+
+    def ff4( self, xmlItem, repetitions=[] ):
+        result = []
+        for rep in repetitions:
+            result.append(xmlItem*rep)
+        return result
+
+    def ff5( self, xmlItem, repetitions=0 ):
+        return ['',]
 
 ######################################
-#																								#
-#				This set of ff's fuzz the XML ( mostly ) without		#
-#									breaking XML sintax								#
-#																								#
-######################################	
+#                                                                                               #
+#               This set of ff's fuzz the XML ( mostly ) without        #
+#                                   breaking XML sintax                             #
+#                                                                                               #
+######################################  
 
-	def _sameType( self, charA, charB ):
-		if charA.isalpha() and charB.isalpha():
-			return True
-		elif charA.isdigit() and charB.isdigit():
-			return True		
-		else:
-			return False
-		
-	def ff6( self, xmlItem, repetitions=[] ):
-		'''
-		Lots of fuzzing going on here! :)
-		Some of this fuzzed XML's will be valid, some not.
-		'''
-		result = []
-		last = ''
-		pointer = 0
-		for char in xmlItem:
-			if not self._sameType( last, char ):
-				for rep in repetitions:
-					fuzzedItem = xmlItem[ : pointer ]
-					
-					# This helps me identify the bugs on the remote side
-					if char.isalpha():
-						fuzzedItem += 'A'* rep
-					elif char.isdigit():
-						fuzzedItem += '1'* rep
-					else:
-						fuzzedItem += char* rep
-						
-					fuzzedItem += xmlItem[ pointer : ]
-					result.append( fuzzedItem )
-			pointer += 1
-			last = char
-			
-		return result
-		
+    def _sameType( self, charA, charB ):
+        if charA.isalpha() and charB.isalpha():
+            return True
+        elif charA.isdigit() and charB.isdigit():
+            return True     
+        else:
+            return False
+        
+    def ff6( self, xmlItem, repetitions=[] ):
+        '''
+        Lots of fuzzing going on here! :)
+        Some of this fuzzed XML's will be valid, some not.
+        '''
+        result = []
+        last = ''
+        pointer = 0
+        for char in xmlItem:
+            if not self._sameType( last, char ):
+                for rep in repetitions:
+                    fuzzedItem = xmlItem[ : pointer ]
+                    # This helps me identify the bugs on the remote side
+                    if char.isalpha():
+                        fuzzedItem += 'A'* rep
+                    elif char.isdigit():
+                        fuzzedItem += '1099511627775'
+                    else:
+                        fuzzedItem += char* rep
+                    fuzzedItem += xmlItem[ pointer : ]
+                    result.append( fuzzedItem )
+            pointer += 1
+            last = char
+        return result
+
+    def ff8( self, xmlItem, repetitions=[] ):
+        '''
+        fuzz numerical attr
+        '''
+        result = []
+        last = ''
+        pointer = 0
+        #print xmlItem
+        for item in xmlItem.split(' '):
+            if item.find('=') > 0:
+                for i in repetitions:
+                    attr, val = item.split('=')
+                    val = str(self.evilint())
+                    if item[-1] == '>' and item[-2] != ' ':
+                        result.append("""%s="%s">""" % (attr, val))
+                    else:
+                        result.append("""%s="%s" """ % (attr, val))
+            else:
+                for i in repetitions:
+                    result.append(item)
+        #print result
+        return result
+
+    def evilint( self ):
+        '''
+        return an evil integer
+        '''
+        if random.randint(0, 5) == 0:
+            return random.randint(0, 0xFFFFFFFF+2)
+        return random.choice(EVIL_INT)
