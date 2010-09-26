@@ -1,0 +1,330 @@
+*
+{
+	font-family: Arial, Helvetica, sans-serif;
+	color: #767a7d;
+}
+
+a
+{
+	text-decoration: none;
+}
+
+a:hover
+{
+	text-decoration: underline;
+}
+
+#handler
+{
+	margin-left: auto;
+	margin-right: auto;
+	width: 910px;
+	border: 1px solid #cccccc;
+	overflow: hidden;
+}
+
+#header
+{
+	height: 230px;
+	width: 910px;
+	background: url(../images/910x230.jpg) no-repeat;
+}
+
+#header a
+{
+	height: 230px;
+        width: 910px;
+}
+
+#news-handler
+{
+	float: left;
+	padding: 10px 10px 14px 10px;
+	width: 500px;
+}
+
+#news-handler h2, #archive-handler h2
+{
+	padding: 0px 0px 4px 0px;
+	margin: 0px;
+	font-weight: normal;
+	font-size: 16px;
+	letter-spacing: 6px;
+	text-align: center;
+}
+
+#news-handler .entry
+{
+	font-size: 14px;
+}
+
+#news-handler .title
+{
+	font-size: 16px;
+	border-bottom: 1px dotted #cccccc;
+	overflow: hidden;
+}
+
+#news-handler h3
+{
+	padding: 0;
+	margin: 0;
+	font-size: 16px;
+	font-weight: normal;
+	float: left;
+}
+
+#news-handler .date
+{
+	float: right;
+}
+
+#news-handler .block
+{
+	padding: 0 0 4px 0;
+	clear: both;
+}
+
+#news-handler p
+{
+	margin: 10px 0 10px 0;;
+}
+
+#news-handler blockquote p
+{
+	font-family: courier, Helvetica, sans-serif;
+	line-height: 16px;
+}
+
+#news-handler blockquote p a
+{
+        font-family: courier, Helvetica, sans-serif;
+	font-size: 14px;
+}
+
+#news-handler .commentLink
+{
+	text-align: right;
+	margin-right: 20px;
+	font-size: 11px;
+}
+
+#news-handler .adsense
+{
+	text-align: center;
+	margin: 10px 0 10px 0;
+}
+
+#news-handler a, #footer a
+{
+	text-decoration: underline;
+}
+
+#news-handler .comment a:hover, #footer a:hover
+{
+        text-decoration: none;
+}
+
+#news-handler h2 a, #news-handler h3 a
+{
+	text-decoration: none;
+}
+
+#news-handler h2 a:hover, #news-handler h3 a:hover
+{
+        text-decoration: underline;
+}
+
+#list-handler
+{
+	float: right;
+}
+
+.advisory-handler
+{
+	padding: 10px 10px 14px 2px;
+	width: 374px;
+}
+
+.advisory-handler h2
+{
+	padding: 0px 0px 4px 0px;
+	margin: 0px;
+	font-weight: normal;
+	font-size: 16px;
+	letter-spacing: 6px;
+	text-align: center;
+}
+
+.advisory-list
+{
+	list-style-type: none;
+	padding: 0;
+	margin: 0;
+}
+
+.advisory-list li
+{
+	font-size: 14px;
+	padding-top: 2px;
+}
+
+.advisory-list .blogEntry
+{
+        margin-left: 10px;
+}
+
+#archive-handler
+{
+        padding: 10px 10px 14px 10px;
+}
+
+#archive
+{
+	border-spacing: 0;
+	margin-left: auto;
+	margin-right: auto;
+	width: 740px;
+}
+
+#archive th
+{
+	color: #fff;
+	background: #333;
+	font-size: 13px;
+	font-weight: normal;
+	text-align: left;
+}
+
+#archive .th-center
+{
+	text-align: center;
+}
+
+#archive td, #archive .alt
+{
+	font-size: 13px;
+	padding: 2px 3px 2px 3px;
+	color: #000;
+}
+
+#archive .alt-tr
+{
+	background: #edece7;
+}
+
+#archive .first-td
+{
+	color: #767a7d;
+}
+
+#archive .short-td
+{
+	width: 120px;
+}
+
+#comments-handler
+{
+	margin: 0 0 10px 0;
+}
+
+#comments-handler .entry
+{
+	margin: 0 0 14px 0;
+}
+
+#comments-handler .poster
+{
+	margin: 0 0 0 20px;
+}
+
+#comments-handler .comment
+{
+	margin: 4px 0 0 50px;
+}
+
+/* Form comments handler, or general form handler */
+#fcomments-handler
+{
+	border-top: 1px dotted #ccc;
+	padding-top: 20px;
+}
+
+#fcomments-handler .row
+{
+	margin-bottom: 4px;
+}
+
+#fcomments-handler .flabel, .aform .flongLabel
+{
+	float: left;
+	width: 60px;
+	margin-right: 60px;
+}
+
+.aform .flongLabel
+{
+	width: 84px;
+	margin-right: 30px;
+}
+
+/* cform = Comments, or general form */
+.cform input, .aform input
+{
+	border: 1px solid #ccc;
+	width: 250px;
+}
+
+.aform input
+{
+	width: 378px;
+}
+
+.cform textarea, .aform textarea
+{
+        border: 1px solid #ccc;
+        width: 250px;
+	height: 120px;
+}
+
+.aform textarea
+{
+	width: 378px;
+}
+
+.aform .combo
+{
+	border: 1px solid #ccc;
+        width: 380px;
+}
+
+.cform .button, .aform .button
+{
+	width: 80px;
+	margin-left: 292px;
+}
+
+.aform .button
+{
+	margin-left: 414px;
+}
+
+.capture-img
+{
+	float: left;
+}
+
+.cform .capture-text
+{
+	float: left;
+	width: 140px;
+	margin: 2px 0 5px 10px;
+}
+
+#footer
+{
+	text-align: center;
+	clear: both;
+	height: 30px;
+	font-size: 14px;
+}
