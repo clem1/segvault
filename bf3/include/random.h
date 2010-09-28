@@ -60,6 +60,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 MA 02110-1301, USA.
 */
 
+#if 0
 static char *z[] = {"a", "b", "c", "d", "e",
                     "f", "g", "h", "i", "j",
                     "k", "l", "m", "n", "o",
@@ -79,3 +80,7 @@ static char *z[] = {"a", "b", "c", "d", "e",
                     "\\", "{", "}", "|", ";",
                     "'", ":", "\"", ",", ".",
                     "/", "<", ">", "?"};
+#endif
+
+static char *z[] = { "0x7FFFFFFF", "0xFFFFFFFFFF", "-1", "0", "\"%x%x%x%x%x%xaaaaaaaaa%n%n%n%n%n%n%n%n%n\"", "-0x80000000", "1024", "4096",
+                        "\"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\"" };

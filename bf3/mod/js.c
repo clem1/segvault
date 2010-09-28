@@ -121,6 +121,7 @@ char data[x*2+512], fn[128], *modn = "js";
 
      snprintf(fn, sizeof(fn), "%s/%s%d.html", outp, modn, cnt);
 
+#if 0
 if(o == 1)
      snprintf(data, sizeof(data), "%s\n%s%s%d.html%s\n%s\n%s\n%s(\"%s\");\n%s\n%s", HTMLA, REFRESHA, modn, cnt+1, REFRESHB, JSA, JSDATA, fuzz, TESTDATA, JSB, HTMLB);
 
@@ -128,14 +129,16 @@ if(o == 2)
      snprintf(data, sizeof(data), "%s\n%s%s%d.html%s\n%s\n%s\n%s(\"%s\");\n%s\n%s", HTMLA, REFRESHA, modn, cnt+1, REFRESHB, JSA, JSDATA, func, fuzz, JSB, HTMLB);
 
 if(o == 3)
+#endif
      snprintf(data, sizeof(data), "%s\n%s%s%d.html%s\n%s\n%s\n%s(%s);\n%s\n%s", HTMLA, REFRESHA, modn, cnt+1, REFRESHB, JSA, JSDATA, func, fuzz, JSB, HTMLB);
 
+#if 0
 if(o == 4)
      snprintf(data, sizeof(data), "%s\n%s%s%d.html%s\n%s\n%s\n%s(%s, %s);\n%s\n%s", HTMLA, REFRESHA, modn, cnt+1, REFRESHB, JSA, JSDATA, func, fuzz, fuzz, JSB, HTMLB);
 
 if(o == 5)
      snprintf(data, sizeof(data), "%s\n%s%s%d.html%s\n%s\n%s\n%s(\"%s\", \"%s\");\n%s\n%s", HTMLA, REFRESHA, modn, cnt+1, REFRESHB, JSA, JSDATA, func, fuzz, fuzz, JSB, HTMLB);
-
+#endif
      cli_eng(data, fn);
 
 }

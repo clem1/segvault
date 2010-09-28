@@ -197,157 +197,160 @@ char rnd[x];
 
 if(chr == 1)
 {
-
-for(ii = 0; ii < x; ii++)
-{
-
-     strncat(rnd, z[r0], 1);
-
-}
+     strcat(rnd, z[r0]);
 }
 
 if(chr == 2)
 {
+     strcat(rnd, z[r0]);
+     strcat(rnd, ",");
+     strcat(rnd, z[r1]);
 
-for(ii = 0; ii < x/chr; ii++)
-{
-
-     strncat(rnd, z[r0], 1);
-     strncat(rnd, z[r1], 1);
-
-}
 }
 
 if(chr == 3)
 {
 
-for(ii = 0; ii < x/chr; ii++)
-{
+     strcat(rnd, z[r0]);
+     strcat(rnd, ",");
+     strcat(rnd, z[r1]);
+     strcat(rnd, ",");
+     strcat(rnd, z[r2]);
 
-     strncat(rnd, z[r0], 1);
-     strncat(rnd, z[r1], 1);
-     strncat(rnd, z[r2], 1);
-
-}
 }
 
 if(chr == 4)
 {
 
-for(ii = 0; ii < x/chr; ii++)
-{
+     strcat(rnd, z[r0]);
+     strcat(rnd, ",");
+     strcat(rnd, z[r1]);
+     strcat(rnd, ",");
+     strcat(rnd, z[r2]);
+     strcat(rnd, ",");
+     strcat(rnd, z[r3]);
 
-     strncat(rnd, z[r0], 1);
-     strncat(rnd, z[r1], 1);
-     strncat(rnd, z[r2], 1);
-     strncat(rnd, z[r3], 1);
-
-}
 }
 
 if(chr == 5)
 {
 
-for(ii = 0; ii < x/chr; ii++)
-{
+     strcat(rnd, z[r0]);
+     strcat(rnd, ",");
+     strcat(rnd, z[r1]);
+     strcat(rnd, ",");
+     strcat(rnd, z[r2]);
+     strcat(rnd, ",");
+     strcat(rnd, z[r3]);
+     strcat(rnd, ",");
+     strcat(rnd, z[r4]);
 
-     strncat(rnd, z[r0], 1);
-     strncat(rnd, z[r1], 1);
-     strncat(rnd, z[r2], 1);
-     strncat(rnd, z[r3], 1);
-     strncat(rnd, z[r4], 1);
-
-}
 }
 
 if(chr == 6)
 {
 
-for(ii = 0; ii < x/chr; ii++)
-{
+     strcat(rnd, z[r0]);
+     strcat(rnd, ",");
+     strcat(rnd, z[r1]);
+     strcat(rnd, ",");
+     strcat(rnd, z[r2]);
+     strcat(rnd, ",");
+     strcat(rnd, z[r3]);
+     strcat(rnd, ",");
+     strcat(rnd, z[r4]);
+     strcat(rnd, ",");
+     strcat(rnd, z[r5]);
 
-     strncat(rnd, z[r0], 1);
-     strncat(rnd, z[r1], 1);
-     strncat(rnd, z[r2], 1);
-     strncat(rnd, z[r3], 1);
-     strncat(rnd, z[r4], 1);
-     strncat(rnd, z[r5], 1);
-
-}
 }
 
 if(chr == 7)
 {
 
-for(ii = 0; ii < x/chr; ii++)
-{
+     strcat(rnd, z[r0]);
+     strcat(rnd, ",");
+     strcat(rnd, z[r1]);
+     strcat(rnd, ",");
+     strcat(rnd, z[r2]);
+     strcat(rnd, ",");
+     strcat(rnd, z[r3]);
+     strcat(rnd, ",");
+     strcat(rnd, z[r4]);
+     strcat(rnd, ",");
+     strcat(rnd, z[r5]);
+     strcat(rnd, ",");
+     strcat(rnd, z[r6]);
 
-     strncat(rnd, z[r0], 1);
-     strncat(rnd, z[r1], 1);
-     strncat(rnd, z[r2], 1);
-     strncat(rnd, z[r3], 1);
-     strncat(rnd, z[r4], 1);
-     strncat(rnd, z[r5], 1);
-     strncat(rnd, z[r6], 1);
-
-}
 }
 
 if(chr == 8)
 {
 
-for(ii = 0; ii < x/chr; ii++)
-{
+     strcat(rnd, z[r0]);
+     strcat(rnd, ",");
+     strcat(rnd, z[r1]);
+     strcat(rnd, ",");
+     strcat(rnd, z[r2]);
+     strcat(rnd, ",");
+     strcat(rnd, z[r3]);
+     strcat(rnd, ",");
+     strcat(rnd, z[r4]);
+     strcat(rnd, ",");
+     strcat(rnd, z[r5]);
+     strcat(rnd, ",");
+     strcat(rnd, z[r6]);
+     strcat(rnd, ",");
+     strcat(rnd, z[r7]);
 
-     strncat(rnd, z[r0], 1);
-     strncat(rnd, z[r1], 1);
-     strncat(rnd, z[r2], 1);
-     strncat(rnd, z[r3], 1);
-     strncat(rnd, z[r4], 1);
-     strncat(rnd, z[r5], 1);
-     strncat(rnd, z[r6], 1);
-     strncat(rnd, z[r7], 1);
-
-}
 }
 
 if(chr == 9)
 {
 
-for(ii = 0; ii < x/chr; ii++)
-{
+     strcat(rnd, z[r0]);
+     strcat(rnd, ",");
+     strcat(rnd, z[r1]);
+     strcat(rnd, ",");
+     strcat(rnd, z[r2]);
+     strcat(rnd, ",");
+     strcat(rnd, z[r3]);
+     strcat(rnd, ",");
+     strcat(rnd, z[r4]);
+     strcat(rnd, ",");
+     strcat(rnd, z[r5]);
+     strcat(rnd, ",");
+     strcat(rnd, z[r6]);
+     strcat(rnd, ",");
+     strcat(rnd, z[r7]);
+     strcat(rnd, ",");
+     strcat(rnd, z[r8]);
 
-     strncat(rnd, z[r0], 1);
-     strncat(rnd, z[r1], 1);
-     strncat(rnd, z[r2], 1);
-     strncat(rnd, z[r3], 1);
-     strncat(rnd, z[r4], 1);
-     strncat(rnd, z[r5], 1);
-     strncat(rnd, z[r6], 1);
-     strncat(rnd, z[r7], 1);
-     strncat(rnd, z[r8], 1);
-
-}
 }
 
 if(chr == 10)
 {
 
-for(ii = 0; ii < x/chr; ii++)
-{
+    strcat(rnd, z[r0]);
+     strcat(rnd, ",");
+     strcat(rnd, z[r1]);
+     strcat(rnd, ",");
+     strcat(rnd, z[r2]);
+     strcat(rnd, ",");
+     strcat(rnd, z[r3]);
+     strcat(rnd, ",");
+     strcat(rnd, z[r4]);
+     strcat(rnd, ",");
+     strcat(rnd, z[r5]);
+     strcat(rnd, ",");
+     strcat(rnd, z[r6]);
+     strcat(rnd, ",");
+     strcat(rnd, z[r7]);
+     strcat(rnd, ",");
+     strcat(rnd, z[r8]);
+     strcat(rnd, ",");
+     strcat(rnd, z[r9]);
 
-     strncat(rnd, z[r0], 1);
-     strncat(rnd, z[r1], 1);
-     strncat(rnd, z[r2], 1);
-     strncat(rnd, z[r3], 1);
-     strncat(rnd, z[r4], 1);
-     strncat(rnd, z[r5], 1);
-     strncat(rnd, z[r6], 1);
-     strncat(rnd, z[r7], 1);
-     strncat(rnd, z[r8], 1);
-     strncat(rnd, z[r9], 1);
 
-}
 }
 
 if(tatt != 0) n = rand() % tatt;

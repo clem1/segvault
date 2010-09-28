@@ -68,7 +68,7 @@ JavaScript Module
 
 */
 
-#define JSTL 66-1
+#define JSTL sizeof(jsfunc)/sizeof(char *)
 
 #define JSATL 3-1
 
@@ -78,8 +78,9 @@ JavaScript Module
 #define JSA "<script type=\"text/javascript\">"
 #define JSB "</script>"
 
-#define JSDATA "var s = \"fuzz\"; var d = new Date(); var n = new Number(2000);"
+#define JSDATA "var st = \"fuzz\"; var da = new Date(); var nu = new Number(2000); var xm = new Xml(\"<xml><coin><foo attr=\"foo\"></foo></coin></xml>\"); var bo = new Boolean(); var re = new RegExp(\"haha\", \"gi\"); var it = new Iterator(); var ex = new Exception(); var ge = new Generator(); var nm = new NameSpace(); var sc = new Script(); var ar = new Array(); var fu = new Function();"
 
+#if 0
 static char *jsfunc[]  = {"decodeURI", "decodeURIComponent", "encodeURI", "encodeURIcomponent", "escape",
                           "unescape", "eval", "isFinite", "isNaN", "Number",
                           "parseFloat", "parseInt", "String", "s.anchor", "s.charAt",
@@ -94,6 +95,50 @@ static char *jsfunc[]  = {"decodeURI", "decodeURIComponent", "encodeURI", "encod
                           "Math.log", "Math.max", "Math.min", "Math.pow", "Math.round",
                           "Math.sin", "Math.sqrt", "Math.tan", "n.toExponential", "n.toPercision",
                           "n.toString"};
+#endif
+
+static char *jsfunc[] = { "st.quote", "st.toSource", "st.toString", "st.valueOf", "st.substring",
+                          "st.toLowerCase", "st.toUpperCase", "st.charAt", "st.charCodeAt",
+                          "st.indexOf", "st.lastIndexOf", "st.toLocaleLowerCase", "st.toLocaleUpperCase", 
+                          "st.localeCompare", "st.match", "st.search", "st.replace", "st.split", "st.substr",
+                          "st.concat", "st.slice", "st.bold", "st.italics", "st.fixed", "st.fontsize", 
+                          "st.fontcolor", "st.link", "st.anchor", "st.strike", "st.small", "st.big", 
+                          "st.blink", "st.sup", "st.sub", "String.fromCharCode",
+                          "it.item", "it.bindMethod",
+                          "bo.toSource", "bo.toString", "bo.valueOf",
+                          "it.iterator", "it.next", "ge.iterator", "ge.next", "ge.send", "ge.throw",
+                          "ge.close", "ex.toSource", "ex.toString", "na.toString", "qn.toString",
+                          "xm.addNamespace", "xm.appendChild", "xm.attribute", "xm.attributes", 
+                          "xm.child", "xm.childIndex", "xm.children", "xm.comments", "xm.contains", 
+                          "xm.copy", "xm.descendants", "xm.elements", "xm.hasOwnProperty", "xm.hasComplexContent",
+                          "xm.hasSimpleContent", "xm.inScopeNamespaces", "xm.insertChildAfter", "xm.insertChildBefore", 
+                          "xm.length", "xm.localName", "xm.name", "xm.namespace", "xm.namespaceDeclarations", 
+                          "xm.nodeKind", "xm.normalize", "xm.xml_parent", "xm.processingInstructions", "xm.prependChild",
+                          "xm.propertyIsEnumerable", "xm.removeNamespace", "xm.replace", "xm.setChildren", "xm.setLocalName", 
+                          "xm.setName", "xm.setNamespace", "xm.text", "xm.toString", "xm.toXMLString", "xm.toSource",
+                          "xm.valueOf", "Xml.settings", "Xml.setSettings", "Xml.defaultSettings", "re.toSource", 
+                          "re.toString", "re.compile", "re.exec", "re.test", "ob.toSource", "ob.toString", 
+                          "ob.toLocaleString", "ob.valueOf", "ob.eval", "ob.watch", "ob.unwatch", "ob.hasOwnProperty", 
+                          "ob.isPrototypeOf", "ob.propertyIsEnumerable", "ob.defineGetter", "ob.defineSetter", 
+                          "ob.lookupGetter", "ob.lookupSetter", "sc.toSource", "sc.toString", "sc.compile", 
+                          "sc.exec", "sc.freeze", "sc.thaw", "Script.thaw", "Math.toSource", "Math.abs", 
+                          "Math.acos", "Math.asin", "Math.atan", "Math.atan2", "Math.ceil", "Math.cos", 
+                          "Math.exp", "Math.floor", "Math.log", "Math.max", "Math.min", "Math.pow", 
+                          "Math.random", "Math.round", "Math.sin", "Math.sqrt", "Math.tan", "fu.toSource", 
+                          "fu.toString", "fu.apply", "fu.__applyConstructor__", "ar.toSource", "ar.toString", 
+                          "ar.toLocaleString", "ar.join", "ar.reverse", "ar.sort", "ar.push", "ar.pop", "ar.shift", 
+                          "ar.unshift", "ar.splice", "ar.concat", "ar.slice", "ar.indexOf", "ar.lastIndexOf", "ar.forEach",
+                          "ar.map", "ar.filter", "ar.some", "ar.every", "Date.UTC", "Date.parse", "Date.now", "da.getTime", 
+                          "da.getTimezoneOffset", "da.getYear", "da.getFullYear", "da.getUTCFullYear", "da.getMonth",
+                          "da.getUTCMonth", "da.getDate", "da.getUTCDate", "da.getDay", "da.getUTCDay", "da.getHours", 
+                          "da.getUTCHours", "da.getMinutes", "da.getUTCMinutes", "da.getSeconds", "da.getUTCSeconds", 
+                          "da.getMilliseconds", "da.getUTCMilliseconds", "da.setTime", "da.setYear", "da.setFullYear", 
+                          "da.setUTCFullYear", "da.setMonth", "da.setUTCMonth", "da.setDate", "da.setUTCDate", "da.setHours",
+                          "da.setUTCHours", "da.setMinutes", "da.setUTCMinutes", "da.setSeconds", "da.setUTCSeconds", 
+                          "da.setMilliseconds", "da.setUTCMilliseconds", "da.toUTCString", "da.toLocaleString", "da.toLocaleDateString",
+                          "da.toLocaleTimeString", "da.toLocaleFormat", "da.toDateString", "da.toTimeString", "da.toSource",
+                          "da.toString", "da.valueOf", "nu.toSource", "nu.toString", "nu.toLocaleString", "nu.valueOf",
+                          "nu.toFixed", "nu.toExponential", "nu.toPrecision" };
 
 static char *jsfunca[] = {"alert", "confirm", "prompt"};
 

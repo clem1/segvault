@@ -43,7 +43,7 @@
 
 CC = gcc
 #CFLAGS = -static
-#CFLAGS = -ggdb # debug
+CFLAGS = -ggdb # debug
 bf3: bf3.c core.c oracle.c gen.c rand.c mut.c cli.c mod/css.c mod/dom.c mod/html.c mod/js.c mod/xml.c
 clean:
 	rm -f bf3

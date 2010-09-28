@@ -79,7 +79,7 @@ MA 02110-1301, USA.
 #define SIZE  1024
 
 #define RNDSZ     100000
-#define RNDTL         94
+#define RNDTL         (sizeof(z)/sizeof(char *))
 #define RNDMAX 100000000
 #define CHRMAX      10+1
 
