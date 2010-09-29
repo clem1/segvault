@@ -78,7 +78,7 @@ JavaScript Module
 #define JSA "<script type=\"text/javascript\">"
 #define JSB "</script>"
 
-#define JSDATA "var st = \"fuzz\"; var da = new Date(); var nu = new Number(2000); var xm = new Xml(\"<xml><coin><foo attr=\"foo\"></foo></coin></xml>\"); var bo = new Boolean(); var re = new RegExp(\"haha\", \"gi\"); var it = new Iterator(); var ex = new Exception(); var ge = new Generator(); var nm = new NameSpace(); var sc = new Script(); var ar = new Array(); var fu = new Function();"
+#define JSDATA "var st = \"fuzz\";\nvar da = new Date();\nvar nu = new Number(2000);\nvar xm = new XML(\"<xml><coin><foo attr=\\\"foo\\\"></foo></coin></xml>\");\nvar bo = new Boolean();\nvar re = new RegExp(\"haha\", \"gi\");\nvar ar = new Array();\nvar fu = new Function();"
 
 #if 0
 static char *jsfunc[]  = {"decodeURI", "decodeURIComponent", "encodeURI", "encodeURIcomponent", "escape",
@@ -106,8 +106,6 @@ static char *jsfunc[] = { "st.quote", "st.toSource", "st.toString", "st.valueOf"
                           "st.blink", "st.sup", "st.sub", "String.fromCharCode",
                           "it.item", "it.bindMethod",
                           "bo.toSource", "bo.toString", "bo.valueOf",
-                          "it.iterator", "it.next", "ge.iterator", "ge.next", "ge.send", "ge.throw",
-                          "ge.close", "ex.toSource", "ex.toString", "na.toString", "qn.toString",
                           "xm.addNamespace", "xm.appendChild", "xm.attribute", "xm.attributes", 
                           "xm.child", "xm.childIndex", "xm.children", "xm.comments", "xm.contains", 
                           "xm.copy", "xm.descendants", "xm.elements", "xm.hasOwnProperty", "xm.hasComplexContent",
