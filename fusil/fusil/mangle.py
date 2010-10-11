@@ -3,7 +3,8 @@ from random import randint, choice
 from fusil.mangle_op import SPECIAL_VALUES, MAX_INCR
 from array import array
 from fusil.tools import minmax
-from untidy import xmlFuzzer
+from bsfuzzer import BSFuzzer
+from fusil.svggen import SVGGen
 
 
 class MangleConfig:
@@ -121,13 +122,12 @@ class MangleXML(MangleAgent):
     """
     Inject errors in a valid XML file.
     """
-    def __init__(self):
-        self.xmliter = None
+    def __init__(self, nofile=False, svg=True):
+        self.nofile = nofile
+        if svg:
+            self.gen = SVGGen("dtds/svg11-flat.dtd")
 
     def mangleData(self, data):
-        if not self.xmliter:
-            xf = xmlFuzzer()
-            xf.setRepetitions([3,30,60,1024,4096])
-            self.xmliter = xf.fuzz(data)
-        return self.xmliter.next()
-
+        if self.nofile:
+            return str(self.gen.fuzz())
+        return BSFuzzer(data).fuzz()

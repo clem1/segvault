@@ -10,7 +10,10 @@ class AutoMangle(MangleFile):
         self.aggressivity = None
         self.fixed_size_factor = 1.0
         if kw.has_key('ext') and kw['ext'] in ('.xml', '.svg', '.rdf'):
-            self.xml = MangleXML()
+            if kw.has_key('nofile'):
+                self.xml = MangleXML(nofile=True)
+            else:
+                self.xml = MangleXML()
         else:
             self.xml = None
 
