@@ -80,7 +80,7 @@ class WatchProcess(ProjectAgent):
             return None
 
         # Process exit code is not nul?
-        if 0 < status:
+        if 0 < status and status != 127:
             return self.exitcode_score
 
         # Process killed by a signal

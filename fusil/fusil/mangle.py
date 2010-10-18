@@ -4,7 +4,7 @@ from fusil.mangle_op import SPECIAL_VALUES, MAX_INCR
 from array import array
 from fusil.tools import minmax
 from bsfuzzer import BSFuzzer
-from fusil.svggen import SVGGen
+from fusil.xmlgen import XMLGen
 
 
 class MangleConfig:
@@ -122,10 +122,18 @@ class MangleXML(MangleAgent):
     """
     Inject errors in a valid XML file.
     """
-    def __init__(self, nofile=False, svg=True):
+    SVG11="svg11"
+    SVG10="svg10"
+    XHTML1="xhtml1"
+
+    def __init__(self, nofile=False, xmltype="svg11"):
         self.nofile = nofile
-        if svg:
-            self.gen = SVGGen("dtds/svg11-flat.dtd")
+        if xmltype == self.SVG11:
+            self.gen = XMLGen("dtds/svg11-flat.dtd", self.SVG11)
+        elif xmltype == self.SVG10:
+            self.gen = XMLGen("dtds/svg10.dtd", self.SVG10)
+        elif xmltype == self.XHTML1:
+            self.gen = XMLGen("dtds/xhtml1-transitional.dtd", self.XHTML1)
 
     def mangleData(self, data):
         if self.nofile:

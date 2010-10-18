@@ -9,11 +9,17 @@ class AutoMangle(MangleFile):
         self.hard_min_op = 0
         self.aggressivity = None
         self.fixed_size_factor = 1.0
-        if kw.has_key('ext') and kw['ext'] in ('.xml', '.svg', '.rdf'):
-            if kw.has_key('nofile'):
-                self.xml = MangleXML(nofile=True)
-            else:
-                self.xml = MangleXML()
+        if kw.has_key('ext'):
+            if kw['ext'] in ('.xml', '.svg', '.rdf'):
+                if kw.has_key('nofile'):
+                    self.xml = MangleXML(nofile=True, xmltype=MangleXML.SVG11)
+                else:
+                    self.xml = MangleXML(xmltype=MangleXML.SVG11)
+            elif kw['ext'] == ".html":
+                if kw.has_key('nofile'):
+                    self.xml = MangleXML(nofile=True, xmltype=MangleXML.XHTML1)
+                else:
+                    self.xml = MangleXML(xmltype=MangleXML.XHTML1)
         else:
             self.xml = None
 

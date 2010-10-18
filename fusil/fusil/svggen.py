@@ -40,8 +40,10 @@ def fuzz_xmlattr():
         return str(random.randint(0, 50000)) + "." + (str(random.randint(0,50000))) + "%"
     elif what == 15:
         return str(random.randint(0, 50000)) +"." + (str(random.randint(0,50000))) + "px"
-    else:
+    elif what > 15 and what < 30:
         return random.randint(0, 100000)
+    else:
+        return "ABCD"
     return "f000"
 
 def fuzz_randstring():
@@ -73,14 +75,16 @@ class SVGGen:
         self.toend = []
 
     def fuzz(self):
-        nelem = random.randint(1, 10)
+        nelem = random.randint(1, 80)
         data = self.header + self.root
         for i in xrange(0, nelem):
             # pick random elem
             elem = random.choice(self.elems.keys())
+            if elem in ("text"):
+                continue
             data += "<" + elem + " "
             # add attributes
-            nattr = random.randint(1, 5)
+            nattr = random.randint(1, 7)
             attr_done = []
             for ii in xrange(0, nattr):
                 if len(attr_done) == len(self.elems[elem]):
@@ -91,7 +95,7 @@ class SVGGen:
                 attr_done.append(a)
                 data += """ %s="%s" """ % (a, fuzz_xmlattr())
             # end
-            end = (random.randint(0, 2) == 0)
+            end = (random.randint(0, 3) == 0)
             if end:
                 data += "/>\n"
             else:

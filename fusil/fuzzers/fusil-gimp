@@ -37,7 +37,7 @@ class Fuzzer(Application):
         if self.options.test:
             DummyMangle(self.project, self.arguments)
         else:
-            mangle = AutoMangle(self.project, self.arguments, self.options.nb_files)
+            mangle = AutoMangle(self.project, self.arguments, nb_file=self.options.nb_files, nofile=True, ext=".svg")
             mangle.max_size = self.options.filesize
 
         # Create the process
@@ -48,9 +48,12 @@ class Fuzzer(Application):
             '--batch', '-']
         process = GimpProcess(self.project, arguments)
         WatchProcess(process)
-        stdout = WatchStdout(process)
-        del stdout.words['warning']
-        del stdout.words['error']
+        #stdout = WatchStdout(process)
+        #del stdout.words['warning']
+        #del stdout.words['error']
+        #del stdout.words['memory']
+        #del stdout.words['allocate']
+        #del stdout.words['failed']
 
 class GimpProcess(CreateProcess):
     def init(self):
