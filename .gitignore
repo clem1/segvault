@@ -6,3 +6,6 @@ php-*
 *.pyc
 *.phpt
 apps/*
+*.html
+*svn-*
+*.log
