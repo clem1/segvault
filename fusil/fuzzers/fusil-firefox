@@ -6,7 +6,7 @@ Project is currently specific to Firefox on Linux.
 """
 from __future__ import with_statement
 
-HOST = '127.0.0.1'
+HOST = '0.0.0.0'
 PORT = 8080
 NB_FILES = 5
 ROWS = 3
