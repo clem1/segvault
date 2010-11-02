@@ -18,6 +18,7 @@
 #include <signal.h>
 #include <getopt.h>
 #include <string.h>
+#include <dirent.h>
 #define _GNU_SOURCE
 #include <fcntl.h>
 #include <net/if_arp.h>
@@ -31,6 +32,9 @@
 #include <sys/uio.h>
 #endif
 
+#if defined(__OpenBSD__)
+#include <util.h>
+#endif
 //#define DEBUG_SENDMSG 1
 
 #define SEED_FILE "netusse.seed"
@@ -315,13 +319,13 @@ void ioctlusse(int s)
 
     do
     {
-        switch (rand() % 3)
+        switch (rand() % 8)
         {
             case 0:
             case 1:
                 req = rand() & 255;
                 break;
-            case 2:
+            default:
                 req = rand();
                 break;
         }
@@ -329,10 +333,12 @@ void ioctlusse(int s)
         n = rand() % 7;
         for (i = 0; i < n; i++)
         {
-            int len = rand() % 255;
+            int len = rand() % 1024;
             iav[i] = malloc(len);
             fuzzer(iav[i], len);
         }
+
+#define GETIAV(iii) (rand() % 5 == 0) ? iav[iii] : (void *)evilint()
 
         switch (n)
         {
@@ -340,22 +346,22 @@ void ioctlusse(int s)
                 ret = ioctl(s, req);
                 break;
             case 1:
-                ret = ioctl(s, req, iav[0]);
+                ret = ioctl(s, req, GETIAV(0));
                 break;
             case 2:
-                ret = ioctl(s, req, iav[0], iav[1]);
+                ret = ioctl(s, req, GETIAV(0), GETIAV(1));
                 break;
             case 3:
-                ret = ioctl(s, req, iav[0], iav[1], iav[2]);
+                ret = ioctl(s, req, GETIAV(0), GETIAV(1), GETIAV(2));
                 break;
             case 4:
-                ret = ioctl(s, req, iav[0], iav[1], iav[2], iav[3]);
+                ret = ioctl(s, req, GETIAV(0), GETIAV(1), GETIAV(2), GETIAV(3));
                 break;
             case 5:
-                ret = ioctl(s, req, iav[0], iav[1], iav[2], iav[3], iav[4]);
+                ret = ioctl(s, req, GETIAV(0), GETIAV(1), GETIAV(2), GETIAV(3), GETIAV(4));
                 break;
             case 6:
-                ret = ioctl(s, req, iav[0], iav[1], iav[2], iav[3], iav[4], iav[5]);
+                ret = ioctl(s, req, GETIAV(0), GETIAV(1), GETIAV(2), GETIAV(3), GETIAV(4), GETIAV(5));
                 break;
         }
 
@@ -618,9 +624,9 @@ void sendfilusse(int fd)
 #endif
 
 #if defined(__NetBSD__) || defined(__OpenBSD__) || defined(__FreeBSD__)
-void sendmsgusse(int fd)
+void recvmsgusse(int fd)
 {
-    char name[1024], ctrl[1024], base[1024];
+    char name[1024], ctrl[1024], base[1024], iovb[sizeof(struct iovec)];
     struct iovec iov;
     struct msghdr msg;
     int i;
@@ -630,17 +636,123 @@ void sendmsgusse(int fd)
         fuzzer(name, 1024);
         fuzzer(base, 1024);
         fuzzer(ctrl, 1024);
+        fuzzer(iovb, sizeof(struct iovec));
         msg.msg_name    = name;
         msg.msg_namelen = evilint();
         msg.msg_iovlen  = evilint();
         msg.msg_flags   = rand() & 255;
+        msg.msg_iov     = iovb;
         if ( rand() % 3 )
+        {
+            msg.msg_iov     = &iov;
+            msg.msg_iovlen  = 1;
+            iov.iov_base    = base;
+            iov.iov_len     = evilint();
+        }
+        else if ( rand() % 5 == 0 )
+            msg.msg_iov = NULL;
+        msg.msg_control = ctrl;
+        msg.msg_controllen = evilint();
+#ifdef DEBUG_SENDMSG
+        printf("recvmsg(%d, {nl = %x, iol = %x, ctl = %x}, 0);\n", fd, msg.msg_namelen, msg.msg_iovlen, msg.msg_controllen);
+        getchar();
+#endif
+        recvmsg(fd, &msg, MSG_DONTWAIT);
+    }
+    return;
+}
+#elif defined(__LINUX__)
+void recvmsgusse(int fd)
+{
+	struct msghdr   msg;
+	struct cmsghdr  *cmsg = NULL;
+	struct iovec    iov;
+    char            *b = NULL;
+    int             i, flags;
+
+    for ( i = 0 ; i < 50 ; i++ )
+    {
+        msg.msg_controllen = (rand() % 50) ? rand() & 0xFFFF : 0;
+        if (msg.msg_controllen)
+        {
+            if (msg.msg_controllen < sizeof (struct cmsghdr))
+                cmsg = (struct cmsghdr *)malloc(sizeof (struct cmsghdr));
+            else
+                cmsg = (struct cmsghdr *)malloc(msg.msg_controllen);
+            if (cmsg == NULL) goto nocmsghdr;
+            msg.msg_control = cmsg;
+            fuzzer(cmsg, msg.msg_controllen);
+            if ( rand()%10 == 0)
+            {
+                cmsg->cmsg_level = (rand() % 2) ? IPPROTO_IP : evilint();
+                cmsg->cmsg_type = (rand() % 2) ? rand() % 255 : evilint();
+                cmsg->cmsg_len = (rand() % 2) ? msg.msg_controllen : evilint();
+            }
+        }
+        else
+        {
+nocmsghdr:
+            msg.msg_control = (rand() % 5) ? NULL : (void*)evilint();
+            msg.msg_controllen = (rand() % 2) ? rand() : 0;
+        }
+        iov.iov_len = (rand() % 2) ? evilint() : 1;
+        iov.iov_base = ((rand() % 5) == 0) ? (void*)evilint() : &msg;
+        msg.msg_iov = ((rand() % 5) == 0) ? (void*)evilint() : &iov;
+        if (rand() % 10)
+        {
+            msg.msg_namelen = evilint() & 4096;
+            b = malloc(msg.msg_namelen);
+            if ( b != NULL && msg.msg_namelen < 0xFFFFF)
+                fuzzer(b, msg.msg_namelen);
+            msg.msg_name = b;
+        }
+        else
+        {
+            msg.msg_name = (caddr_t)evilint();
+            msg.msg_namelen = evilint();
+        }
+        if ( rand() % 5 )
+            flags = evilint() % MSG_CMSG_CLOEXEC;
+        else
+            flags = evilint();
+
+        msg.msg_flags = evilint();
+        recvmsg(fd, &msg, MSG_DONTWAIT);
+        free(cmsg);
+        cmsg = NULL;
+        free(b);
+        b = NULL;
+    }
+}
+#endif
+
+
+#if defined(__NetBSD__) || defined(__OpenBSD__) || defined(__FreeBSD__)
+void sendmsgusse(int fd)
+{
+    char name[1024], ctrl[1024], base[1024], iovb[sizeof(struct iovec)];
+    struct iovec iov;
+    struct msghdr msg;
+    int i;
+
+    for ( i = 0 ; i < 50 ; i++ )
+    {
+        fuzzer(name, 1024);
+        fuzzer(base, 1024);
+        fuzzer(ctrl, 1024);
+        fuzzer(iovb, sizeof(struct iovec));
+        msg.msg_name    = name;
+        msg.msg_namelen = evilint();
+        msg.msg_iovlen  = evilint();
+        msg.msg_iov     = iovb;
+        msg.msg_flags   = rand() & 255;
+        if ( rand() % 2 )
         {
             msg.msg_iov   = &iov;
             iov.iov_base  = base;
-            iov.iov_len   = evilint();
+            iov.iov_len   = 1;
         }
-        else
+        else if ( rand() % 5 == 0 )
             msg.msg_iov = NULL;
         msg.msg_control = ctrl;
         msg.msg_controllen = evilint();
@@ -821,10 +933,57 @@ void usage(char *prog)
 	exit(EXIT_FAILURE);
 }
 
+int randfd(void)
+{
+    DIR             *dip;
+    struct dirent   *dit;
+    static int      nbf = 1500;
+    unsigned int    n = rand() % nbf, i = 0;
+    int             fd;
+
+    chdir("/dev");
+    dip = opendir("/dev");
+    if ( dip == NULL )
+        return -1;
+
+    while ( (dit = readdir(dip)) != NULL )
+    {
+        if ( i == n )
+        {
+            printf("open(%s)...", dit->d_name);
+            switch (rand() % 3)
+            {
+#if defined(__OpenBSD__)
+                case 1:
+                fd = opendev(dit->d_name, O_RDONLY, (rand() % 2) ? OPENDEV_BLCK : OPENDEV_PART, NULL);
+                break;
+                case 2:
+                fd = opendev(dit->d_name, O_RDWR, (rand() % 2) ? OPENDEV_BLCK : OPENDEV_PART, NULL);
+                break;
+#else
+                case 1:
+                case 2:
+#endif
+                case 0:
+                fd = open(dit->d_name, O_RDONLY);
+                break;
+            }
+            printf("%s\n", (fd > 0) ? "done" : "failed");
+            closedir(dip);
+            return fd;
+        }
+        i++;
+    }
+    nbf = i;
+
+    closedir(dip);
+    return -1;
+}
+
 int main(int ac, char **av)
 {
 	char c;
-	int s, i, opts, type, domain, proto, flags;
+	int s, i, opts, type, domain, proto, flags, isfd = 0;
 	unsigned int seed, occ;
     const int types[] = {
         SOCK_DGRAM,
@@ -1026,7 +1185,8 @@ int main(int ac, char **av)
 
 	while (occ)
 	{
-        switch ((snum = rand() % 30))
+        isfd = 0;
+        switch ((snum = rand() % 50))
         {
             case 0:
                 s = socket(AF_INET6, SOCK_STREAM, IPPROTO_TCP);
@@ -1112,19 +1272,27 @@ int main(int ac, char **av)
                 break;
 #endif
             default:
-                if (rand() % 10 == 0)
+                if (rand() % 2 == 0)
                 {
-                    domain = rand() % 255;
-                    proto  = rand() % 255;
-                    type   = rand() % 255;
+                    s = randfd();
+                    isfd = 1;
                 }
                 else
                 {
-                    domain = domains[rand() % (sizeof(domains)/sizeof(domains[0]))];
-                    proto = protos[rand() % (sizeof(protos)/sizeof(protos[0]))];
-                    type = types[rand() % (sizeof(types)/sizeof(types[0]))];
+                    if (rand() % 10 == 0)
+                    {
+                        domain = rand() % 255;
+                        proto  = rand() % 255;
+                        type   = rand() % 255;
+                    }
+                    else
+                    {
+                        domain = domains[rand() % (sizeof(domains)/sizeof(domains[0]))];
+                        proto = protos[rand() % (sizeof(protos)/sizeof(protos[0]))];
+                        type = types[rand() % (sizeof(types)/sizeof(types[0]))];
+                    }
+                    s = socket(domain, type, proto);
                 }
-                s = socket(domain, type, proto);
                 break;
         }
 		if (s == -1) continue;
@@ -1135,17 +1303,25 @@ int main(int ac, char **av)
         flags = fcntl(s, F_GETFL, 0);
         fcntl(s, F_SETFL, flags | O_NONBLOCK);
 
-        if (rand() % 4)
-            connectusse(s);
-        else
-            bindusse(s);
-
+        if (!isfd)
+        {
+            if (rand() % 4)
+                connectusse(s);
+            else
+                bindusse(s);
+        }
 		for (i = 0; i < opts; i++)
 		{
+            if (isfd)
+            {
+                ioctlusse(s);
+                continue;
+            }
 			ssoptusse(s);
 			gsoptusse(s);
             ioctlusse(s);
             sendmsgusse(s);
+            recvmsgusse(s);
             sendtousse(s);
 #if defined(__linux__)
             sendfilusse(s);
@@ -1155,10 +1331,13 @@ int main(int ac, char **av)
 #ifdef __linux__
         splicusse(s);
 #endif
-        sendtousse(s);
-        getsocknamusse(s);
-        getpeernamusse(s);
-        mmapusse(s);
+        if (!isfd)
+        {
+            sendtousse(s);
+            getsocknamusse(s);
+            getpeernamusse(s);
+            mmapusse(s);
+        }
         printf(".");fflush(stdout);
 		close(s);
 

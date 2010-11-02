@@ -5,6 +5,188 @@ import random
 
 protos = open("dtds/protos").readlines()
 
+dict_meta_characters = [
+    '~',
+    '`',
+    '!',
+    '@',
+    '#',
+    '$',
+    '%',
+    '^',
+    '&',
+    '*',
+    '(',
+    ')',
+    '-',
+    '_',
+    '+',
+    '=',
+    '{',
+    '}',
+    '[',
+    ']',
+    '\\',
+    '|',
+    ';',
+    ':',
+    "'",
+    '"',
+    '<',
+    '>',
+    ',',
+    '.',
+    '/',
+    '?'
+]
+
+dict_string_values = [
+    '.',
+    '..',
+    '.' * 10000,
+    '%00',
+    '%00' * 10000,
+    '\x00',
+    '\x00' * 1000,
+    '\x0A',
+    '\x0A' * 1000,
+    '\x0D',
+    '\x0D' * 1000,
+    '\x0D\x0A',
+    '\x0D\x0A' * 1000,
+    '&#x00;',
+    '&#x00;' * 1000,
+    '&#x0A;',
+    '&#x0A;' * 1000,
+    '&#x0D;',
+    '&#x0D;' * 1000,
+    '&#x0D;&#x0A;',
+    '&#x0D;&#x0A;' * 1000,
+    '../' * 1000,
+    '..\\' * 1000,
+    "'",
+    "'" * 1000,
+    '"',
+    '"' * 1000,
+    '>',
+    '<',
+    '<>',
+    '<' + 'A' * 100 + '>',
+    '&' + 'A' * 100 + ';'
+    'A' * 10000,
+    "'" + 'A' * 1000 + "'",
+    'A' * 1000,
+    "%x%x%x%x%x%n%n%n%n%n",
+]
+
+dict_number_values = [
+    0,
+    -1,
+    0x100,
+    0x1000,
+    0x10000,
+    0x100000,
+    0xffffffff,
+    0xfffffffe,
+    0x80000000,
+    0x7fffffff,
+    0x7ffffffe,
+    0x3fffffff
+]
+
+dict_special_strings = [
+    '..',
+    '../',
+    '..\\',
+    '%00',
+    '%0A',
+    '%0D',
+    '%0D%0A',
+    '&#x00;',
+    '&#x0A;',
+    '&#x0D;',
+    '&#x0D;&#x0A;'
+]
+
+dict_plain_strings = [
+    'A' * 100,
+    'A' * 1000,
+]
+
+dict_mimes = [
+    'application/asx',
+    'application/divxplayer-plugi',
+    'application/futuresplas',
+    'application/itunes-plugi',
+    'application/ogg',
+    'application/pdf',
+    'application/sdp',
+    'application/vnd.adobe.x-mars',
+    'application/vnd.adobe.xdp+xml',
+    'application/vnd.adobe.xfd+xm',
+    'application/vnd.adobe.xfdf',
+    'application/vnd.fdf',
+    'application/x-divxcontentuploa',
+    'application/x-dr',
+    'application/x-drm-v',
+    'application/x-google-vlc-plugi',
+    'application/x-mpeg',
+    'application/x-mplayer2',
+    'application/x-ogg',
+    'application/x-rtsp',
+    'application/x-sdp',
+    'application/x-shockwave-flash',
+    'application/x-silverligh',
+    'application/x-vlc-plugin',
+    'audio/3gpp',
+    'audio/3gpp2',
+    'audio/AMR',
+    'audio/aac',
+    'audio/aiff',
+    'audio/basic',
+    'audio/mid',
+    'audio/midi',
+    'audio/mp4',
+    'audio/mpeg',
+    'audio/vnd.qcel',
+    'audio/wa',
+    'audio/x-aac',
+    'audio/x-aiff',
+    'audio/x-caf',
+    'audio/x-gsm',
+    'audio/x-m4',
+    'audio/x-m4a',
+    'audio/x-m4p',
+    'audio/x-midi',
+    'audio/x-mpeg',
+    'audio/x-ms-wax',
+    'audio/x-ms-wma',
+    'audio/x-wav',
+    'image/pict',
+    'image/png',
+    'image/x-macpaint',
+    'image/x-pict',
+    'image/x-png',
+    'image/x-quicktime',
+    'image/x-sgi',
+    'image/x-targ',
+    'video/3gp',
+    'video/3gpp2',
+    'video/div',
+    'video/flc',
+    'video/mp4',
+    'video/mpeg',
+    'video/quicktime',
+    'video/sd-video',
+    'video/x-m4v',
+    'video/x-mpe',
+    'video/x-ms-asf',
+    'video/x-ms-asf-plugin',
+    'video/x-ms-wm',
+    'video/x-ms-wmv',
+    'video/x-ms-wv'
+]
+
 def fuzz_randurl():
     """
     return a random fuzzed URL
@@ -20,48 +202,21 @@ def fuzz_xmlattr():
     """
     return a random fuzzed XML attribute
     """
-    foostr = [ "coin", "gni", "bar", "pouette" ]
-    what = random.randint(0, 60)
+    what = random.randint(0, 10)
     if what == 0:
-        return 0xFFFF
+        return random.choice(dict_string_values)
     elif what == 1:
-        return -1
+        return random.choice(dict_number_values)
     elif what == 2:
-        return 0xFFFFFFFF
+        return random.choice(dict_special_strings)
     elif what == 3:
-        return 0x7FFFFFFF
+        return random.choice(dict_plain_strings)
     elif what == 4:
-        return -0x7FFFFFFF
+        return random.choice(dict_mimes)
     elif what == 5:
-        return 255
-    elif what == 6:
-        return 0
-    elif what == 7:
-        return 0x80000000
-    elif what == 8:
-        return "%x"*random.randint(0,500)+"%n"*random.randint(0,100)
-    elif what == 9:
-        return "A"*random.randint(1,50000)
-    elif what == 10:
-        return ((str(random.randint(-5000,50000)) + ",")*random.randint(1,500))[:-1]
-    elif what == 11:
-        return str(random.randint(-500, 50000)) + "%"
-    elif what == 12:
-        return str(random.randint(-500, 50000)) + "px"
-    elif what == 13:
-        return ((str(random.randint(-500,50000)) + "." + (str(random.randint(-500,50000))) + ",")*random.randint(1,500))[:-1]
-    elif what == 14:
-        return str(random.randint(0, 50000)) + "." + (str(random.randint(0,50000))) + "%"
-    elif what == 15:
-        return str(random.randint(0, 50000)) +"." + (str(random.randint(0,50000))) + "px"
-    elif what > 15 and what < 20:
-        return random.randint(0, 100000)
-    elif what > 20 and what < 25:
-        return "#" + random.choice(foostr)
-    elif what > 25 and what < 30:
-        return random.choice(foostr)
-    elif what > 30 and what < 45:
         return fuzz_randurl()
+    elif what == 6:
+        return random.choice(dict_meta_characters) * random.randint(0, 15)
     else:
         return fuzz_randstring()
     return "f000"
@@ -70,8 +225,9 @@ def fuzz_randstring():
     """
     return random string
     """
+    foostr = [ "coin", "gni", "bar", "pouette" ]
     proto = random.choice(protos)
-    what = random.randint(0, 5)
+    what = random.randint(0, 8)
     if what == 0:
         return "A"*random.randint(1, 200)
     elif what == 1:
@@ -89,6 +245,12 @@ def fuzz_randstring():
         return "../" * random.randint(0, 20)
     elif what == 5:
         return "#%x" % random.randint(0, 0xFFFFFF)
+    elif what == 6:
+        return "%s%s" % (random.choice(dict_meta_characters), random.choice(foostr))
+    elif what == 7:
+        return random.choice(foostr)
+
+    return "coin"
 
 class XMLGen:
 
