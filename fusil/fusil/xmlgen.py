@@ -187,6 +187,297 @@ dict_mimes = [
     'video/x-ms-wv'
 ]
 
+dict_css_properties = [
+    'azimuth',
+    'background',
+    'background-attachment',
+    'background-color',
+    'background-image',
+    'background-position',
+    'background-repeat',
+    'border',
+    'behaviour',
+    'border-bottom',
+    'border-bottom-color',
+    'border-bottom-style',
+    'border-bottom-width',
+    'border-collapse',
+    'border-color',
+    'border-left',
+    'border-left-color',
+    'border-left-style',
+    'border-left-width',
+    'border-right',
+    'border-right-color',
+    'border-right-style',
+    'border-right-width',
+    'border-spacing',
+    'border-style',
+    'border-top',
+    'border-top-color',
+    'border-top-style',
+    'border-top-width',
+    'border-width',
+    'bottom',
+    'caption-side',
+    'clear',
+    'clip',
+    'color',
+    'content',
+    'counter-increment',
+    'counter-reset',
+    'cue',
+    'cue-after',
+    'cue-before',
+    'cursor',
+    'direction',
+    'display',
+    'elevation',
+    'empty-cells',
+    'filter',
+    'float',
+    'font',
+    'font-family',
+    'font-size',
+    'font-style',
+    'font-variant',
+    'font-weight',
+    'height',
+    'left',
+    'letter-spacing',
+    'line-height',
+    'list-style',
+    'list-style-image',
+    'list-style-position',
+    'list-style-type',
+    'margin',
+    'margin-bottom',
+    'margin-left',
+    'margin-right',
+    'margin-top',
+    'max-height',
+    'max-width',
+    'min-height',
+    'min-width',
+    '-moz-border-radius',
+    '-moz-box-sizing',
+    'orphans',
+    'outline',
+    'outline-color',
+    'outline-style',
+    'outline-width',
+    'overflow',
+    'padding',
+    'padding-bottom',
+    'padding-left',
+    'padding-right',
+    'padding-top',
+    'page-break-after',
+    'page-break-before',
+    'page-break-inside',
+    'pause',
+    'pause-after',
+    'pause-before',
+    'pitch',
+    'pitch-range',
+    'play-during',
+    'position',
+    'quotes',
+    'richness',
+    'right',
+    'speak',
+    'speak-header',
+    'speak-numeral',
+    'speak-punctuation',
+    'speech-rate',
+    'stress',
+    'table-layout',
+    'text-align',
+    'text-decoration',
+    'text-indent',
+    'text-transform',
+    'top',
+    'unicode-bidi',
+    'vertical-align',
+    'visibility',
+    'voice-family',
+    'volume',
+    'white-space',
+    'widows',
+    'width',
+    'word-spacing',
+    'z-index'
+    'zoom',
+]
+
+dict_css_values = [
+    '100',
+    '200',
+    '300',
+    '400',
+    '500',
+    '600',
+    '700',
+    '800',
+    '900',
+    'above',
+    'absolute',
+    'always',
+    'armenian',
+    'attr(<placeholder>)',
+    'rect(0)',
+    'circle(0)',
+    'auto',
+    'avoid',
+    'background-color',
+    'baseline',
+    'behind',
+    'below',
+    'bidi-override',
+    'blink',
+    'block',
+    'bold',
+    'bolder',
+    'border-top-color',
+    'both',
+    'bottom',
+    'capitalize',
+    'caption',
+    'center',
+    'center-left',
+    'center-right',
+    'circle',
+    'close-quote',
+    'code',
+    'collapse',
+    'continuous',
+    'crosshair',
+    'decimal',
+    'decimal-leading-zero',
+    'default',
+    'digits',
+    'disc',
+    'e-resize',
+    'embed',
+    'far-left',
+    'far-right',
+    'fast',
+    'faster',
+    'fixed',
+    'georgian',
+    'help',
+    'hidden',
+    'hide',
+    'high',
+    'higher',
+    'icon',
+    'inherit',
+    'inline',
+    'inline-block',
+    'inline-table',
+    'inside',
+    'invert',
+    'italic',
+    'justify',
+    'left',
+    'left-side',
+    'leftwards',
+    'level',
+    'lighter',
+    'line-through',
+    'list-item',
+    'loud',
+    'low',
+    'lower',
+    'lower-alpha',
+    'lower-greek',
+    'lower-latin',
+    'lower-roman',
+    'lowercase',
+    'ltr',
+    'medium',
+    'menu',
+    'message-box',
+    'middle',
+    'mix',
+    'move',
+    'n-resize',
+    'ne-resize',
+    'no-close-quote',
+    'no-open-quote',
+    'no-repeat',
+    'none',
+    'normal',
+    'nowrap',
+    'nw-resize',
+    'oblique',
+    'once',
+    'open-quote',
+    'outside',
+    'overline',
+    'pointer',
+    'pre',
+    'pre-line',
+    'pre-wrap',
+    'progress',
+    'relative',
+    'repeat',
+    'repeat-x',
+    'repeat-y',
+    'right',
+    'right-side',
+    'rightwards',
+    'rtl',
+    'run-in',
+    's-resize',
+    'scroll',
+    'se-resize',
+    'separate',
+    'show',
+    'silent',
+    'slow',
+    'slower',
+    'small-caps',
+    'small-caption',
+    'soft',
+    'spell-out',
+    'square',
+    'static',
+    'status-bar',
+    'sub',
+    'super',
+    'sw-resize',
+    'table',
+    'table-caption',
+    'table-cell',
+    'table-column',
+    'table-column-group',
+    'table-footer-group',
+    'table-header-group',
+    'table-row',
+    'table-row-group',
+    'text',
+    'text-bottom',
+    'text-top',
+    'top',
+    'transparent',
+    'underline',
+    'upper-alpha',
+    'upper-latin',
+    'upper-roman',
+    'uppercase',
+    'url(<placeholder>)',
+    'visible',
+    'w-resize',
+    'wait',
+    'x-fast',
+    'x-high',
+    'x-loud',
+    'x-low',
+    'x-slow',
+    'x-soft'
+]
+
 def fuzz_randurl():
     """
     return a random fuzzed URL
@@ -252,6 +543,37 @@ def fuzz_randstring():
 
     return "coin"
 
+class CSSFuzz:
+    """
+    Generate random fuzzed CSS
+    """
+    def __init__(self, dtd):
+        self.elems = {}
+        p = dtdparser.DTDParser()
+        p.set_dtd_consumer(DTDConsume(self.elems))
+        p.parse_resource(dtd)
+        self.toend = []
+
+    def fuzz(self):
+        nelem = random.randint(1, 30)
+        data = ""
+        done = []
+        for i in xrange(0, nelem):
+            elem = random.choice(self.elems.keys())
+            if elem in done:
+                continue
+            done.append(elem)
+            data += "%s {\n" % elem
+            for i in xrange(0, random.randint(1, 15)):
+                p = random.choice(dict_css_properties)
+                if random.randint(1, 3) == 2:
+                    a = random.choice(dict_css_values)
+                else:
+                    a = fuzz_xmlattr()
+                data += "%s: %s;\n" % (p, a)
+            data += "}\n"
+        return data
+
 class XMLGen:
 
     """
@@ -260,7 +582,7 @@ class XMLGen:
     xml_types = {}
     xml_types["svg11"] = {"header": """<?xml version="1.0" encoding="UTF-8"?>\n<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/TR/SVG/DTD/svg11.dtd">\n""", "root": """<svg xmlns="http://www.w3.org/2000/svg" version="1.1">\n""", "endroot": """</svg>\n""" }
     xml_types["svg10"] = {"header": """<?xml version="1.0" encoding="UTF-8"?>\n<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN" "http://www.w3.org/TR/SVG/DTD/svg10.dtd">\n""", "root": """<svg xmlns="http://www.w3.org/2000/svg" version="1.0">\n""", "endroot": """</svg>\n""" }
-    xml_types["xhtml1"] = {"header": """<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">""", "root": """<html>""", "endroot": "</html>" }
+    xml_types["xhtml1"] = {"header": """<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">""", "root": """<html><head><style type="text/css">%(css)s</style></head>""", "endroot": "</html>" }
 
     def __init__(self, dtd, xmltype="svg11"):
         self.elems = {}
@@ -269,15 +591,22 @@ class XMLGen:
         p.parse_resource(dtd)
         self.toend = []
         self.xmlt = xmltype
+        if xmltype == "xhtml1":
+            self.css = CSSFuzz(dtd)
+        else:
+            self.css = None
 
     def fuzz(self):
         nelem = random.randint(1, 80)
-        data = self.xml_types[self.xmlt]["header"] + self.xml_types[self.xmlt]["root"]
+        if self.css:
+            data = self.xml_types[self.xmlt]["header"]
+            data += self.xml_types[self.xmlt]["root"] % {"css":self.css.fuzz()}
+        else:
+            data = self.xml_types[self.xmlt]["header"] + self.xml_types[self.xmlt]["root"]
+
         for i in xrange(0, nelem):
             # pick random elem
             elem = random.choice(self.elems.keys())
-            if elem in ("text"):
-                continue
             data += "<" + elem + " "
             # add attributes
             nattr = random.randint(1, 7)

@@ -47,6 +47,8 @@ class Agent(object):
             self.send('application_interrupt')
         except PTRACE_ERRORS, error:
             writeError(self, error, "Agent destruction error")
+        except:
+            pass
 
     def destroy(self):
         """

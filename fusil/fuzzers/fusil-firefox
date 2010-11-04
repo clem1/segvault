@@ -8,9 +8,9 @@ from __future__ import with_statement
 
 HOST = '0.0.0.0'
 PORT = 8080
-NB_FILES = 5
+NB_FILES = 6
 ROWS = 3
-MAX_MEMORY = 550*1024*1024
+MAX_MEMORY = 0
 HTML_REFRESH_TIMEOUT = 2.0
 
 from fusil.application import Application
@@ -34,7 +34,7 @@ from mimetypes import guess_type
 
 IMAGE_TEMPLATE = '<img src="%(url)s" alt="%(text)s">'
 EMBEDED_TEMPLATE = '<embed src="%(url)s" name="%(text)s" type="%(mime)s"></embed>'
-IFRAME_TEMPLATE = '<iframe src="%(url)s" name="%(text)s" width="150px" height="150px"></iframe>'
+IFRAME_TEMPLATE = '<iframe src="%(url)s" name="%(text)s" width="450px" height="450px"></iframe>'
 
 FILE_EXTENSIONS = {
     # Imaged
@@ -179,7 +179,6 @@ class FuzzyHttpServer(HttpServer):
 
             page = url
             self.error("Serve URL=%r" % url)
-            print "server %r" % url
             match = self.file_url_match(url)
             if match:
                 try:

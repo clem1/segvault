@@ -209,9 +209,9 @@ class Application(ApplicationAgent):
         # Limit Fusil environment
         if not self.options.fast:
             beNice(True)
-        if 0 < self.config.fusil_max_memory:
-            self.info("Limit memory to %s bytes" % self.config.fusil_max_memory)
-            limitMemory(self.config.fusil_max_memory)
+        #if 0 < self.config.fusil_max_memory:
+        #    self.info("Limit memory to %s bytes" % self.config.fusil_max_memory)
+        #    limitMemory(self.config.fusil_max_memory)
 
         # Create multi agent system
         self.createMAS()
@@ -390,17 +390,24 @@ class Application(ApplicationAgent):
         session, create a second session, etc.
         """
         self.project.activate()
-        try:
-            if self.options.profiler:
-                from ptrace.profiler import runProfiler
-                runProfiler(self, self.univers.execute, (self.project,))
-            else:
-                self.univers.execute(self.project)
-        except KeyboardInterrupt:
-            self.interrupt("Fuzzer execution interrupted!")
-        except PTRACE_ERRORS, error:
-            writeError(self, error, "Fuzzer execution error")
-            self.exitcode = 1
+        run = 1
+        while run:
+            try:
+                if self.options.profiler:
+                    from ptrace.profiler import runProfiler
+                    runProfiler(self, self.univers.execute, (self.project,))
+                else:
+                    self.univers.execute(self.project)
+            except KeyboardInterrupt:
+                self.interrupt("Fuzzer execution interrupted!")
+                run = 0
+            except PTRACE_ERRORS, error:
+                writeError(self, error, "Fuzzer execution error")
+                self.exitcode = 1
+                run = 0
+            except:
+                run = 1
+                pass
         self.project.deactivate()
 
     def setupProject(self):
