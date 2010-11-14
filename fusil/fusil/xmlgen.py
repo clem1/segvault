@@ -224,6 +224,35 @@ dict_css_properties = [
     'clip',
     'color',
     'content',
+    'hanging-punctuation',
+    'letter-spacing',
+    'line-break',
+    'punctuation-trim',
+    'text-align',
+    'text-align-last',
+    'text-autospace',
+    'text-decoration',
+    'text-decoration-color',
+    'text-decoration-line',
+    'text-decoration-skip',
+    'text-decoration-style',
+    'text-emphasis',
+    'text-emphasis-color',
+    'text-emphasis-position',
+    'text-emphasis-style',
+    'text-indent',
+    'text-justify',
+    'text-outline',
+    'text-overflow',
+    'text-shadow',
+    'text-transform',
+    'text-underline-position',
+    'text-wrap',
+    'white-space',
+    'white-space-collapsing',
+    'word-break',
+    'word-spacing',
+    'word-wrap',
     'counter-increment',
     'counter-reset',
     'cue',
@@ -475,7 +504,11 @@ dict_css_values = [
     'x-loud',
     'x-low',
     'x-slow',
-    'x-soft'
+    'x-soft',
+    'break-word',
+    'suppress',
+    'newspaper',
+    'keep-all'
 ]
 
 def fuzz_randurl():
@@ -554,12 +587,15 @@ class CSSFuzz:
         p.parse_resource(dtd)
         self.toend = []
 
-    def fuzz(self):
-        nelem = random.randint(1, 30)
+    def fuzz(self, elems=None):
         data = ""
         done = []
-        for i in xrange(0, nelem):
-            elem = random.choice(self.elems.keys())
+        if not elems:
+            elems = []
+            nelem = random.randint(1, 30)
+            for i in xrange(0, nelem):
+                elems.append(random.choice(self.elems.keys()))
+        for elem in elems:
             if elem in done:
                 continue
             done.append(elem)
@@ -597,16 +633,16 @@ class XMLGen:
             self.css = None
 
     def fuzz(self):
+        body = random.randint(0, 3)
         nelem = random.randint(1, 80)
-        if self.css:
-            data = self.xml_types[self.xmlt]["header"]
-            data += self.xml_types[self.xmlt]["root"] % {"css":self.css.fuzz()}
-        else:
-            data = self.xml_types[self.xmlt]["header"] + self.xml_types[self.xmlt]["root"]
-
+        elems = []
+        data = ""
+        if body:
+            data += "<body>"
         for i in xrange(0, nelem):
             # pick random elem
             elem = random.choice(self.elems.keys())
+            elems.append(elem)
             data += "<" + elem + " "
             # add attributes
             nattr = random.randint(1, 7)
@@ -637,8 +673,16 @@ class XMLGen:
         # end every not yet ended elem
         for i in xrange(0, len(self.toend)):
             data += "</%s>\n" % self.toend.pop()
-        data += self.xml_types[self.xmlt]["endroot"]
-        return data
+        if body:
+            data += "</body>"
+        if self.css:
+            htmldata = self.xml_types[self.xmlt]["header"]
+            htmldata += self.xml_types[self.xmlt]["root"] % {"css":self.css.fuzz(elems)}
+        else:
+            htmldata = self.xml_types[self.xmlt]["header"] + self.xml_types[self.xmlt]["root"]
+        htmldata += data
+        htmldata += self.xml_types[self.xmlt]["endroot"]
+        return htmldata
 
 class DTDConsume(xmlapp.DTDConsumer):
 
