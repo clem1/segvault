@@ -66,7 +66,7 @@ static void fuzzer(char *mm, size_t mm_size)
 
     for ( i = 0 ; i < mm_size ; i++ )
     {
-        if ( rand() % 10 == 0 && i < mm_size - 2 )
+        if ( rand() % 40 == 0 && i < mm_size - 2 )
         {
             mm[i++] = '%';
             switch (rand() % 2)
@@ -950,7 +950,7 @@ int randfd(void)
     {
         if ( i == n )
         {
-            printf("open(%s)...", dit->d_name);
+            //printf("open(%s)...", dit->d_name);
             switch (rand() % 3)
             {
 #if defined(__OpenBSD__)
@@ -968,7 +968,7 @@ int randfd(void)
                 fd = open(dit->d_name, O_RDONLY);
                 break;
             }
-            printf("%s\n", (fd > 0) ? "done" : "failed");
+            //printf("%s\n", (fd > 0) ? "done" : "failed");
             closedir(dip);
             return fd;
         }
@@ -1186,6 +1186,7 @@ int main(int ac, char **av)
 	while (occ)
 	{
         isfd = 0;
+#if 0
         switch ((snum = rand() % 50))
         {
             case 0:
@@ -1272,7 +1273,8 @@ int main(int ac, char **av)
                 break;
 #endif
             default:
-                if (rand() % 2 == 0)
+#endif
+                if (rand() % 20 == 0)
                 {
                     s = randfd();
                     isfd = 1;
@@ -1293,8 +1295,10 @@ int main(int ac, char **av)
                     }
                     s = socket(domain, type, proto);
                 }
+#if 0
                 break;
         }
+#endif
 		if (s == -1) continue;
 
         if (snum > 16)

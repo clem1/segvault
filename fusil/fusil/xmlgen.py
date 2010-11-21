@@ -320,6 +320,10 @@ dict_css_properties = [
     'speak-punctuation',
     'speech-rate',
     'stress',
+    'src',
+    'font-family',
+    'font-weight',
+    'font-style',
     'table-layout',
     'text-align',
     'text-decoration',
@@ -337,6 +341,15 @@ dict_css_properties = [
     'word-spacing',
     'z-index'
     'zoom',
+]
+
+dict_css_functions = [
+    'url',
+    'local',
+    'format',
+    'attr',
+    'calc',
+    'counter',
 ]
 
 dict_css_values = [
@@ -474,6 +487,7 @@ dict_css_values = [
     'static',
     'status-bar',
     'sub',
+    'src',
     'super',
     'sw-resize',
     'table',
@@ -551,9 +565,9 @@ def fuzz_randstring():
     """
     foostr = [ "coin", "gni", "bar", "pouette" ]
     proto = random.choice(protos)
-    what = random.randint(0, 8)
+    what = random.randint(0, 11)
     if what == 0:
-        return "A"*random.randint(1, 200)
+        return "A"*random.randint(1, 20000)
     elif what == 1:
         return "\\\\\\\\\\\\\\\\\\\\%x"*random.randint(0,50)+"%n"*random.randint(0,10)
     elif what == 2:
@@ -572,6 +586,14 @@ def fuzz_randstring():
     elif what == 6:
         return "%s%s" % (random.choice(dict_meta_characters), random.choice(foostr))
     elif what == 7:
+        a = [ "%", "px", "pt", "em" ]
+        return "%d%s" % (random.randint(0, 0xFFFFFFF), random.choice(a))
+    elif what == 8:
+        s = ""
+        for i in xrange(random.randint(1, 500)):
+            s += str(random.randint(0, 255))
+        return s
+    else:
         return random.choice(foostr)
 
     return "coin"
@@ -582,6 +604,7 @@ class CSSFuzz:
     """
     def __init__(self, dtd):
         self.elems = {}
+        self.elems["@font-face"] = ()
         p = dtdparser.DTDParser()
         p.set_dtd_consumer(DTDConsume(self.elems))
         p.parse_resource(dtd)
@@ -595,6 +618,7 @@ class CSSFuzz:
             nelem = random.randint(1, 30)
             for i in xrange(0, nelem):
                 elems.append(random.choice(self.elems.keys()))
+        elems.append("@font-face")
         for elem in elems:
             if elem in done:
                 continue
@@ -602,13 +626,49 @@ class CSSFuzz:
             data += "%s {\n" % elem
             for i in xrange(0, random.randint(1, 15)):
                 p = random.choice(dict_css_properties)
-                if random.randint(1, 3) == 2:
-                    a = random.choice(dict_css_values)
-                else:
+                w = random.randint(1, 5)
+                if w == 2:
+                    a = self.fuzz_cssfunc()
+                elif w == 4:
+                    a = ""
+                    for i in xrange(0, random.randint(1, 10)):
+                        a += self.fuzz_cssfunc() + ","
+                    a = a[:-1]
+                elif w == 3:
                     a = fuzz_xmlattr()
+                else:
+                    a = self.fuzz_cssattr()
                 data += "%s: %s;\n" % (p, a)
             data += "}\n"
         return data
+
+    def fuzz_cssfunc(self):
+        na = random.randint(1, 3)
+        func = random.choice(dict_css_functions)
+        args = ""
+        for x in xrange(na):
+            if random.randint(0, 3) == 2:
+                args += "\"" + str(fuzz_xmlattr()) + "\"" + ","
+            else:
+                args += str(fuzz_xmlattr()) + ","
+
+        return func + "(" + args[:-1] + ")"
+
+    def fuzz_cssattr(self):
+        s = ""
+        m = random.randint(0, 10)
+        if m == 1:
+            n = random.randint(1, 50000)
+            same = random.randint(0,1)
+            if same:
+                a = random.choice(dict_css_values)
+                for i in xrange(n):
+                    s += a + ","
+            else:
+                for i in xrange(n):
+                    s += random.choice(dict_css_values) + ","
+        else:
+            return random.choice(dict_css_values)
 
 class XMLGen:
 
@@ -634,7 +694,7 @@ class XMLGen:
 
     def fuzz(self):
         body = random.randint(0, 3)
-        nelem = random.randint(1, 80)
+        nelem = random.randint(1, 10)
         elems = []
         data = ""
         if body:

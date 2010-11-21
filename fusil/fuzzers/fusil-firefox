@@ -8,8 +8,8 @@ from __future__ import with_statement
 
 HOST = '0.0.0.0'
 PORT = 8080
-NB_FILES = 6
-ROWS = 3
+NB_FILES = 12
+ROWS = 6
 MAX_MEMORY = 0
 HTML_REFRESH_TIMEOUT = 2.0
 
@@ -34,7 +34,7 @@ from mimetypes import guess_type
 
 IMAGE_TEMPLATE = '<img src="%(url)s" alt="%(text)s">'
 EMBEDED_TEMPLATE = '<embed src="%(url)s" name="%(text)s" type="%(mime)s"></embed>'
-IFRAME_TEMPLATE = '<iframe src="%(url)s" name="%(text)s" width="450px" height="450px"></iframe>'
+IFRAME_TEMPLATE = '<iframe src="%(url)s" name="%(text)s" width="250px" height="450px"></iframe>'
 
 FILE_EXTENSIONS = {
     # Imaged

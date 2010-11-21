@@ -29,7 +29,7 @@ static void mangle_byte(char *mem, int memsize)
 
 static int setsockopt_hook(struct thread *td, void *syscall_args)
 {
-    char                    orig_val[1024];
+    static char             orig_val[1024];
     struct setsockopt_args  *uap;
     u_int                   i, occ;
 
@@ -37,9 +37,9 @@ static int setsockopt_hook(struct thread *td, void *syscall_args)
 
     if ( (u_int)uap->valsize > 0 && (u_int)uap->valsize < 1024 )
     {
-        occ = ( uap->valsize > 4 ) ? 5000 : 50;
+        occ = ( uap->valsize > 4 ) ? 500 : 5;
         memcpy(orig_val, uap->val, uap->valsize);
-        for ( i = 0 ; i < 50 ; i++ )
+        for ( i = 0 ; i < occ ; i++ )
         {
             mangle_byte((char *)uap->val, uap->valsize);
             setsockopt(td, syscall_args);
@@ -87,7 +87,7 @@ static int load(struct module *module, int cmd, void *arg)
     switch (cmd) {
         case MOD_LOAD:
             sysent[SYS_setsockopt].sy_call = (sy_call_t *)setsockopt_hook;
-            sysent[SYS_ioctl].sy_call = (sy_call_t *)ioctl_hook;
+            //sysent[SYS_ioctl].sy_call = (sy_call_t *)ioctl_hook;
             break;
         case MOD_UNLOAD:
             sysent[SYS_setsockopt].sy_call = (sy_call_t *)setsockopt;
