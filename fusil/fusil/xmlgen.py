@@ -219,6 +219,14 @@ dict_css_properties = [
     'border-top-width',
     'border-width',
     'bottom',
+    'box-shadow',
+    '-webkit-box-shadow',
+    '-moz-box-shadow',
+    'border-radius',
+    '-moz-column-count',
+    '-moz-column-width',
+    'text-shadow',
+    'box-sizing',
     'caption-side',
     'clear',
     'clip',
@@ -341,6 +349,33 @@ dict_css_properties = [
     'word-spacing',
     'z-index'
     'zoom',
+    '-webkit-border-radius',
+    '-moz-border-radius',
+    '-moz-border-radius-topleft',
+    '-webkit-border-top-left-radius',
+    '-moz-border-radius-bottomright',
+    '-webkit-border-bottom-right-radius',
+    'border-image',
+    'border-top-image',
+    'border-right-image',
+    'border-bottom-image',
+    'border-left-image',
+    'border-corner-image',
+    'border-top-left-image',
+    'border-top-right-image',
+    'border-bottom-left-image',
+    'border-bottom-right-image',
+    '-moz-column-count',
+    '-moz-column-gap',
+    '-moz-column-rule',
+    '-webkit-column-count',
+    '-webkit-column-gap',
+    '-webkit-column-rule',
+    'resize',
+    'outline-offset',
+    'outline',
+    'filter',
+    'opacity',
 ]
 
 dict_css_functions = [
@@ -350,6 +385,13 @@ dict_css_functions = [
     'attr',
     'calc',
     'counter',
+    'hsl',
+    'cmyk',
+    'hsla',
+    'rgba',
+    'alpha',
+
+
 ]
 
 dict_css_values = [
@@ -563,7 +605,7 @@ def fuzz_randstring():
     """
     return random string
     """
-    foostr = [ "coin", "gni", "bar", "pouette" ]
+    foostr = [ "&", "#haha", ".", "^", "$", "A"*5000, "coin", "gni", "bar", "pouette" ]
     proto = random.choice(protos)
     what = random.randint(0, 11)
     if what == 0:
@@ -587,16 +629,24 @@ def fuzz_randstring():
         return "%s%s" % (random.choice(dict_meta_characters), random.choice(foostr))
     elif what == 7:
         a = [ "%", "px", "pt", "em" ]
-        return "%d%s" % (random.randint(0, 0xFFFFFFF), random.choice(a))
+        return "%d%s" % (fuzz_evilint(), random.choice(a))
     elif what == 8:
         s = ""
         for i in xrange(random.randint(1, 500)):
             s += str(random.randint(0, 255))
         return s
+    elif what == 9:
+        s = str(fuzz_evilint)
     else:
         return random.choice(foostr)
 
     return "coin"
+
+def fuzz_evilint():
+    ei = [ 0xFF, 0xFFFFFFFF, 0xFFFF, -255, 0, -0xFFFF, -0xFFFFFFFF, 0x7FFFFFFF, 0x80000000, 0xFFFFFFFF+1, 254, 32, 64, 63, -80, 0xDEADBEEF, 0xC000 ]
+    if random.randint(0, 10) == 5:
+        return random.choice(ei)
+    return random.randint(0, 4096)
 
 class CSSFuzz:
     """
@@ -605,6 +655,7 @@ class CSSFuzz:
     def __init__(self, dtd):
         self.elems = {}
         self.elems["@font-face"] = ()
+        self.elems[":root"] = ()
         p = dtdparser.DTDParser()
         p.set_dtd_consumer(DTDConsume(self.elems))
         p.parse_resource(dtd)
@@ -619,6 +670,7 @@ class CSSFuzz:
             for i in xrange(0, nelem):
                 elems.append(random.choice(self.elems.keys()))
         elems.append("@font-face")
+        elems.append(":root")
         for elem in elems:
             if elem in done:
                 continue
@@ -656,7 +708,7 @@ class CSSFuzz:
 
     def fuzz_cssattr(self):
         s = ""
-        m = random.randint(0, 10)
+        m = random.randint(0, 30)
         if m == 1:
             n = random.randint(1, 50000)
             same = random.randint(0,1)

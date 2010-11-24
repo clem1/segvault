@@ -773,24 +773,21 @@ void sendmsgusse(int fd)
     char            *b = NULL;
     int             i, flags;
 
-    for ( i = 0 ; i < 50 ; i++ )
+    for ( i = 0 ; i < 500 ; i++ )
     {
-        msg.msg_controllen = (rand() % 50) ? rand() & 0xFFFF : 0;
+        msg.msg_controllen = (rand() % 50) ? rand() : 0;
         if (msg.msg_controllen)
         {
-            if (msg.msg_controllen < sizeof (struct cmsghdr))
-                cmsg = (struct cmsghdr *)malloc(sizeof (struct cmsghdr));
-            else
-                cmsg = (struct cmsghdr *)malloc(msg.msg_controllen);
-            if (cmsg == NULL) goto nocmsghdr;
-            msg.msg_control = cmsg;
-            fuzzer(cmsg, msg.msg_controllen);
-            if ( rand()%10 == 0)
-            {
-                cmsg->cmsg_level = (rand() % 2) ? IPPROTO_IP : evilint();
-                cmsg->cmsg_type = (rand() % 2) ? rand() % 255 : evilint();
-                cmsg->cmsg_len = (rand() % 2) ? msg.msg_controllen : evilint();
-            }
+            b = malloc(CMSG_SPACE(msg.msg_controllen % 5000));
+            if ( b == NULL )
+                continue;
+            msg.msg_control = b;
+            msg.msg_controllen = CMSG_SPACE(msg.msg_controllen % 5000);
+            cmsg = CMSG_FIRSTHDR(&msg);
+            cmsg->cmsg_len = CMSG_LEN(msg.msg_controllen);
+            cmsg->cmsg_type = (rand() % 2) ? rand() % 255 : evilint();
+            cmsg->cmsg_len = (rand() % 2) ? msg.msg_controllen : evilint();
+            fuzzer(CMSG_DATA(cmsg), msg.msg_controllen % 5000);
         }
         else
         {
@@ -798,32 +795,30 @@ nocmsghdr:
             msg.msg_control = (rand() % 5) ? NULL : (void*)evilint();
             msg.msg_controllen = (rand() % 2) ? rand() : 0;
         }
-        iov.iov_len = (rand() % 2) ? evilint() : 1;
-        iov.iov_base = ((rand() % 5) == 0) ? (void*)evilint() : &msg;
-        msg.msg_iov = ((rand() % 5) == 0) ? (void*)evilint() : &iov;
-        if (rand() % 10)
-        {
-            msg.msg_namelen = evilint() & 4096;
-            b = malloc(msg.msg_namelen);
-            if ( b != NULL && msg.msg_namelen < 0xFFFFF)
-                fuzzer(b, msg.msg_namelen);
-            msg.msg_name = b;
-        }
-        else
-        {
-            msg.msg_name = (caddr_t)evilint();
-            msg.msg_namelen = evilint();
-        }
-        if ( rand() % 5 )
-            flags = evilint() % MSG_CMSG_CLOEXEC;
-        else
-            flags = evilint();
 
-        msg.msg_flags = evilint();
+        if ((rand() % 5) == 0)
+        {
+            iov.iov_len = (rand() % 2) ? evilint() : 1;
+            iov.iov_base = ((rand() % 5) == 0) ? (void*)evilint() : &msg;
+            msg.msg_iov = ((rand() % 5) == 0) ? (void*)evilint() : &iov;
+            if (rand() % 10)
+            {
+                msg.msg_namelen = evilint() & 4096;
+                b = malloc(msg.msg_namelen);
+                if ( b != NULL && msg.msg_namelen < 0xFFFFF)
+                    fuzzer(b, msg.msg_namelen);
+                msg.msg_name = b;
+            }
+            else
+            {
+                msg.msg_name = (caddr_t)evilint();
+                msg.msg_namelen = evilint();
+            }
+            msg.msg_flags = evilint();
+        }
+
         sendmsg(fd, &msg, MSG_DONTWAIT);
-        free(cmsg);
-        cmsg = NULL;
-        free(b);
+        if (b) free(b);
         b = NULL;
     }
 }
