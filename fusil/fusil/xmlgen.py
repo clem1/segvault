@@ -4,6 +4,7 @@ import string
 import random
 
 protos = open("dtds/protos").readlines()
+protos.extend(["http", "https"]*100)
 
 dict_meta_characters = [
     '~',
@@ -408,7 +409,7 @@ dict_css_values = [
     'absolute',
     'always',
     'armenian',
-    'attr(<placeholder>)',
+    'attr(0)',
     'rect(0)',
     'circle(0)',
     'auto',
@@ -551,7 +552,7 @@ dict_css_values = [
     'upper-latin',
     'upper-roman',
     'uppercase',
-    'url(<placeholder>)',
+    'url',
     'visible',
     'w-resize',
     'wait',
@@ -573,9 +574,9 @@ def fuzz_randurl():
     """
     proto = random.choice(protos)
     url = ""
-    for i in xrange(0, random.randint(0, 2)):
-        url += fuzz_randstring() + "/"
-    url += fuzz_randstring()
+    for i in xrange(0, random.randint(0, 3)):
+        url += str(fuzz_randstring()) + "/"
+    url += str(fuzz_randstring())
     return proto.strip() + "://" + url
 
 def fuzz_xmlattr():
@@ -596,18 +597,18 @@ def fuzz_xmlattr():
     elif what == 5:
         return fuzz_randurl()
     elif what == 6:
-        return random.choice(dict_meta_characters) * random.randint(0, 15)
+        return str(fuzz_randstring()) + str(random.choice(dict_meta_characters)) + str(fuzz_randstring())
     else:
-        return fuzz_randstring()
+        return str(fuzz_randstring())
     return "f000"
 
 def fuzz_randstring():
     """
     return random string
     """
-    foostr = [ "&", "#haha", ".", "^", "$", "A"*5000, "coin", "gni", "bar", "pouette" ]
+    foostr = [ "javascript:", "style", "#", "|", "&", "#haha", ".", "^", "$", "A"*5000, "coin", "gni", "bar", "pouette", "\\", "\"", "^", "$", "*", "}", "/", "`" ]
     proto = random.choice(protos)
-    what = random.randint(0, 11)
+    what = random.randint(0, 15)
     if what == 0:
         return "A"*random.randint(1, 20000)
     elif what == 1:
@@ -636,14 +637,19 @@ def fuzz_randstring():
             s += str(random.randint(0, 255))
         return s
     elif what == 9:
-        s = str(fuzz_evilint)
+        return str(fuzz_evilint())
+    elif what == 10:
+        s = "%s%s" % (str(fuzz_evilint()), random.choice(dict_meta_characters))
+        s += "A%s%sA%s" % (random.choice(foostr), random.choice(dict_meta_characters), random.choice(foostr))
+        s += "I%s%sI%s" % (random.choice(foostr), random.choice(dict_meta_characters), random.choice(foostr))
+        return s
     else:
-        return random.choice(foostr)
+        return random.choice(foostr)*random.randint(1, 15)
 
     return "coin"
 
 def fuzz_evilint():
-    ei = [ 0xFF, 0xFFFFFFFF, 0xFFFF, -255, 0, -0xFFFF, -0xFFFFFFFF, 0x7FFFFFFF, 0x80000000, 0xFFFFFFFF+1, 254, 32, 64, 63, -80, 0xDEADBEEF, 0xC000 ]
+    ei = ( 0xFF, 0xFFFFFFFF, 0xFFFF, -255, 0, -0xFFFF, -0xFFFFFFFF, 0x7FFFFFFF, 0x80000000, 0xFFFFFFFF+1, 254, 32, 64, 63, -80, 0xDEADBEEF, 0xC000 )
     if random.randint(0, 10) == 5:
         return random.choice(ei)
     return random.randint(0, 4096)

@@ -770,7 +770,7 @@ void sendmsgusse(int fd)
 	struct msghdr   msg;
 	struct cmsghdr  *cmsg = NULL;
 	struct iovec    iov;
-    char            *b = NULL;
+    char            *b = NULL, *bb = NULL;
     int             i, flags;
 
     for ( i = 0 ; i < 500 ; i++ )
@@ -781,13 +781,13 @@ void sendmsgusse(int fd)
             b = malloc(CMSG_SPACE(msg.msg_controllen % 5000));
             if ( b == NULL )
                 continue;
+            fuzzer(b, CMSG_SPACE(msg.msg_controllen % 5000));
             msg.msg_control = b;
             msg.msg_controllen = CMSG_SPACE(msg.msg_controllen % 5000);
             cmsg = CMSG_FIRSTHDR(&msg);
             cmsg->cmsg_len = CMSG_LEN(msg.msg_controllen);
             cmsg->cmsg_type = (rand() % 2) ? rand() % 255 : evilint();
             cmsg->cmsg_len = (rand() % 2) ? msg.msg_controllen : evilint();
-            fuzzer(CMSG_DATA(cmsg), msg.msg_controllen % 5000);
         }
         else
         {
@@ -804,10 +804,10 @@ nocmsghdr:
             if (rand() % 10)
             {
                 msg.msg_namelen = evilint() & 4096;
-                b = malloc(msg.msg_namelen);
-                if ( b != NULL && msg.msg_namelen < 0xFFFFF)
-                    fuzzer(b, msg.msg_namelen);
-                msg.msg_name = b;
+                bb = malloc(msg.msg_namelen);
+                if ( bb != NULL && msg.msg_namelen < 0xFFFFF)
+                    fuzzer(bb, msg.msg_namelen);
+                msg.msg_name = bb;
             }
             else
             {
@@ -819,7 +819,9 @@ nocmsghdr:
 
         sendmsg(fd, &msg, MSG_DONTWAIT);
         if (b) free(b);
+        if (bb) free(bb);
         b = NULL;
+        bb = NULL;
     }
 }
 
