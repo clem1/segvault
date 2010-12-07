@@ -3,8 +3,9 @@ from xml.parsers.xmlproc import dtdparser, xmlapp
 import string
 import random
 
-protos = open("dtds/protos").readlines()
-protos.extend(["http", "https"]*100)
+#protos = open("dtds/protos").readlines()
+#protos.extend(["http", "https"]*100)
+protos = ["http", "https"]
 
 dict_meta_characters = [
     '~',
@@ -391,8 +392,30 @@ dict_css_functions = [
     'hsla',
     'rgba',
     'alpha',
+]
 
+dict_css_func_selectors = [
+    'nth-child',
+    'nth-last-child',
+    'nth-of-type',
+    'nth-last-of-type',
+    'not',
 
+]
+
+dict_css_selectors = [
+    'root',
+    'last-child',
+    'first-of-type',
+    'last-of-type',
+    'only-child',
+    'only-of-type',
+    'empty',
+    'target',
+    'enabled',
+    'disabled',
+    'checked',
+    'selection'
 ]
 
 dict_css_values = [
@@ -587,7 +610,7 @@ def fuzz_xmlattr():
     if what == 0:
         return random.choice(dict_string_values)
     elif what == 1:
-        return random.choice(dict_number_values)
+        return str(random.choice(dict_number_values))
     elif what == 2:
         return random.choice(dict_special_strings)
     elif what == 3:
@@ -681,7 +704,7 @@ class CSSFuzz:
             if elem in done:
                 continue
             done.append(elem)
-            data += "%s {\n" % elem
+            data += "%s%s {\n" % (elem, self.fuzz_cssselectors())
             for i in xrange(0, random.randint(1, 15)):
                 p = random.choice(dict_css_properties)
                 w = random.randint(1, 5)
@@ -727,6 +750,43 @@ class CSSFuzz:
                     s += random.choice(dict_css_values) + ","
         else:
             return random.choice(dict_css_values)
+
+    def fuzz_cssselectorsfunc(self):
+        w = random.randint(0, 6)
+        if w == 0:
+            return "odd"
+        elif w == 1:
+            return "even"
+        elif w == 3:
+            return fuzz_randstring()
+        elif w == 4:
+            return fuzz_xmlattr()
+        elif w == 5:
+            return str(random.randint(0, 0xFFFFFFFF+1)) + 'n+' + str(random.randint(0, 0xFFFFFFFF+1))
+        elif w == 6:
+            return str(random.randint(0, 0xFFFFFFFF+1))
+        return "foo"
+
+    def fuzz_cssselectors(self):
+        s = ""
+        if random.randint(0, 2) == 1:
+            return ""
+        w = random.randint(0, 2)
+        if w == 0:
+            # simple selector
+            return ':' + random.choice(dict_css_selectors)
+        elif w == 1:
+            # function selector
+            return ':' + random.choice(dict_css_func_selectors) + '(' + self.fuzz_cssselectorsfunc() + ')'
+        elif w == 2:
+            # [attr] [type="text"]
+            f = "^$* "
+            s += '[' + str(fuzz_xmlattr()) + str(random.choice(f)) + '=' + str(fuzz_randstring()) + ']'
+            if random.randint(0, 5) == 3:
+                s += ':' + random.choice(dict_css_selectors)
+            elif random.randint(0, 5) == 3:
+                s += ':' + random.choice(dict_css_func_selectors) + '(' + self.fuzz_cssselectorsfunc() + ')'
+            return s
 
 class XMLGen:
 

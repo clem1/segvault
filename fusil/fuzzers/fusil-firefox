@@ -34,7 +34,7 @@ from mimetypes import guess_type
 
 IMAGE_TEMPLATE = '<img src="%(url)s" alt="%(text)s">'
 EMBEDED_TEMPLATE = '<embed src="%(url)s" name="%(text)s" type="%(mime)s"></embed>'
-IFRAME_TEMPLATE = '<iframe src="%(url)s" name="%(text)s" width="250px" height="450px"></iframe>'
+IFRAME_TEMPLATE = '<iframe sandbox src="%(url)s" name="%(text)s" width="250px" height="450px"></iframe>'
 
 FILE_EXTENSIONS = {
     # Imaged
@@ -126,14 +126,27 @@ class HtmlPage:
         self.body = ''
 
     def __str__(self):
+        jsreload = """<script language="JavaScript">
+        var sURL = unescape(window.location.pathname);
+        function doLoad()
+        {
+            setTimeout( "refresh()", 3*1000 );
+        }
+        function refresh()
+        {
+            window.location.href = sURL;
+        }
+        </script>
+        """
         html = ['<html>\n']
         if self.title or self.headers:
-            html.append('  <head>\n')
+            html.append('<head>\n')
             if self.title:
-                html.append('    <title>%s</title>\n' % self.title)
-            html.append('   <META HTTP-EQUIV="Refresh" content="3;URL=/"/>')
+                html.append('<title>%s</title>\n' % self.title)
+            #html.append('<meta http-equiv="refresh" content="3"/>\n')
+            html.append('%s' % jsreload)
             html.append('  </head>\n')
-        html.append('<body>\n')
+        html.append('<body onload="doLoad()">\n')
         html.append(self.body+"\n")
         html.append('</body>\n')
         html.append('</html>\n')
