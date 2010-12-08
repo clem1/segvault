@@ -685,6 +685,7 @@ class CSSFuzz:
         self.elems = {}
         self.elems["@font-face"] = ()
         self.elems[":root"] = ()
+        self.elems["@import"] = ()
         p = dtdparser.DTDParser()
         p.set_dtd_consumer(DTDConsume(self.elems))
         p.parse_resource(dtd)
@@ -700,6 +701,7 @@ class CSSFuzz:
                 elems.append(random.choice(self.elems.keys()))
         elems.append("@font-face")
         elems.append(":root")
+        elems.append("@import")
         for elem in elems:
             if elem in done:
                 continue
