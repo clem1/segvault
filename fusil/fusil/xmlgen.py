@@ -38,7 +38,11 @@ dict_meta_characters = [
     '>',
     ',',
     '.',
+    '*',
     '/',
+    '\uFFFF',
+    '\u0000',
+    '\uABCD',
     '?'
 ]
 
@@ -225,6 +229,14 @@ dict_css_properties = [
     '-webkit-box-shadow',
     '-moz-box-shadow',
     'border-radius',
+    '-webkit-border-radius',
+    '-webkit-box-shadow',
+    '-webkit-transform',
+    '-moz-transform',
+    '-webkit-animation-timing-function',
+    '-webkit-animation-iteration-count',
+    '-webkit-animation-direction',
+    '-webkit-transition-property',
     '-moz-column-count',
     '-moz-column-width',
     'text-shadow',
@@ -378,6 +390,12 @@ dict_css_properties = [
     'outline',
     'filter',
     'opacity',
+    'z-index',
+    '-moz-transition',
+    '-webkit-transition',
+    '-webkit-animation-name',
+    '-webkit-animation-duration',
+    '-webkit-animation-iteration-count',
 ]
 
 dict_css_functions = [
@@ -392,6 +410,22 @@ dict_css_functions = [
     'hsla',
     'rgba',
     'alpha',
+    'scale',
+    'circle',
+    'rect',
+    'rgba',
+    '-webkit-gradient',
+    '-moz-linear-gradient',
+    '-o-radial-gradient',
+    '-moz-radial-gradient',
+    '-webkit-gradient',
+    'cubic-bezier',
+    'hsla',
+    'rotate',
+    'translateY',
+    'translateX',
+    'skewY',
+
 ]
 
 dict_css_func_selectors = [
@@ -419,6 +453,7 @@ dict_css_selectors = [
 ]
 
 dict_css_values = [
+    'all',
     '100',
     '200',
     '300',
@@ -465,6 +500,8 @@ dict_css_values = [
     'default',
     'digits',
     'disc',
+    'ease-out',
+    'ease-in',
     'e-resize',
     'embed',
     'far-left',
@@ -621,6 +658,8 @@ def fuzz_xmlattr():
         return fuzz_randurl()
     elif what == 6:
         return str(fuzz_randstring()) + str(random.choice(dict_meta_characters)) + str(fuzz_randstring())
+    elif what == 7:
+        return "data:" + str(fuzz_randstring())
     else:
         return str(fuzz_randstring())
     return "f000"
@@ -629,7 +668,8 @@ def fuzz_randstring():
     """
     return random string
     """
-    foostr = [ "javascript:", "style", "#", "|", "&", "#haha", ".", "^", "$", "A"*5000, "coin", "gni", "bar", "pouette", "\\", "\"", "^", "$", "*", "}", "/", "`" ]
+    foostr = [ "javascript:", "data:", "image/png", "base64", "style", "#", "|", "&", "#haha",
+            ".", "^", "$", "A"*5000, "coin", "gni", "bar", "pouette", "\\", "\"", "^", "$", "*", "}", "/", "`" ]
     proto = random.choice(protos)
     what = random.randint(0, 15)
     if what == 0:
@@ -685,6 +725,7 @@ class CSSFuzz:
         self.elems = {}
         self.elems["@font-face"] = ()
         self.elems[":root"] = ()
+        self.elems["*"] = ()
         self.elems["@import"] = ()
         p = dtdparser.DTDParser()
         p.set_dtd_consumer(DTDConsume(self.elems))
@@ -702,14 +743,17 @@ class CSSFuzz:
         elems.append("@font-face")
         elems.append(":root")
         elems.append("@import")
+        for i in xrange(0, random.randint(0, 5)):
+            elems.append(str(fuzz_xmlattr()))
+
         for elem in elems:
-            if elem in done:
+            if elem in done or random.randint(0, 5) == 1:
                 continue
             done.append(elem)
             data += "%s%s {\n" % (elem, self.fuzz_cssselectors())
             for i in xrange(0, random.randint(1, 15)):
                 p = random.choice(dict_css_properties)
-                w = random.randint(1, 5)
+                w = random.randint(1, 20)
                 if w == 2:
                     a = self.fuzz_cssfunc()
                 elif w == 4:
@@ -739,7 +783,7 @@ class CSSFuzz:
 
     def fuzz_cssattr(self):
         s = ""
-        m = random.randint(0, 30)
+        m = random.randint(0, 100)
         if m == 1:
             n = random.randint(1, 50000)
             same = random.randint(0,1)
@@ -750,6 +794,12 @@ class CSSFuzz:
             else:
                 for i in xrange(n):
                     s += random.choice(dict_css_values) + ","
+            return s
+        elif m == 2:
+            n = random.randint(1, 20)
+            for i in xrange(n):
+                s += random.choice(dict_css_values) + " "
+            return s
         else:
             return random.choice(dict_css_values)
 
@@ -814,7 +864,9 @@ class XMLGen:
 
     def fuzz(self):
         body = random.randint(0, 3)
-        nelem = random.randint(1, 10)
+        if self.xmlt != "xhtml1":
+            body = 0
+        nelem = random.randint(1, 60)
         elems = []
         data = ""
         if body:
@@ -822,6 +874,8 @@ class XMLGen:
         for i in xrange(0, nelem):
             # pick random elem
             elem = random.choice(self.elems.keys())
+            if elem in ("object", "applet"):
+                continue
             elems.append(elem)
             data += "<" + elem + " "
             # add attributes

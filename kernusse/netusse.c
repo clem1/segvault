@@ -35,7 +35,10 @@
 #if defined(__OpenBSD__)
 #include <util.h>
 #endif
-//#define DEBUG_SENDMSG 1
+
+//#define DEBUG 1
+//#define DEBUG_SOCKET 1
+//#define DEBUG_BIND 1
 
 #define SEED_FILE "netusse.seed"
 
@@ -58,7 +61,33 @@ struct sockaddr_llc {
 };
 #endif
 
+/* socket choosen
+ */
 int snum = -1;
+
+/* handler for debug
+ */
+FILE *dbg;
+
+/* current socket family
+ */
+int current_family;
+
+/* current socket protocol
+ */
+int current_proto;
+
+static int debug_socket(int domain, int type, int protocol)
+{
+#if defined(DEBUG) || defined(DEBUG_SOCKET)
+    fprintf(dbg, "socket(%d, %d, %d)\n", domain, type, protocol);
+#endif
+
+    current_proto = protocol;
+    current_family = domain;
+    return socket(domain, type, protocol);
+}
+
 
 static void fuzzer(char *mm, size_t mm_size)
 {
@@ -171,7 +200,7 @@ static int getfd(void)
                 fd = open("/etc/passwd", O_RDONLY);
                 break;
             case 1:
-                fd = socket(AF_INET6, SOCK_STREAM, IPPROTO_TCP);
+                fd = debug_socket(AF_INET6, SOCK_STREAM, IPPROTO_TCP);
                 break;
             case 2:
                 fd = open("/dev/random", O_RDONLY);
@@ -180,7 +209,7 @@ static int getfd(void)
                 fd = open("/tmp/fusse", O_CREAT|O_RDWR, 0666);
                 break;
             case 4:
-                fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+                fd = debug_socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
                 break;
             default:
                 fd = open("/proc/self/maps", O_RDONLY);
@@ -258,7 +287,7 @@ void ssoptusse(int s)
 	int optlen, optname, level, ret, on = rand() % 2, tout = 50;
 	do
 	{
-		switch (rand() % 15)
+		switch (rand() % 25)
 		{
 		case 0:
 			level = IPPROTO_IPV6;
@@ -267,14 +296,14 @@ void ssoptusse(int s)
 			level = SOL_SOCKET;
 			break;
 		case 2:
-			level = IPPROTO_UDP;
-			break;
 		case 3:
-			level = IPPROTO_TCP;
-			break;
 		case 4:
-			level = IPPROTO_IP;
+            level = current_proto;
 			break;
+        case 5:
+        case 6:
+            level = current_family;
+            break;
         default:
             level = evilint();
             break;
@@ -303,8 +332,11 @@ void ssoptusse(int s)
 		 */
 		if (optname == 182 || optname == 202 || optname == 254 || optname == 91 || optname == 25 || optname == IPV6_IPSEC_POLICY || 
 				optname == IPV6_FW_ADD || optname == IPV6_FW_FLUSH
-				|| optname == IPV6_FW_DEL || optname == IPV6_FW_ZERO)
+				|| optname == IPV6_FW_DEL || optname == IPV6_FW_ZERO || (current_family == AF_INET && optname == 21) || (current_family == AF_INET6 && optname == 21) )
 			continue;
+#endif
+#ifdef DEBUG
+        fprintf(dbg, "setsockopt(%u, %u, %u, %p, %u) family = %d proto = %d\n", s, level, optname, optval, optlen, current_family, current_proto);
 #endif
 		ret = setsockopt(s, level, optname, (void *)optval, optlen);
 	}
@@ -460,14 +492,14 @@ void gsoptusse(int s)
 			level = SOL_SOCKET;
 			break;
 		case 2:
-			level = IPPROTO_UDP;
-			break;
 		case 3:
-			level = IPPROTO_TCP;
-			break;
 		case 4:
-			level = IPPROTO_IP;
+            level = current_proto;
 			break;
+        case 5:
+        case 6:
+            level = current_family;
+            break;
         default:
             level = evilint();
             break;
@@ -478,7 +510,7 @@ void gsoptusse(int s)
 		 */
 		if (optname == 182 || optname == 202 || optname == 254 || optname == 91 || optname == 25 || optname == IPV6_IPSEC_POLICY || 
 				optname == IPV6_FW_ADD || optname == IPV6_FW_FLUSH
-				|| optname == IPV6_FW_DEL || optname == IPV6_FW_ZERO)
+				|| optname == IPV6_FW_DEL || optname == IPV6_FW_ZERO || (current_family == AF_INET && optname == 21) || (current_family == AF_INET6 && optname == 21) )
 			continue;
 #endif
 		ret = getsockopt(s, level, optname, &buf, &len);
@@ -491,14 +523,16 @@ void gsoptusse(int s)
 
     /* linux false positive
      */
+#if defined(__linux__)
     if ( len == 104 && optname == 11 )
         return;
+#endif
 
     kernop(s);
 
     getsockopt(s, level, optname, &pbuf, &len);
 
-    if ( memcmp(&buf, &pbuf, (len < 0 || len > 2048) ? 2048 : len) != 0 && memcmp(&pbuf, &rbuf, (len > 2048) ? 2048 : len) != 0 )
+    if ( buf[0] == 0xc7 || buf[0] == 0xc8 || ( memcmp(&buf, &pbuf, (len < 0 || len > 2048) ? 2048 : len) != 0 && memcmp(&pbuf, &rbuf, (len > 2048) ? 2048 : len) != 0 ) )
     {
         printf("\nPOSSIBLE LEAK WITH :\n");
 		printf("\tgetsockopt(sock (%d), %d, %u, buf, &%d)\n", snum, level, optname, len);
@@ -519,9 +553,10 @@ void gsoptusse(int s)
  */
 void bindusse(int fd)
 {
-    size_t  len;
-    int     ret, tout = 5;
-    char    *b;
+    size_t              len;
+    int                 ret, tout = 5;
+    char                *b;
+    struct sockaddr     *sa;
 
     do
     {
@@ -529,6 +564,14 @@ void bindusse(int fd)
         b = malloc(len);
         if ( b != NULL && len < 0xFFFFF )
             fuzzer(b, len);
+#if defined(DEBUG) || defined(DEBUG_BIND)
+        fprintf(dbg, "bind(%d, x, %u)\n", fd, len);
+#endif
+        if ( b != NULL && len >= sizeof(struct sockaddr) )
+        {
+            sa = (struct sockaddr *)b;
+            sa->sa_family = current_family;
+        }
         ret = bind(fd, (struct sockaddr *)&b, len);
         if (ret && (rand() % 2))
             listen(fd, rand());
@@ -539,9 +582,10 @@ void bindusse(int fd)
 
 void connectusse(int fd)
 {
-    int     ret, tout = 5;
-    size_t  len;
-    char    *b;
+    int                 ret, tout = 5;
+    size_t              len;
+    char                *b;
+    struct sockaddr     *sa;
 
     do
     {
@@ -549,6 +593,14 @@ void connectusse(int fd)
         b = malloc(len);
         if ( b != NULL && len < 0xFFFFF )
             fuzzer(b, len);
+        if ( b != NULL && len >= sizeof(struct sockaddr) )
+        {
+            sa = (struct sockaddr *)b;
+            sa->sa_family = current_family;
+        }
+#if defined(DEBUG) || defined(DEBUG_CONNECT)
+        fprintf(dbg, "connect(%d, x, %u)\n", fd, len);
+#endif
         ret = connect(fd, (struct sockaddr *)&b, len);
         if ( b ) free(b); b = NULL;
     }
@@ -560,11 +612,17 @@ void sendtousse(int fd)
     char    *addr, *msg;
     size_t  alen, mlen;
     int     flags = 0;
+    struct sockaddr *sa;
 
     alen = evilint();
     addr = malloc(alen);
     if ( addr != NULL && alen < 0xFFFFF )
         fuzzer(addr, alen);
+    if ( addr != NULL && alen >= sizeof(struct sockaddr) )
+    {
+        sa = (struct sockaddr *)addr;
+        sa->sa_family = current_family;
+    }
 
     mlen = evilint();
     msg = malloc(mlen);
@@ -623,7 +681,7 @@ void sendfilusse(int fd)
 }
 #endif
 
-#if defined(__NetBSD__) || defined(__OpenBSD__) || defined(__FreeBSD__)
+#if defined(__NetBSD__) || defined(__OpenBSD__)
 void recvmsgusse(int fd)
 {
     char name[1024], ctrl[1024], base[1024], iovb[sizeof(struct iovec)];
@@ -653,15 +711,14 @@ void recvmsgusse(int fd)
             msg.msg_iov = NULL;
         msg.msg_control = ctrl;
         msg.msg_controllen = evilint();
-#ifdef DEBUG_SENDMSG
-        printf("recvmsg(%d, {nl = %x, iol = %x, ctl = %x}, 0);\n", fd, msg.msg_namelen, msg.msg_iovlen, msg.msg_controllen);
-        getchar();
+#ifdef DEBUG
+        fprintf(dbg, "recvmsg(%d, {nl = %x, iol = %x, ctl = %x}, 0);\n", fd, msg.msg_namelen, msg.msg_iovlen, msg.msg_controllen);
 #endif
         recvmsg(fd, &msg, MSG_DONTWAIT);
     }
     return;
 }
-#elif defined(__LINUX__)
+#elif defined(__LINUX__) || defined(__FreeBSD__)
 void recvmsgusse(int fd)
 {
 	struct msghdr   msg;
@@ -681,7 +738,7 @@ void recvmsgusse(int fd)
                 cmsg = (struct cmsghdr *)malloc(msg.msg_controllen);
             if (cmsg == NULL) goto nocmsghdr;
             msg.msg_control = cmsg;
-            fuzzer(cmsg, msg.msg_controllen);
+            fuzzer((char *)cmsg, msg.msg_controllen);
             if ( rand()%10 == 0)
             {
                 cmsg->cmsg_level = (rand() % 2) ? IPPROTO_IP : evilint();
@@ -712,11 +769,14 @@ nocmsghdr:
             msg.msg_namelen = evilint();
         }
         if ( rand() % 5 )
-            flags = evilint() % MSG_CMSG_CLOEXEC;
+            flags = evilint() % 255;
         else
             flags = evilint();
 
         msg.msg_flags = evilint();
+#ifdef DEBUG
+        fprintf(dbg, "recvmsg(%d, {nl = %x, iol = %x, ctl = %x}, 0);\n", fd, msg.msg_namelen, msg.msg_iovlen, msg.msg_controllen);
+#endif
         recvmsg(fd, &msg, MSG_DONTWAIT);
         free(cmsg);
         cmsg = NULL;
@@ -730,11 +790,66 @@ nocmsghdr:
 #if defined(__NetBSD__) || defined(__OpenBSD__) || defined(__FreeBSD__)
 void sendmsgusse(int fd)
 {
-    char name[1024], ctrl[1024], base[1024], iovb[sizeof(struct iovec)];
+    char name[1024], ctrl[1024], base[1024], iovb[sizeof(struct iovec)], *b = NULL, *bb = NULL;
     struct iovec iov;
     struct msghdr msg;
+    struct cmsghdr *cmsg;
     int i;
 
+    for ( i = 0 ; i < 50 ; i++ )
+    {
+        msg.msg_controllen = (rand() % 50) ? rand() : 0;
+        if (msg.msg_controllen)
+        {
+            b = malloc(CMSG_SPACE(msg.msg_controllen % 5000));
+            if ( b == NULL )
+                continue;
+            fuzzer(b, CMSG_SPACE(msg.msg_controllen % 5000));
+            msg.msg_control = b;
+            msg.msg_controllen = CMSG_SPACE(msg.msg_controllen % 5000);
+            cmsg = CMSG_FIRSTHDR(&msg);
+            cmsg->cmsg_len = CMSG_LEN(msg.msg_controllen);
+            cmsg->cmsg_type = (rand() % 2) ? rand() % 255 : evilint();
+            cmsg->cmsg_len = (rand() % 2) ? msg.msg_controllen : evilint();
+        }
+        else
+        {
+nocmsghdr:
+            msg.msg_control = (rand() % 5) ? NULL : (void*)evilint();
+            msg.msg_controllen = (rand() % 2) ? rand() : 0;
+        }
+
+        if ((rand() % 5) == 0)
+        {
+            iov.iov_len = (rand() % 2) ? evilint() : 1;
+            iov.iov_base = ((rand() % 5) == 0) ? (void*)evilint() : &msg;
+            msg.msg_iov = ((rand() % 5) == 0) ? (void*)evilint() : &iov;
+            if (rand() % 10)
+            {
+                msg.msg_namelen = evilint() & 4096;
+                bb = malloc(msg.msg_namelen);
+                if ( bb != NULL && msg.msg_namelen < 0xFFFFF)
+                    fuzzer(bb, msg.msg_namelen);
+                msg.msg_name = bb;
+            }
+            else
+            {
+                msg.msg_name = (caddr_t)evilint();
+                msg.msg_namelen = evilint();
+            }
+            msg.msg_flags = evilint();
+        }
+#ifdef DEBUG
+        fprintf(dbg, "sendmsg(%d, {nl = %x, iol = %x, ctl = %x}, 0);\n", fd, msg.msg_namelen, msg.msg_iovlen, msg.msg_controllen);
+#endif
+        sendmsg(fd, &msg, MSG_DONTWAIT);
+        if (b) free(b);
+        if (bb) free(bb);
+        b = NULL;
+        bb = NULL;
+    }
+
+#if 0
     for ( i = 0 ; i < 50 ; i++ )
     {
         fuzzer(name, 1024);
@@ -762,6 +877,7 @@ void sendmsgusse(int fd)
 #endif
         sendmsg(fd, &msg, 0);
     }
+#endif
     return;
 }
 #elif defined(__linux__)
@@ -773,7 +889,7 @@ void sendmsgusse(int fd)
     char            *b = NULL, *bb = NULL;
     int             i, flags;
 
-    for ( i = 0 ; i < 500 ; i++ )
+    for ( i = 0 ; i < 50 ; i++ )
     {
         msg.msg_controllen = (rand() % 50) ? rand() : 0;
         if (msg.msg_controllen)
@@ -1134,6 +1250,7 @@ int main(int ac, char **av)
 #endif
     };
 
+    dbg = stdout;
 	seed = getpid() ^ time(NULL);
 	occ = 5000000;
 	opts = 10;
@@ -1183,26 +1300,25 @@ int main(int ac, char **av)
 	while (occ)
 	{
         isfd = 0;
-#if 0
         switch ((snum = rand() % 50))
         {
             case 0:
-                s = socket(AF_INET6, SOCK_STREAM, IPPROTO_TCP);
+                s = debug_socket(AF_INET6, SOCK_STREAM, IPPROTO_TCP);
                 break;
             case 1:
-                s = socket(AF_INET6, SOCK_DGRAM, IPPROTO_UDP);
+                s = debug_socket(AF_INET6, SOCK_DGRAM, IPPROTO_UDP);
                 break;
             case 2:
-                s = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+                s = debug_socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
                 break;
             case 3:
-                s = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+                s = debug_socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
                 break;
 #ifdef __linux__
             case 4:
             {
                 struct sockaddr_at sat;
-                s = socket(AF_APPLETALK, SOCK_DGRAM, 0);
+                s = debug_socket(AF_APPLETALK, SOCK_DGRAM, 0);
                 memset(&sat, 0, sizeof(sat));
                 sat.sat_family = AF_APPLETALK;
                 sat.sat_addr.s_net = htons(ATADDR_ANYNET);
@@ -1212,15 +1328,15 @@ int main(int ac, char **av)
                 break;
             }
             case 5:
-                s = socket(AF_X25, SOCK_SEQPACKET, 0);
+                s = debug_socket(AF_X25, SOCK_SEQPACKET, 0);
                 break;
             case 6:
-                s = socket(AF_IRDA, SOCK_DGRAM, 0);
+                s = debug_socket(AF_IRDA, SOCK_DGRAM, 0);
                 break;
             case 7:
             {
                 struct sockaddr_llc sllc;
-                s = socket(AF_LLC, SOCK_DGRAM, 0);
+                s = debug_socket(AF_LLC, SOCK_DGRAM, 0);
                 memset(&sllc, 0, sizeof(sllc));
                 sllc.sllc_family = AF_LLC;
                 sllc.sllc_arphrd = ARPHRD_ETHER;
@@ -1231,46 +1347,45 @@ int main(int ac, char **av)
 #endif
 #ifdef IPPROTO_SCTP
             case 8:
-                s = socket(PF_INET, SOCK_STREAM, IPPROTO_SCTP);
+                s = debug_socket(PF_INET, SOCK_STREAM, IPPROTO_SCTP);
                 break;
 #endif
             case 9:
-                s = socket(AF_UNIX, SOCK_STREAM, IPPROTO_TCP);
+                s = debug_socket(AF_UNIX, SOCK_STREAM, IPPROTO_TCP);
                 break;
             case 10:
-                s = socket(AF_UNIX, SOCK_DGRAM, IPPROTO_UDP);
+                s = debug_socket(AF_UNIX, SOCK_DGRAM, IPPROTO_UDP);
                 break;
             case 11:
-                s = socket(AF_IPX, SOCK_DGRAM, IPPROTO_UDP);
+                s = debug_socket(AF_IPX, SOCK_DGRAM, IPPROTO_UDP);
                 break;
 #ifdef __linux__
             case 12:
-                s = socket(AF_ATMPVC, SOCK_DGRAM, 0);
+                s = debug_socket(AF_ATMPVC, SOCK_DGRAM, 0);
                 break;
             case 13:
-                s = socket(AF_X25, SOCK_SEQPACKET, 0);
+                s = debug_socket(AF_X25, SOCK_SEQPACKET, 0);
                 break;
 #endif
 #ifdef AF_PACKET
             case 14:
-                s = socket(AF_PACKET, SOCK_DGRAM, 0);
+                s = debug_socket(AF_PACKET, SOCK_DGRAM, 0);
                 break;
             case 15:
-                s = socket(AF_PACKET, SOCK_PACKET, 0);
+                s = debug_socket(AF_PACKET, SOCK_PACKET, 0);
                 break;
             case 16:
-                s = socket(AF_PACKET, SOCK_SEQPACKET, 0);
+                s = debug_socket(AF_PACKET, SOCK_SEQPACKET, 0);
                 break;
 #endif
 #ifdef PF_CAN
             case 17:
             case 18:
             case 19:
-                s = socket(PF_CAN, SOCK_DGRAM, CAN_BCM);
+                s = debug_socket(PF_CAN, SOCK_DGRAM, CAN_BCM);
                 break;
 #endif
             default:
-#endif
                 if (rand() % 20 == 0)
                 {
                     s = randfd();
@@ -1290,16 +1405,11 @@ int main(int ac, char **av)
                         proto = protos[rand() % (sizeof(protos)/sizeof(protos[0]))];
                         type = types[rand() % (sizeof(types)/sizeof(types[0]))];
                     }
-                    s = socket(domain, type, proto);
+                    s = debug_socket(domain, type, proto);
                 }
-#if 0
                 break;
         }
-#endif
 		if (s == -1) continue;
-
-        if (snum > 16)
-            printf("\nsocket(%d, %d, %d);\n", domain, type, proto);
 
         flags = fcntl(s, F_GETFL, 0);
         fcntl(s, F_SETFL, flags | O_NONBLOCK);

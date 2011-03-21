@@ -14,6 +14,7 @@ class AutoMangle(MangleFile):
                 if kw.has_key('nofile'):
                     self.xml = MangleXML(nofile=True, xmltype=MangleXML.SVG11)
                 else:
+                    print "coin"
                     self.xml = MangleXML(xmltype=MangleXML.SVG11)
             elif kw['ext'] == ".html":
                 if kw.has_key('nofile'):

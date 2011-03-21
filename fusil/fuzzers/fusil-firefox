@@ -8,8 +8,8 @@ from __future__ import with_statement
 
 HOST = '0.0.0.0'
 PORT = 8080
-NB_FILES = 12
-ROWS = 6
+NB_FILES = 6
+ROWS = 2
 MAX_MEMORY = 0
 HTML_REFRESH_TIMEOUT = 2.0
 
@@ -66,6 +66,8 @@ class Fuzzer(Application):
             type=str, default="firefox")
         options.add_option("--test", help="Test mode (no fuzzing, just make sure that the fuzzer works)",
             action="store_true")
+        options.add_option("--win", help="Windows name",
+            type=str, default=None)
         options.add_option("--port", help="TCP port using to listen on (default: %s)" % PORT,
             type="int", default=PORT)
         options.add_option("--nb-files", help="Number of generated files (default: %s)" % NB_FILES,
@@ -101,6 +103,8 @@ class Fuzzer(Application):
             man = AutoMangle(project, orig_filename, nb_file=self.options.nb_files, ext=filename_ext, nofile=True)
             #man.aggressivity = 0.25
         FuzzyHttpServer(project, self.options, orig_filename, filename_ext, rows=self.options.rows)
+        if self.options.win:
+            FirefoxWindow(project, self.options.win)
 
 class FirefoxProcess(CreateProcess):
     def on_project_start(self):
@@ -143,10 +147,10 @@ class HtmlPage:
             html.append('<head>\n')
             if self.title:
                 html.append('<title>%s</title>\n' % self.title)
-            #html.append('<meta http-equiv="refresh" content="3"/>\n')
+            html.append('<meta http-equiv="refresh" content="5;url=/"/>\n')
             html.append('%s' % jsreload)
             html.append('  </head>\n')
-        html.append('<body onload="doLoad()">\n')
+        html.append('<body>\n')
         html.append(self.body+"\n")
         html.append('</body>\n')
         html.append('</html>\n')
@@ -272,6 +276,28 @@ class FuzzyHttpServer(HttpServer):
         self.error("DONE")
         self.is_done = False
         self.send('session_stop')
+
+class FirefoxWindow(ProjectAgent):
+    def __init__(self, project, regex):
+        ProjectAgent.__init__(self, project, "firefox_window")
+        self.display = getDisplay()
+        self.root_window = self.display.screen().root
+        self.F5_keycode = self.display.keysym_to_keycode(XK_F5)
+        self.window = None
+        self.regex = regex
+
+    def findWindow(self):
+        if self.window:
+            return
+        self.window = findWindowByNameRegex(self.root_window, self.regex)
+
+    def on_http_server_ready(self):
+        if self.project().session_index == 1:
+            return
+        self.error("HTTP SERVER READY")
+        self.findWindow()
+        self.error("Send key F5 (%s) to window!" % self.F5_keycode)
+        sendKey(self.window, self.F5_keycode, released=False) # 71=keycode of "F5" key (reload page)
 
 if __name__ == "__main__":
     Fuzzer().main()

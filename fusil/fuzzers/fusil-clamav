@@ -11,7 +11,7 @@ Supported file formats:
 
 NB_FILES = 10
 MAX_MUTATIONS = 100
-MAX_MEMORY = 100*1024*1024
+MAX_MEMORY = 400*1024*1024
 
 from fusil.application import Application
 from optparse import OptionGroup
@@ -51,7 +51,7 @@ class Fuzzer(Application):
 
         orig_filename = self.arguments[0]
 
-        mangle = AutoMangle(project, orig_filename, self.options.nb_files)
+        mangle = AutoMangle(project, orig_filename, nb_file=self.options.nb_files)
         mangle.config.max_op = self.options.max_mutations
         mangle.config.change_size = self.options.change_filesize
 
@@ -62,10 +62,12 @@ class Fuzzer(Application):
 
         process = ClamavProcess(project, [PROGRAM], timeout=100.0)
         process.max_memory = self.options.max_memory
-        WatchProcess(process, exitcode_score=0.10)
+        watch = WatchProcess(process, exitcode_score=0.10)
+        if watch.cpu:
+            watch.cpu.max_load = 1.0
+
         stdout = WatchStdout(process)
         stdout.max_nb_line = (50+self.options.nb_files, 1.0)
-        stdout.addRegex(r"Can't connect to clamd", 1.0)
 
         logs = [stdout]
         if self.options.use_clamd:
