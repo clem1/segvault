@@ -1,4 +1,5 @@
 #!/bin/sh
+# (c) 2011 Clement Lecigne <root@clem1.be>
 # (c) 2006-2009 Steve Grubb <sgrubb@redhat.com>
 # (c) 2006, LMH <lmh@info-pull.com>
 #
@@ -9,60 +10,79 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-VERSION="0.7"
+# XXX: FreeBSD
+# mdconfig -a -t vnode -f /path/to/image.iso -u 1
+# mount -t cd9660 /dev/md1 /media
+# umount /media
+# mdconfig -d -u 1
+
+VERSION="0.8"
 FUZZER="./mangle"
-
-# Tunables
-DIR="/media/test"
-PASSES="1000"
-START_SWEEP=`expr \( $PASSES \* 6 \) \/ 10`
-
-# Basic filesystems that should be included by default
-filesystems="cramfs ext2 ext3 ext4 swap"
-
-# Optional filesystems
-if [ -x /usr/bin/mkisofs ] ; then
-	filesystems="$filesystems iso9660"
-fi
-if [ -x /sbin/mkdosfs ] ; then
-	filesystems="$filesystems msdos"
-fi
-if [ -x /sbin/mkfs.vfat ] ; then
-	filesystems="$filesystems vfat"
-fi
-if [ -x /sbin/mksquashfs ] ; then
-	filesystems="$filesystems squashfs"
-fi
-if [ -x /sbin/mkfs.xfs ] ; then
-	filesystems="$filesystems xfs"
-fi
-if [ -x /usr/bin/hformat ] ; then
-	filesystems="$filesystems hfs"
-
-	# gfs2 is superset of hfs
-	if [ -x /sbin/mkfs.gfs2 ] ; then
-		filesystems="$filesystems gfs2"
-	fi
-fi
-if [ -x /usr/sbin/mkfs.jffs2 ] ; then
-	filesystems="$filesystems jffs2"
-fi
-if [ -x /sbin/mkfs.reiserfs ] ; then
-	filesystems="$filesystems reiserfs"
-fi
-if [ -x /usr/bin/genromfs ] ; then
-	filesystems="$filesystems romfs"
-fi
-# ecryptfs overlays another fs, so fudge the check this way...
-if [ -x /sbin/mount.ecryptfs ] ; then
-	filesystems="$filesystems ecryptfs"
-fi
-ext="base"
 
 if [ ! -x $FUZZER ] ; then
 	echo "You need to run make first"
 	exit 1
 fi
+
+# Tunables
+DIR="/media/coin"
+PASSES="1000"
+START_SWEEP=`expr \( $PASSES \* 6 \) \/ 10`
+
+OS=`uname -s`
+
+case $OS in
+    "Linux")
+    # Basic filesystems that should be included by default
+    filesystems="cramfs ext2 ext3 ext4 swap"
+    ;;
+    "FreeBSD")
+    filesystems="ufs ffs msdosfs ext2fs smbfs zfs ntfs hpfs cd9660"
+    ;;
+esac
+
+if [ $OS = "Linux" ]; then
+
+    # Optional filesystems
+    if [ -x /usr/bin/mkisofs ] ; then
+        filesystems="$filesystems iso9660"
+    fi
+    if [ -x /sbin/mkdosfs ] ; then
+        filesystems="$filesystems msdos"
+    fi
+    if [ -x /sbin/mkfs.vfat ] ; then
+        filesystems="$filesystems vfat"
+    fi
+    if [ -x /sbin/mksquashfs ] ; then
+        filesystems="$filesystems squashfs"
+    fi
+    if [ -x /sbin/mkfs.xfs ] ; then
+        filesystems="$filesystems xfs"
+    fi
+    if [ -x /usr/bin/hformat ] ; then
+        filesystems="$filesystems hfs"
+
+        # gfs2 is superset of hfs
+        if [ -x /sbin/mkfs.gfs2 ] ; then
+            filesystems="$filesystems gfs2"
+        fi
+    fi
+    if [ -x /usr/sbin/mkfs.jffs2 ] ; then
+        filesystems="$filesystems jffs2"
+    fi
+    if [ -x /sbin/mkfs.reiserfs ] ; then
+        filesystems="$filesystems reiserfs"
+    fi
+    if [ -x /usr/bin/genromfs ] ; then
+        filesystems="$filesystems romfs"
+    fi
+    # ecryptfs overlays another fs, so fudge the check this way...
+    if [ -x /sbin/mount.ecryptfs ] ; then
+        filesystems="$filesystems ecryptfs"
+    fi
+fi
+ext="base"
+
 trap cleanup 1 2 3 5 15
 export DIR
 
@@ -166,7 +186,7 @@ mount_fs () {
 	typeset target="$2"
 	typeset tdir="$3"
 
-	mount $target $tdir -o loop >/dev/null 2>&1
+	mount $target $tdir -o loop
 	base_mount_ret=$?
 	if [ "$tfs" = "ecryptfs" -a $base_mount_ret -eq 0 ] ; then
 		# Now overlay ecrytpfs atop the ext3 image just mounted
@@ -179,6 +199,7 @@ mount_fs () {
 	if [ $base_mount_ret -eq 0 ] ; then
 		typeset dev=`mount | grep $tdir | awk '{ print $1 }'`
 		# Make sure we only have 1 entry
+        echo $dev
 		if [ `echo $dev | wc -w` -ne 1 ] ; then
 			umount $tdir
 			echo "Error creating $tfs file system"
@@ -186,12 +207,12 @@ mount_fs () {
 		fi
 				
 		# make dead sure we have the right device
-		typeset tst=`echo $dev | grep loop`
-		if [ x"$tst" = "x" ] ; then
-			umount $tdir
-			echo "Error creating $tfs file system"
-			exit 1
-		fi
+		#typeset tst=`echo $dev | grep loop`
+		#if [ x"$tst" = "x" ] ; then
+	#		umount $tdir
+	#		echo "Error creating $tfs file system"
+	#		exit 1
+#		fi
 	else
 		echo "Error mounting $tfs file system...you may need to reboot your machine"
 		exit 1
@@ -206,11 +227,11 @@ populate_fs() {
 	typeset target="$1"
 	typeset cdir=`pwd`
 
-	cp * $target 2>/dev/null
+	cp * $target
 	cd $target
-	ln -s COPYING COPYING2 2>/dev/null
+	ln -s COPYING COPYING2
 	cd $cdir
-	mknod $target/null c 1 3 >/dev/null 2>&1
+	mknod $target/null c 1 3
 }
 
 prep_fs() {
@@ -220,7 +241,7 @@ prep_fs() {
 	fi
 	typeset fstype="$1"
 	typeset file="fs/$fstype.$ext"
-	dd if=/dev/zero of=$file bs=1M count=$FS_SIZE >/dev/null 2>&1
+	dd if=/dev/zero of=$file bs=1M count=$FS_SIZE
 	if [ ! -e $file ] ; then
 		echo "Error creating $file"
 		return 1
@@ -242,7 +263,7 @@ prep_fs() {
 	;;
 	hfs) /usr/bin/hformat $file >/dev/null
 	;;
-	xfs) /sbin/mkfs.xfs -q -b size=$BLOCKSIZE -f -dname=$file
+	xfs) /sbin/mkfs.xfs -q -b size=$BLOCKSIZE -f -d name=$file
 	;;
 	swap) /sbin/mkswap $file
 	;;
@@ -343,6 +364,7 @@ prep_fs() {
 
 		# unmount
 		umount $DIR
+        echo $?
 		if [ $? -ne 0 ] ; then
 			echo "Error creating $fstype file system"
 			exit 1

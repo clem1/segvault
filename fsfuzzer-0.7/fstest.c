@@ -27,23 +27,32 @@
 #include <fcntl.h>
 #include <stdlib.h>
 #include <errno.h>
+#if defined(__linux__)
 #include <sys/vfs.h>
-#include <dirent.h>
 #include <sys/sendfile.h>
+#else
+#include <sys/cdefs.h>
+#include <sys/limits.h>
+#include <sys/mount.h>
+#endif
+#include <dirent.h>
 #include <sys/socket.h>
 #include <netdb.h>
 #include <signal.h>
 #include <sys/file.h>
 #include <sys/mman.h>
+#include <netinet/in.h>
 #include <sys/stat.h>
 
 #define LOGGIT 1
+#if defined(__linux__)
 #define CHECK_XATTR 1
+#endif
 
 #ifdef CHECK_XATTR
 #include <attr/xattr.h>
-#define MAXLISTBUF 65536
 #endif
+#define MAXLISTBUF 65536
 
 char origin[PATH_MAX];
 const char *orig_dpath = NULL;
@@ -157,6 +166,7 @@ static void file_read_checks(const char *path)
 	// fcntl ?
 
 	// sendfile to localhost:discard
+#if defined(__linux__)
 	setup_socket();
 	if (sfd >= 0) {
 		mlog("+sendfile");
@@ -165,6 +175,7 @@ static void file_read_checks(const char *path)
 		close(sfd);
 		sfd = -1;
 	}
+#endif
 
 	// mmap each file
 	if (rc == 0) {
