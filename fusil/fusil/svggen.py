@@ -75,13 +75,11 @@ class SVGGen:
         self.toend = []
 
     def fuzz(self):
-        nelem = random.randint(1, 80)
+        nelem = random.randint(1, 100)
         data = self.header + self.root
         for i in xrange(0, nelem):
             # pick random elem
             elem = random.choice(self.elems.keys())
-            if elem in ("text"):
-                continue
             data += "<" + elem + " "
             # add attributes
             nattr = random.randint(1, 7)

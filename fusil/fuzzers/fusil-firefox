@@ -7,11 +7,11 @@ Project is currently specific to Firefox on Linux.
 from __future__ import with_statement
 
 HOST = '0.0.0.0'
-PORT = 8080
-NB_FILES = 6
-ROWS = 2
+PORT = 8081
+NB_FILES = 4
+ROWS = 1
 MAX_MEMORY = 0
-HTML_REFRESH_TIMEOUT = 2.0
+HTML_REFRESH_TIMEOUT = 1.0
 
 from fusil.application import Application
 from optparse import OptionGroup

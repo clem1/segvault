@@ -737,7 +737,7 @@ class CSSFuzz:
         done = []
         if not elems:
             elems = []
-            nelem = random.randint(1, 30)
+            nelem = random.randint(1, 10)
             for i in xrange(0, nelem):
                 elems.append(random.choice(self.elems.keys()))
         elems.append("@font-face")

@@ -35,6 +35,7 @@
 #include <signal.h>
 #include <sys/file.h>
 #include <sys/mman.h>
+#include <sys/stat.h>
 
 #define LOGGIT 1
 #define CHECK_XATTR 1
