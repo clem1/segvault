@@ -1,0 +1,475 @@
+#!/bin/sh
+# (c) 2006-2009 Steve Grubb <sgrubb@redhat.com>
+# (c) 2006, LMH <lmh@info-pull.com>
+#
+# This software may be freely redistributed under the terms of the GNU
+# public license version 2.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+VERSION="0.7"
+FUZZER="./mangle"
+
+# Tunables
+DIR="/media/test"
+PASSES="1000"
+START_SWEEP=`expr \( $PASSES \* 6 \) \/ 10`
+
+# Basic filesystems that should be included by default
+filesystems="cramfs ext2 ext3 ext4 swap"
+
+# Optional filesystems
+if [ -x /usr/bin/mkisofs ] ; then
+	filesystems="$filesystems iso9660"
+fi
+if [ -x /sbin/mkdosfs ] ; then
+	filesystems="$filesystems msdos"
+fi
+if [ -x /sbin/mkfs.vfat ] ; then
+	filesystems="$filesystems vfat"
+fi
+if [ -x /sbin/mksquashfs ] ; then
+	filesystems="$filesystems squashfs"
+fi
+if [ -x /sbin/mkfs.xfs ] ; then
+	filesystems="$filesystems xfs"
+fi
+if [ -x /usr/bin/hformat ] ; then
+	filesystems="$filesystems hfs"
+
+	# gfs2 is superset of hfs
+	if [ -x /sbin/mkfs.gfs2 ] ; then
+		filesystems="$filesystems gfs2"
+	fi
+fi
+if [ -x /usr/sbin/mkfs.jffs2 ] ; then
+	filesystems="$filesystems jffs2"
+fi
+if [ -x /sbin/mkfs.reiserfs ] ; then
+	filesystems="$filesystems reiserfs"
+fi
+if [ -x /usr/bin/genromfs ] ; then
+	filesystems="$filesystems romfs"
+fi
+# ecryptfs overlays another fs, so fudge the check this way...
+if [ -x /sbin/mount.ecryptfs ] ; then
+	filesystems="$filesystems ecryptfs"
+fi
+ext="base"
+
+if [ ! -x $FUZZER ] ; then
+	echo "You need to run make first"
+	exit 1
+fi
+trap cleanup 1 2 3 5 15
+export DIR
+
+cleanup_all () {
+	rm -f cfs/* 2>/dev/null
+	rm -f fs/* 2>/dev/null
+	rmdir cfs 2>/dev/null
+	rmdir fs 2>/dev/null
+	umount $DIR 2>/dev/null
+	if [ -d $DIR ] ; then
+		rmdir $DIR
+	fi
+}
+
+cleanup () {
+	umount $DIR 2>/dev/null
+	if [ -d $DIR ] ; then
+		rmdir $DIR
+	fi
+}
+
+pick_block_size () {
+	typeset offset=0
+	typeset range=4
+	typeset fs="$1"
+
+	case $fs in
+	squashfs)
+		offset=3
+		range=4
+	;;
+	esac
+
+	# This will be weighted towards 1024
+	typeset tm=`date +%S`
+	typeset rand=`expr $tm % $range`
+	case `expr $rand + $offset` in
+	0|1) BLOCKSIZE="1024"
+	;;
+	2) BLOCKSIZE="2048"
+	;;
+	3) BLOCKSIZE="4096"
+	;;
+	4) BLOCKSIZE="8192"
+	;;
+	5) BLOCKSIZE="16384"
+	;;
+	6) BLOCKSIZE="32768"
+	;;
+	esac
+	echo "Using block size of $BLOCKSIZE"
+}
+
+pick_filesystem_size () {
+	typeset fs="$1"
+	typeset blocksize="$2"
+	typeset min="0"
+
+	# This will be weighted towards 4 meg
+	typeset tm=`date +%S`
+	typeset rand=`expr $tm % 6`
+	case $rand in
+	0|1) FS_SIZE="4"
+	;;
+	2) FS_SIZE="8"
+	;;
+	3) FS_SIZE="12"
+	;;
+	4) FS_SIZE="16"
+	;;
+	*) FS_SIZE="20"
+	;;
+	esac
+
+	case $fs in
+	"ext3|ext4") # ext3 needs at least 1024 journal blocks, say 1024 fs
+		min=`expr $blocksize \* 2048 / 1048576`
+	;;
+	"ecryptfs")
+		# ext3 needs at least 1024 journal blocks, say 1024 fs, and
+		# we're going to overlay ecryptfs on ext3 for now...
+		min=`expr $blocksize \* 2048 / 1048576`
+	;;
+	"xfs") # xfs needs at least 4k blocks
+		min=`expr $blocksize \* 4096 / 1048576`
+	;;
+	"reiserfs") # reiserfs needs at least 513 journal blocks, say 1024 fs
+		min=`expr $blocksize \* 1537 / 1048576`
+	;;
+	esac
+
+	if [ "$min" -gt "0" -a "$FS_SIZE" -lt "$min" ]; then
+		FS_SIZE="$min"
+	fi
+
+	echo "Using filesystem size of $FS_SIZE Megs"
+}
+
+mount_fs () {
+	typeset tfs="$1"
+	typeset target="$2"
+	typeset tdir="$3"
+
+	mount $target $tdir -o loop >/dev/null 2>&1
+	base_mount_ret=$?
+	if [ "$tfs" = "ecryptfs" -a $base_mount_ret -eq 0 ] ; then
+		# Now overlay ecrytpfs atop the ext3 image just mounted
+		mount -t ecryptfs $tdir $tdir -o "key=passphrase:passwd=foo,ecryptfs_cipher=aes,ecryptfs_key_bytes=16,verbosity=0,no_sig_cache"
+		if [ $? -ne 0 ] ; then
+			echo "Error mounting $tfs file system overlay..."
+			exit 1
+		fi
+	fi
+	if [ $base_mount_ret -eq 0 ] ; then
+		typeset dev=`mount | grep $tdir | awk '{ print $1 }'`
+		# Make sure we only have 1 entry
+		if [ `echo $dev | wc -w` -ne 1 ] ; then
+			umount $tdir
+			echo "Error creating $tfs file system"
+			exit 1
+		fi
+				
+		# make dead sure we have the right device
+		typeset tst=`echo $dev | grep loop`
+		if [ x"$tst" = "x" ] ; then
+			umount $tdir
+			echo "Error creating $tfs file system"
+			exit 1
+		fi
+	else
+		echo "Error mounting $tfs file system...you may need to reboot your machine"
+		exit 1
+	fi
+}
+
+populate_fs() {
+	if [ $# -ne 1 ] ; then
+		echo "No target file system given"
+		return 1
+	fi
+	typeset target="$1"
+	typeset cdir=`pwd`
+
+	cp * $target 2>/dev/null
+	cd $target
+	ln -s COPYING COPYING2 2>/dev/null
+	cd $cdir
+	mknod $target/null c 1 3 >/dev/null 2>&1
+}
+
+prep_fs() {
+	if [ $# -ne 1 ] ; then
+		echo "No extention given"
+		return 1
+	fi
+	typeset fstype="$1"
+	typeset file="fs/$fstype.$ext"
+	dd if=/dev/zero of=$file bs=1M count=$FS_SIZE >/dev/null 2>&1
+	if [ ! -e $file ] ; then
+		echo "Error creating $file"
+		return 1
+	fi
+
+	# Switch on the file system type for special cases
+	case $fstype in
+	ext2) /sbin/mke2fs -q -i 4096 -b $BLOCKSIZE -F $file
+	;;
+	ext3) /sbin/mke2fs -q -b $BLOCKSIZE -j -F $file
+	;;
+	ext4) /sbin/mke2fs -t $fstype -q -b $BLOCKSIZE -j -F $file
+	;;
+	ecryptfs) /sbin/mke2fs -q -b $BLOCKSIZE -j -F $file
+	;;
+	vfat) rm -f $file; /sbin/mkfs.vfat -C $file 1440
+	;;
+	msdos) rm -f $file; /sbin/mkdosfs -C $file 1440
+	;;
+	hfs) /usr/bin/hformat $file >/dev/null
+	;;
+	xfs) /sbin/mkfs.xfs -q -b size=$BLOCKSIZE -f -dname=$file
+	;;
+	swap) /sbin/mkswap $file
+	;;
+	cramfs) mkdir tmp; mv $file tmp
+		populate_fs tmp
+		/sbin/mkfs.cramfs -b $BLOCKSIZE tmp $file
+		rm -f tmp/* ; rmdir tmp
+	;;
+	romfs)  mkdir tmp
+		populate_fs tmp
+		genromfs -f $file -d tmp 
+		if [ $? -ne 0 ] ; then
+			echo "Error creating romfs"
+			exit 1
+		fi
+		rm -f tmp/* ; rmdir tmp
+	;;
+	iso9660) mkdir tmp; mv $file tmp
+		populate_fs tmp
+		# Randomly use compression
+		typeset tm=`date +%S`
+		typeset rand=`expr $tm % 2`
+		typeset opt=""
+		if [ $rand -eq 0 ] ; then
+			opt="-z"
+			echo "Using zisofs"
+		fi
+		/usr/bin/mkisofs $opt -o $file -R -J tmp >/dev/null 2>&1
+		rm -f tmp/* ; rmdir tmp
+	;;
+	squashfs) mkdir tmp; mv $file tmp
+		populate_fs tmp
+		/sbin/mksquashfs tmp $file -b $BLOCKSIZE >/dev/null 2>&1
+		rm -f tmp/* ; rmdir tmp
+	;;
+	# A complicated file format to setup and we need to be very careful
+	gfs2)   /usr/bin/hformat $file >/dev/null 2>&1
+		if [ $? -ne 0 ] ; then
+			echo "Error creating gfs2 file system"
+			exit 1
+		fi
+		mount $file $DIR -o loop >/dev/null 2>&1
+		if [ $? -eq 0 ] ; then
+			typeset mdir=`pwd`
+			typeset dev=`mount | grep $mdir | tr '(=)' ' '| awk '{ print $7 }'`
+			# Make sure we only have 1 entry
+			if [ `echo $dev | wc -w` -ne 1 ] ; then
+				umount $DIR 
+				echo "Error creating gfs2 file system"
+				exit 1
+			fi
+				
+			# make dead sure we have the right device
+			typeset tst=`echo $dev | grep loop`
+			if [ x"$tst" = "x" ] ; then
+				umount $DIR 
+				echo "Error creating gfs2 file system"
+				exit 1
+			fi
+			/sbin/mkfs.gfs2 -O -b $BLOCKSIZE -p lock_nolock -j 1 -J 8 $dev >/dev/null 2>&1
+			tst="$?"
+			populate_fs $DIR 
+			umount $DIR 
+			if [ $tst -ne 0 ] ; then
+				echo "Error creating gfs2 file system"
+				exit 1
+			fi
+		else
+			echo "Error mounting gfs2 file system...you may need to reboot your machine"
+			exit 1
+		fi
+	;;
+	jffs2) mkdir tmp; mv $file tmp
+		populate_fs tmp
+		/usr/sbin/mkfs.jffs2 -d tmp -l --with-xattr -o $file >/dev/null 2>&1
+		rm -f tmp/* ; rmdir tmp
+	;;
+	reiserfs) /sbin/mkfs.reiserfs -b $BLOCKSIZE -ff -q -s 513 $file
+	;;
+	*) /sbin/mkfs -t $fstype -f $file
+	;;
+	esac
+	if [ $? -ne 0 ] ; then
+		echo "Error making $fstype filesystem"
+		return 1
+	fi
+
+	# Populate the initial image for filesystem created from files
+	case $fstype in
+	ext?|vfat|msdos|hfs|xfs|reiserfs|ecryptfs)
+		echo "Populating image..."
+
+		# OK mount the file system
+		mount_fs $fstype $file $DIR 
+
+		# populate the new file system
+		populate_fs $DIR
+
+		# unmount
+		umount $DIR
+		if [ $? -ne 0 ] ; then
+			echo "Error creating $fstype file system"
+			exit 1
+		fi
+	;;
+	esac
+
+	# Switch on the file system type for cleanups
+	case $fstype in
+	ext?) /sbin/tune2fs -c 0 $file
+	;;
+	esac
+	if [ $? -ne 0 ] ; then
+		echo "Error cleaning up filesystem"
+		return 1
+	fi
+	sync
+	return 0
+}
+
+
+#
+# Start of the program
+#
+if [ $# -ge 1 ] ; then
+	if [ $1 = "--help" ] ; then
+		echo "./fsfuzz `echo $filesystems|tr ' ' '|'`"
+		exit 0
+	fi
+	found=""
+	for n in $filesystems
+	do
+		if [ "$n" = "$1" ] ; then
+			found="$1"
+			break;
+		fi
+	done
+	if [ x"$found" = "x" ] ; then
+		echo "File system $1 is unsupported"
+		exit 1
+	fi
+	filesystems="$found"
+fi
+
+echo -e "Starting fsfuzz $VERSION\n\nClearing ring buff"
+dmesg -c >/dev/null
+echo '++ Starting Linux file-system fuzzing...'
+mkdir {fs,cfs} 2>/dev/null
+mkdir $DIR 2>/dev/null
+rm -f cfs/*
+rm -f fs/*
+for fs in $filesystems
+do
+	echo "++ Current filesystem: $fs"
+	echo "+++ Making base image"
+	pick_block_size $fs
+	pick_filesystem_size $fs $BLOCKSIZE
+
+	# Switch on fs specific setups
+	case $fstype in
+	xfs|ecryptfs) modprobe $fstype
+	;;
+	ext4|romfs) START_SWEEP="5"
+	;;
+	esac
+
+	prep_fs $fs
+	if [ $? -ne 0 ] ; then
+		echo "+++ Skipping $fs due to errors creating base image"
+		continue
+	fi
+
+	# This sleep is just so you can read the screen
+	sleep 3
+	t="0"
+	i="0"
+	j="0"
+	fuzz_size=`wc -c fs/$fs.$ext`
+
+	last=""
+	while [ 1 ]
+	do
+		i=`expr $i + 1`
+		if [ $i -gt $PASSES ] ; then
+			echo "-- No problems found."
+			break
+		fi
+
+		cp fs/$fs.$ext cfs/$fs.$i.img
+		if [ $? -ne 0 ] ; then
+			echo "Problem copying fs/$fs.$ext to fs/$fs.$i.img"
+			exit 1
+		fi
+
+		echo "++ Fuzzing $PWD/fs/$fs.$i.img ($fuzz_size bytes can change)..."
+		# After 500 permutations start increasing offset to test deeper
+		# into the file system leaving the front somewhat intact
+		if [ $i -gt $START_SWEEP ] ; then
+			j=`expr $j + 1`
+		fi
+		# make the new image...
+		$FUZZER $PWD/cfs/$fs.$i.img $fuzz_size $j
+
+		# delete the old...
+		if [ x"$last" != "x" ] ; then
+			rm -f cfs/$fs.$last.img
+		fi
+		sync
+
+		# Write command to syslog so we can find it later
+		logger ./run_test $fs $i
+		./run_test $fs $i
+		if [ $? -ne 0 ] ; then
+			exit 1
+		fi
+		sync
+		last="$i"
+	done
+	# Clear out the old images since we passed
+	rm -f cfs/$fs.*
+	rm -f fs/$fs.*
+
+	# Switch on fs specific cleanups
+	case $fstype in
+	xfs|ecryptfs) modprobe -r $fstype
+	;;
+	esac
+done
+cleanup_all
+exit 0 

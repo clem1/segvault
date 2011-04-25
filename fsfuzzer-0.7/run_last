@@ -1,0 +1,21 @@
+#!/bin/sh
+# (c) 2006, Steve Grubb <sgrubb@redhat.com>
+#
+# This software may be freely redistributed under the terms of the GNU
+# public license version 2.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+count=`ls cfs 2>/dev/null | wc -l`
+if [ $count = "0" ] ; then
+	echo "No images to test"
+	exit 0
+fi
+if [ $count = "1" ] ; then
+	cmd=`ls cfs | awk -F \. '{ printf "%s %s\n", $1, $2 }'`
+	./run_test $cmd
+else
+	echo "Too many images to pick from, run ./run_test by hand"
+fi 

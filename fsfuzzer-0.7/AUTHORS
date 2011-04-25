@@ -1,0 +1,5 @@
+Ilja van Sprundel - mangle.c (The version included here is modified)
+LMH - original idea and prototype
+LMH & Steve Grubb - the basic framework
+Eric Sandeen - gfs2 tests and some cleanups
+Jarod Wilson - ecryptfs test

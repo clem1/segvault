@@ -1,0 +1,3 @@
+Several file systems have size limits. Fix this by passing a range in.
+add fsck as a test in run_test.
+Fix ext3 so that it gets a file of the right size. Some small ones do not work.

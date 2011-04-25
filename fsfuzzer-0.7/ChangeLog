@@ -1,0 +1,4 @@
+0.7
+- Changed test driver from shell script to C for better control
+- Support ecryptfs tests
+- lots of new file systems
