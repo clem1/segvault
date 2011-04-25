@@ -10,12 +10,6 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-# XXX: FreeBSD
-# mdconfig -a -t vnode -f /path/to/image.iso -u 1
-# mount -t cd9660 /dev/md1 /media
-# umount /media
-# mdconfig -d -u 1
-
 VERSION="0.8"
 FUZZER="./mangle"
 
@@ -32,11 +26,11 @@ START_SWEEP=`expr \( $PASSES \* 6 \) \/ 10`
 OS=`uname -s`
 
 case $OS in
-    "Linux")
+    Linux)
     # Basic filesystems that should be included by default
     filesystems="cramfs ext2 ext3 ext4 swap"
     ;;
-    "FreeBSD")
+    *BSD)
     filesystems="ufs ffs msdosfs ext2fs smbfs zfs ntfs hpfs cd9660"
     ;;
 esac
@@ -98,6 +92,15 @@ cleanup_all () {
 }
 
 cleanup () {
+    case $OS in
+    NetBSD|OpenBSD)
+    vnconfig -u vnd0a
+    ;;
+    FreeBSD)
+    mdconfig -d -u 1
+    ;;
+    esac
+
 	umount $DIR 2>/dev/null
 	if [ -d $DIR ] ; then
 		rmdir $DIR
@@ -105,20 +108,20 @@ cleanup () {
 }
 
 pick_block_size () {
-	typeset offset=0
-	typeset range=4
-	typeset fs="$1"
+	export offset=0
+	export range=4
+	export fs="$1"
 
 	case $fs in
-	squashfs)
+	squashfs|ffs|ufs)
 		offset=3
 		range=4
 	;;
 	esac
 
 	# This will be weighted towards 1024
-	typeset tm=`date +%S`
-	typeset rand=`expr $tm % $range`
+	export tm=`date +%S`
+	export rand=`expr $tm % $range`
 	case `expr $rand + $offset` in
 	0|1) BLOCKSIZE="1024"
 	;;
@@ -137,13 +140,13 @@ pick_block_size () {
 }
 
 pick_filesystem_size () {
-	typeset fs="$1"
-	typeset blocksize="$2"
-	typeset min="0"
+	export fs="$1"
+	export blocksize="$2"
+	export min="0"
 
 	# This will be weighted towards 4 meg
-	typeset tm=`date +%S`
-	typeset rand=`expr $tm % 6`
+	export tm=`date +%S`
+	export rand=`expr $tm % 6`
 	case $rand in
 	0|1) FS_SIZE="4"
 	;;
@@ -182,9 +185,9 @@ pick_filesystem_size () {
 }
 
 mount_fs () {
-	typeset tfs="$1"
-	typeset target="$2"
-	typeset tdir="$3"
+	export tfs="$1"
+	export target="$2"
+	export tdir="$3"
 
 	mount $target $tdir -o loop
 	base_mount_ret=$?
@@ -197,7 +200,7 @@ mount_fs () {
 		fi
 	fi
 	if [ $base_mount_ret -eq 0 ] ; then
-		typeset dev=`mount | grep $tdir | awk '{ print $1 }'`
+		export dev=`mount | grep $tdir | awk '{ print $1 }'`
 		# Make sure we only have 1 entry
         echo $dev
 		if [ `echo $dev | wc -w` -ne 1 ] ; then
@@ -207,7 +210,7 @@ mount_fs () {
 		fi
 				
 		# make dead sure we have the right device
-		#typeset tst=`echo $dev | grep loop`
+		#export tst=`echo $dev | grep loop`
 		#if [ x"$tst" = "x" ] ; then
 	#		umount $tdir
 	#		echo "Error creating $tfs file system"
@@ -224,8 +227,8 @@ populate_fs() {
 		echo "No target file system given"
 		return 1
 	fi
-	typeset target="$1"
-	typeset cdir=`pwd`
+	export target="$1"
+	export cdir=`pwd`
 
 	cp * $target
 	cd $target
@@ -234,13 +237,77 @@ populate_fs() {
 	mknod $target/null c 1 3
 }
 
+prep_fs_bsd() {
+	if [ $# -ne 1 ] ; then
+		echo "No extention given"
+		return 1
+	fi
+	export fstype="$1"
+	export file="fs/$fstype.$ext"
+	dd if=/dev/zero of=$file bs=1048576 count=$FS_SIZE
+	if [ ! -e $file ] ; then
+		echo "Error creating $file"
+		return 1
+	fi
+
+    case $OS in
+    NetBSD|OpenBSD)
+    vnconfig vnd0 $file
+    DEVICE="/dev/rvnd0d"
+    if [ $? -ne 0 ] ; then
+        echo "vnconfig failed"
+        return 1
+    fi
+    ;;
+    FreeBSD)
+    # mdconfig
+    mdconfig -a -t vnode -f $file -u 1
+    DEVICE="/dev/md1"
+    if [ $? -ne 0 ] ; then
+        echo "mdconfig failed"
+        return 1
+    fi
+    ;;
+    esac
+
+    # ffs only
+    case $fstype in
+    ffs|ufs)
+    if [ $OS = "FreeBSD" ] ; then
+        newfs -J -b $BLOCKSIZE $DEVICE
+    else
+        newfs $DEVICE
+    fi
+    if [ $? -ne 0 ] ; then
+        echo "newfs failed"
+        return 1
+    fi
+    ;;
+	ext2fs) mkfs.ext2 -q -i 4096 -b $BLOCKSIZE -s $FS_SIZE -F $file
+	;;
+	ext3fs) mkfs.ext3 -q -b $BLOCKSIZE -j -F $file
+	;;
+	ext4fs) mkfs.ext4 -t $fstype -q -b $BLOCKSIZE -j -F $file
+    ;;
+    esac
+
+    case $OS in
+    NetBSD|OpenBSD)
+    vnconfig -u vnd0
+    ;;
+    FreeBSD)
+    mdconfig -d -u 1
+    ;;
+    esac
+}
+
 prep_fs() {
 	if [ $# -ne 1 ] ; then
 		echo "No extention given"
 		return 1
 	fi
-	typeset fstype="$1"
-	typeset file="fs/$fstype.$ext"
+	export fstype="$1"
+	export file="fs/$fstype.$ext"
 	dd if=/dev/zero of=$file bs=1M count=$FS_SIZE
 	if [ ! -e $file ] ; then
 		echo "Error creating $file"
@@ -249,7 +316,7 @@ prep_fs() {
 
 	# Switch on the file system type for special cases
 	case $fstype in
-	ext2) /sbin/mke2fs -q -i 4096 -b $BLOCKSIZE -F $file
+	ext2) /sbin/mke2fs -q -i 4096 -b $BLOCKSIZE -s $FS_SIZE -F $file
 	;;
 	ext3) /sbin/mke2fs -q -b $BLOCKSIZE -j -F $file
 	;;
@@ -284,9 +351,9 @@ prep_fs() {
 	iso9660) mkdir tmp; mv $file tmp
 		populate_fs tmp
 		# Randomly use compression
-		typeset tm=`date +%S`
-		typeset rand=`expr $tm % 2`
-		typeset opt=""
+		export tm=`date +%S`
+		export rand=`expr $tm % 2`
+		export opt=""
 		if [ $rand -eq 0 ] ; then
 			opt="-z"
 			echo "Using zisofs"
@@ -307,8 +374,8 @@ prep_fs() {
 		fi
 		mount $file $DIR -o loop >/dev/null 2>&1
 		if [ $? -eq 0 ] ; then
-			typeset mdir=`pwd`
-			typeset dev=`mount | grep $mdir | tr '(=)' ' '| awk '{ print $7 }'`
+			export mdir=`pwd`
+			export dev=`mount | grep $mdir | tr '(=)' ' '| awk '{ print $7 }'`
 			# Make sure we only have 1 entry
 			if [ `echo $dev | wc -w` -ne 1 ] ; then
 				umount $DIR 
@@ -317,7 +384,7 @@ prep_fs() {
 			fi
 				
 			# make dead sure we have the right device
-			typeset tst=`echo $dev | grep loop`
+			export tst=`echo $dev | grep loop`
 			if [ x"$tst" = "x" ] ; then
 				umount $DIR 
 				echo "Error creating gfs2 file system"
@@ -409,10 +476,13 @@ if [ $# -ge 1 ] ; then
 	filesystems="$found"
 fi
 
-echo -e "Starting fsfuzz $VERSION\n\nClearing ring buff"
-dmesg -c >/dev/null
-echo '++ Starting Linux file-system fuzzing...'
-mkdir {fs,cfs} 2>/dev/null
+if [ $OS = "Linux" ] ; then
+    echo -e "Starting fsfuzz $VERSION\n\nClearing ring buff"
+    dmesg -c >/dev/null
+fi
+echo "++ Starting $OS file-system fuzzing..."
+mkdir fs
+mkdir cfs
 mkdir $DIR 2>/dev/null
 rm -f cfs/*
 rm -f fs/*
@@ -431,7 +501,12 @@ do
 	;;
 	esac
 
-	prep_fs $fs
+    case $OS in
+    Linux) prep_fs $fs
+    ;;
+    *BSD) prep_fs_bsd $fs
+    ;;
+    esac
 	if [ $? -ne 0 ] ; then
 		echo "+++ Skipping $fs due to errors creating base image"
 		continue
@@ -466,6 +541,7 @@ do
 			j=`expr $j + 1`
 		fi
 		# make the new image...
+		echo "$FUZZER $PWD/cfs/$fs.$i.img $fuzz_size $j"
 		$FUZZER $PWD/cfs/$fs.$i.img $fuzz_size $j
 
 		# delete the old...

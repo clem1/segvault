@@ -30,9 +30,12 @@
 #if defined(__linux__)
 #include <sys/vfs.h>
 #include <sys/sendfile.h>
-#else
+#elif defined(__FreeBSD__)
 #include <sys/cdefs.h>
 #include <sys/limits.h>
+#include <sys/mount.h>
+#elif defined(__NetBSD__)
+#include <sys/cdefs.h>
 #include <sys/mount.h>
 #endif
 #include <dirent.h>
@@ -57,7 +60,9 @@
 char origin[PATH_MAX];
 const char *orig_dpath = NULL;
 char *lbuf = NULL;
+#if !defined(__NetBSD__)
 struct statfs sfbuf;
+#endif
 struct stat sbuf;
 int dev_null = -1, sfd = -1;
 struct addrinfo *res=NULL, hints;
@@ -71,11 +76,13 @@ static void mlog(const char *msg)
 #endif
 }
 
+#if !defined(__NetBSD__)
 static void check_statfs(void)
 {
 	mlog("+statfs");
 	statfs(orig_dpath, &sfbuf);
 }
+#endif
 
 static void setup_socket(void)
 {	// setup connection to xinetd discard
@@ -213,6 +220,7 @@ static void check_dir(const char *dpath, int level)
 		return;
 	}
 
+#if !defined(__NetBSD__)
 	// fstatfs
 	mlog("+fstatfs");
 	dfd = dirfd(d);
@@ -286,6 +294,7 @@ static void check_dir(const char *dpath, int level)
 			readlinkat(dfd, path, lbuf, MAXLISTBUF);
 		}
 	}
+#endif
 	closedir(d);
 }
 
@@ -331,7 +340,9 @@ int main(int argc, char *argv[])
 	rc = getaddrinfo("localhost", "discard", &hints, &res);
 
 	// fs tests
+#if !defined(__NetBSD__)
 	check_statfs();
+#endif
 
 	// directory tests
 	check_dir(orig_dpath, 0);

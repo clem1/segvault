@@ -9,6 +9,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
+OS=`uname -s`
+
 if [ $# -ne 2 ] ; then
 	echo "Usage: ./run_test <file system type> <pass number>"
 	exit 1
@@ -54,12 +56,14 @@ check_results () {
 ###
 # Start of real test
 ###
-while [ `dmesg | wc -l` -ne 0 ]
-do
-	# Sometimes messages are still coming through
-	# so make sure we are empty
-	dmesg -c >/dev/null 2>&1
-done
+if [ $OS = "Linux" ] ; then
+    while [ `dmesg | wc -l` -ne 0 ]
+    do
+        # Sometimes messages are still coming through
+        # so make sure we are empty
+        dmesg -c >/dev/null 2>&1
+    done
+fi
 echo "++ Testing $PWD/fs/$fs.$i.img..."
 if [ $fs = "swap" ] ; then
 	swapon ./cfs/$fs.$i.img
@@ -73,8 +77,29 @@ if [ $fs = "swap" ] ; then
 	exit 0
 fi
 if [ "$fs" != "ecryptfs" ] ; then
-	mount ./cfs/$fs.$i.img $DIR -t $fs -o loop >/dev/null
+    case $OS in
+    Linux)
+    mount ./cfs/$fs.$i.img $DIR -t $fs -o loop >/dev/null
 	base_mount_ret=$?
+    ;;
+    FreeBSD)
+    mdconfig -a -t vnode -f ./cfs/$fs.$i.img -u 1
+    if [ $? -ne 0 ] ; then
+        echo "mdconfig failed"
+        return 1
+    fi
+    mount -t $fs /dev/md1 $DIR
+	base_mount_ret=$?
+    ;;
+    NetBSD|OpenBSD)
+    vnconfig vnd0 $file
+    if [ $? -ne 0 ] ; then
+        echo "vnconfig failed"
+        return 1
+    fi
+    mount -t $fs /dev/rvnd0d $DIR
+    base_mount_ret=$?
+    esac
 else
 	mount ./cfs/$fs.$i.img $DIR -t ext3 -o loop >/dev/null
 	base_mount_ret=$?
@@ -153,6 +178,14 @@ if [ $base_mount_ret -eq 0 ] ; then
 # does mean that we could miss some test problems like where a filesystem
 # really didn't unmount but umount thinks it did.
 fi
+case $OS in
+    NetBSD|OpenBSD)
+    vnconfig -u vnd0
+    ;;
+    FreeBSD)
+    mdconfig -d -u 1
+    ;;
+    esac
 check_results
 if [ $? -ne 0 ] ; then
 	exit 1
