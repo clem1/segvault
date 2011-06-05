@@ -146,7 +146,7 @@ if [ $base_mount_ret -eq 0 ] ; then
 	# This tends to hang machines...so commented out for now
 #	dd if=$DIR/mangle of=/dev/null >/dev/null 2>&1
 #	cat $DIR/* >/dev/null 2>&1
-	find $DIR -type f -exec cat {} \; >/dev/null 2>&1
+	#find $DIR -type f -exec cat {} \; >/dev/null 2>&1
 
 	echo "+++ device files..."
 	rm $DIR/null >/dev/null 2>&1

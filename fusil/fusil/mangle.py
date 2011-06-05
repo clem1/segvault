@@ -133,10 +133,10 @@ class MangleXML(MangleAgent):
         elif xmltype == self.SVG10:
             self.gen = XMLGen("dtds/svg10.dtd", self.SVG10)
         elif xmltype == self.XHTML1:
-            #self.gen = XMLGen("dtds/xhtml1-transitional.dtd", self.XHTML1)
+            self.gen = XMLGen("dtds/xhtml1-transitional.dtd", self.XHTML1)
             #self.gen = XMLGen("dtds/html5.dtd", self.XHTML1)
             #self.gen = XMLGen("dtds/loose.dtd", self.XHTML1)
-            self.gen = XMLGen("dtds/xhtml11.dtd", self.XHTML1)
+            #self.gen = XMLGen("dtds/xhtml11.dtd", self.XHTML1)
 
     def mangleData(self, data):
         if self.nofile:

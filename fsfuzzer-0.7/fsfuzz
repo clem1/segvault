@@ -47,6 +47,18 @@ if [ $OS = "Linux" ]; then
     if [ -x /sbin/mkfs.vfat ] ; then
         filesystems="$filesystems vfat"
     fi
+    if [ -x /sbin/mkfs.bfs ] ; then
+        filesystems="$filesystems bfs"
+    fi
+    if [ -x /sbin/mkfs.btrfs ] ; then
+        filesystems="$filesystems btrfs"
+    fi
+    if [ -x /sbin/mkfs.minix ] ; then
+        filesystems="$filesystems minix"
+    fi
+    if [ -x /sbin/mkfs.ntfs ] ; then
+        filesystems="$filesystems ntfs"
+    fi
     if [ -x /sbin/mksquashfs ] ; then
         filesystems="$filesystems squashfs"
     fi
@@ -420,7 +432,7 @@ prep_fs() {
 
 	# Populate the initial image for filesystem created from files
 	case $fstype in
-	ext?|vfat|msdos|hfs|xfs|reiserfs|ecryptfs)
+	ext?|vfat|msdos|hfs|xfs|reiserfs|ecryptfs|minix|bfs|ntfs|btrfs)
 		echo "Populating image..."
 
 		# OK mount the file system
