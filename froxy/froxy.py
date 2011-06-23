@@ -85,7 +85,8 @@ class ConnectionHandler:
             l.close()
 
     def addtime(self, data):
-        return data.replace("<head>", """<head><meta http-equiv="refresh" content="2;url=/">""")
+        return data
+        #return data.replace("<head>", """<head><meta http-equiv="refresh" content="2;url=/">""")
 
     def grabpage(self, url):
         if self.cache.get(url):
@@ -118,19 +119,22 @@ class ConnectionHandler:
             return data
         if self.mime.find("html") >= 0 or self.mime.find("svg") >= 0 or self.mime.find("xml") >= 0:
             self.fuzzed = True
-            #return HTMLFuzzer(data).fuzz()
-            return FuzzNumber().fuzz(data)
+            w = random.randint(2, 5)
+            if w == 3:
+                return HTMLFuzzer(data).fuzz()
+            elif w == 4:
+                return FuzzNumber().fuzz(data)
         elif self.mime.find("css") >= 0:
             self.fuzzed = True
             return FuzzNumber().fuzz(data)
         elif self.mime.find("javascript") >= 0:
             self.fuzzed = True
             return FuzzNumber().fuzz(data)
-        elif self.mime.find("image") >= 0 or self.mime.find("swf") >= 0 or self.mime.find("flash") >= 0 or self.mime.find("audio") >= 0:
-            self.fuzzed = True
-            d = bytearray(data)
-            mangle(d, random.randint(1, 10))
-            return d
+        #elif self.mime.find("image") >= 0 or self.mime.find("swf") >= 0 or self.mime.find("flash") >= 0 or self.mime.find("audio") >= 0:
+        #    self.fuzzed = True
+        #    d = bytearray(data)
+        #    mangle(d, random.randint(1, 10))
+        #    return d
         return data
 
 def start_server(host='localhost', port=8081, IPv6=False, timeout=60,
