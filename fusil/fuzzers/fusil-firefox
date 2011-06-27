@@ -8,7 +8,7 @@ from __future__ import with_statement
 
 HOST = '0.0.0.0'
 PORT = 8080
-NB_FILES = 16
+NB_FILES = 4
 ROWS = 1
 MAX_MEMORY = 0
 HTML_REFRESH_TIMEOUT = 1.0
@@ -100,7 +100,7 @@ class Fuzzer(Application):
         if self.options.test:
             DummyMangle(project, orig_filename, nb_file=self.options.nb_files)
         else:
-            man = AutoMangle(project, orig_filename, nb_file=self.options.nb_files, ext=filename_ext, nofile=True)
+            man = AutoMangle(project, orig_filename, nb_file=self.options.nb_files, ext=filename_ext, nofile=False)
             #man.aggressivity = 0.25
         FuzzyHttpServer(project, self.options, orig_filename, filename_ext, rows=self.options.rows)
         if self.options.win:
