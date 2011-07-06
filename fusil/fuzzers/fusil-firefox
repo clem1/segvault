@@ -100,7 +100,7 @@ class Fuzzer(Application):
         if self.options.test:
             DummyMangle(project, orig_filename, nb_file=self.options.nb_files)
         else:
-            man = AutoMangle(project, orig_filename, nb_file=self.options.nb_files, ext=filename_ext, nofile=False)
+            man = AutoMangle(project, orig_filename, nb_file=self.options.nb_files, ext=filename_ext, nofile=True)
             #man.aggressivity = 0.25
         FuzzyHttpServer(project, self.options, orig_filename, filename_ext, rows=self.options.rows)
         if self.options.win:

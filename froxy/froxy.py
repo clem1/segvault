@@ -17,6 +17,13 @@ Connection: close
 
 """
 
+HEADER_404 = """HTTP/1.1 404 Not Found
+Server: FroxyWeb
+Connection: close
+
+coincoin
+"""
+
 class URLCache:
 
     def __init__(self):
@@ -62,10 +69,13 @@ class ConnectionHandler:
 
     def handle(self):
         self.grabpage(self.path)
-        self.client.send(SERVER_HEADER % {"mime": self.mime})
         mdata = self.mangledata(self.data)
-        self.client.send(mdata)
-        self.savedata(self.path, mdata)
+        if self.fuzzed:
+            self.client.send(SERVER_HEADER % {"mime": self.mime})
+            self.client.send(mdata)
+            self.savedata(self.path, mdata)
+        else:
+            self.client.send(HEADER_404)
 
     def savedata(self, url, mdata):
         if self.fuzzed:
