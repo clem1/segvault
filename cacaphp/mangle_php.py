@@ -160,7 +160,7 @@ def php_src(f):
     if randint(0, 5) == 2:
         m = methods.keys()[randint(0, len(methods)-1)]
         f.write("$x = new " + m + "();\n")
-        f.write("$x->open('foo.zip');\n")
+        #f.write("$x->open('foo.zip');\n")
         for i in range(randint(1, 8)):
             fu = methods[m].keys()[randint(0, len(methods[m])-1)]
             if fu.endswith("+"):
