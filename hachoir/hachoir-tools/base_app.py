@@ -24,6 +24,9 @@ class BaseApplication:
         self.popen_args['stdout'] = PIPE
         self.popen_args['stderr'] = STDOUT
 
+    def pipeStderr(self):
+        self.popen_args['stderr'] = PIPE
+
     def nullStdout(self):
         self.popen_args['stdout'] = open('/dev/null', 'w')
         self.popen_args['stderr'] = STDOUT
