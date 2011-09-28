@@ -25,7 +25,7 @@ class FuzzNumber:
                 prev_digit += c
             else:
                 if was_digit:
-                    if random.randint(0, 4) == 2:
+                    if random.randint(0, 10) == 2:
                         d = "%s%lu" % (d, self.num())
                     else:
                         d += prev_digit

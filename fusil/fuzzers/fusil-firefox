@@ -8,8 +8,8 @@ from __future__ import with_statement
 
 HOST = '0.0.0.0'
 PORT = 8080
-NB_FILES = 4
-ROWS = 1
+NB_FILES = 32
+ROWS = 4
 MAX_MEMORY = 0
 HTML_REFRESH_TIMEOUT = 1.0
 
@@ -145,10 +145,10 @@ class HtmlPage:
         html = ['<html>\n']
         if self.title or self.headers:
             html.append('<head>\n')
+            html.append('<meta http-equiv="refresh" content="5">\n')
             if self.title:
                 html.append('<title>%s</title>\n' % self.title)
-            html.append('<meta http-equiv="refresh" content="1s;url=/"/>\n')
-            html.append('%s' % jsreload)
+            #html.append('%s' % jsreload)
             html.append('  </head>\n')
         html.append('<body>\n')
         html.append(self.body+"\n")

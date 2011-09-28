@@ -186,6 +186,27 @@ static void kernop(int fd)
     while ( ret < 0 );
 }
 
+static char *getfile(void)
+{
+    switch (rand() % 5)
+    {
+        case 0:
+            return "/etc/passwd";
+        case 1:
+            return "/dev/random";
+        case 2:
+            return "/tmp/fusse";
+        case 3:
+            return "/tmp/";
+        case 4:
+            return "/proc/self/maps";
+        default:
+            return "/";
+    }
+    return "foo";
+}
+
+
 /**
  * return a random file descriptor
  */
@@ -547,6 +568,47 @@ void gsoptusse(int s)
 	return;
 }
 
+static void createpath(
+
+/* sockaddr fuzzer
+ */
+void sockaddrfuzz(char *buf, size_t len)
+{
+    struct sockaddr     *sa     = (struct sockaddr *)buf;
+    struct sockaddr_sun *sun    = (struct sockaddr_sun *)buf;
+
+    /* mangling
+     */
+    fuzzer(buf, len);
+
+    /* patching
+     */
+    switch (rand() % 5)
+    {
+        case 0:
+        /* basic */
+        if (len > sizeof(struct sockaddr))
+        {
+            sa->sa_len = len;
+            sa->sa_family = current_family;
+        }
+        break;
+        case 1:
+        /* path */
+        if (len > sizeof(struct sockaddr_un))
+        {
+            char *f = getfile();
+            sun->sun_len = len;
+            sun->sun_family = current_family;
+            if (strlen(
+                        /* XXX foo foo foo */
+
+        }
+        default:
+
+
+
+}
 
 /**
  * fucking bindusse #@!
@@ -1351,10 +1413,10 @@ int main(int ac, char **av)
                 break;
 #endif
             case 9:
-                s = debug_socket(AF_UNIX, SOCK_STREAM, IPPROTO_TCP);
+                s = debug_socket(AF_UNIX, SOCK_STREAM, 0);
                 break;
             case 10:
-                s = debug_socket(AF_UNIX, SOCK_DGRAM, IPPROTO_UDP);
+                s = debug_socket(AF_UNIX, SOCK_DGRAM, 0);
                 break;
             case 11:
                 s = debug_socket(AF_IPX, SOCK_DGRAM, IPPROTO_UDP);

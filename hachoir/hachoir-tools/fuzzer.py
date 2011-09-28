@@ -35,7 +35,7 @@ class FuzzParser:
     def _field_parse(self, idx, field):
         if field.is_field_set:
             self._fields_parse(idx, field)
-        else:
+        elif field.size:
             self.bgs.append(field.size)
             self.bgn.append(field.name)
             self.bgi.append(idx)
@@ -43,7 +43,7 @@ class FuzzParser:
 
     def fuzz(self, num):
         bits = self.savedbits.copy()
-        for i in range(randint(1, 10)):
+        for i in range(randint(1, 4)):
             rf = -1
             while rf == -1 or self.bgs[rf] > 128:
                 rf = randint(0, len(self.bgs)-1)
@@ -88,7 +88,7 @@ def is_vuln(line):
 
 def run(prog, args, valgrind):
     if valgrind:
-        app = Application("valgrind", ("--leak-check=no", "--quiet", prog) + args)
+        app = Application("valgrind", ["--leak-check=no", "--quiet", prog] + args)
         app.pipeStderr()
         app.start()
         try:
@@ -121,6 +121,7 @@ def parse_opts():
     parser.add_option("-p", "--prog", dest="prog", default="clamscan", help="Program to fuzz", metavar="PROG")
     parser.add_option("-d", "--dstpath", dest="dstpath", default="/tmp/fuzz", help="Path where fuzzed files are created", metavar="DSTPATH")
     parser.add_option("-q", "--quiet", dest="quiet", default="False", action="store_true", help="No fucking print")
+    parser.add_option("-a", "--args", dest="args", default="", help="Program args")
     return parser.parse_args()
 
 
@@ -147,8 +148,15 @@ def main():
                 fname, fext = basename(fp.filename).split(".")
                 fp.fuzz(i).tofile(open("/%s/%s-fuzzy-%02d.%s" % (options.dstpath, fname, i, fext), "wb"))
 
+        # dir or single file?
+        args = options.args.split(",")
+        if options.occ == 1:
+            args.append("/%s/%s-fuzzy-%02d.%s" % (options.dstpath, fname, 0, fext))
+        else:
+            args.append(options.dstpath)
+
         # launch our proggy against fuzzed files
-        if run(options.prog, (options.dstpath,), options.use_valgrind):
+        if run(options.prog, args, options.use_valgrind):
             print "Youhou, crashed!"
             exit(0)
 

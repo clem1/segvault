@@ -3,7 +3,6 @@ from logging import info, warning, error
 from errno import ENOENT, ECHILD
 from select import select
 from time import time, sleep
-from timeout import limitedTime, Timeout
 import os
 
 class BaseApplication:
@@ -24,6 +23,9 @@ class BaseApplication:
     def pipeStdout(self):
         self.popen_args['stdout'] = PIPE
         self.popen_args['stderr'] = STDOUT
+
+    def pipeStderr(self):
+        self.popen_args['stderr'] = PIPE
 
     def nullStdout(self):
         self.popen_args['stdout'] = open('/dev/null', 'w')

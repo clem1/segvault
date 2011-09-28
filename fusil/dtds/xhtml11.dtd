@@ -97,10 +97,6 @@
 
 <!-- declare Document Model module instantiated in framework
 -->
-<!ENTITY % xhtml-model.mod
-     PUBLIC "-//W3C//ENTITIES XHTML 1.1 Document Model 1.0//EN"
-            "xhtml11-model-1.mod" >
-
 <!-- Modular Framework Module (required) ......................... -->
 <!ENTITY % xhtml-framework.module "INCLUDE" >
 <![%xhtml-framework.module;[

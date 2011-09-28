@@ -56,7 +56,7 @@ class Fuzzer(Application):
 
         # Create buggy input file
         orig_filename = self.arguments[0]
-        mangle = AutoMangle(project, orig_filename)
+        mangle = AutoMangle(project, orig_filename, nb_file=1)
         mangle.max_size = self.options.filesize
 
         process = MangleProcess(project,

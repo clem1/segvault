@@ -59,12 +59,14 @@ def _phpvalue(names = [ "$CACAPHP" ]):
         return "new dummy()"
     elif what == 8:
         # big string
-        return """str_repeat("A", 16000000)"""
+        return """str_repeat("A", 200000000)"""
     elif what == 9 or what == 10:
         # crypt() string
-        return "\"$%d$%s\"" % (randint(1, 7), mangle.string()[1:-1])
+        return "\"$%d$%s\"" % (randint(1, 500), mangle.string()[1:-1])
     elif what == 11:
         return "emptyfile"
+    elif what == 12:
+        return mangle.regex()
     return mangle.string()
 
 def _args(nb):

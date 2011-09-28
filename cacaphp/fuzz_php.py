@@ -35,23 +35,44 @@ class Fuzzer:
         self.tmp_dir = config.get('application', 'tmp_dir')
         self.truncate_rate = config.getint("application", "truncate_rate")
         self.timeout_is_fatal = config.getboolean("application", "timeout_is_fatal")
+        self.valgrind = config.getboolean("application", "valgrind")
         php_init()
         #assert 1 <= len(self.data)
 
+    def is_vuln(self, line):
+        return line.find("Invalid read") >= 0 or line.find("Invalid write") >= 0
+
     def fuzzFile(self, filenames):
         args = self.program_args + filenames
-        app = Application(self.program, args)
-        app.start()
-        try:
-            limitedTime(self.timeout, app.wait)
-        except Timeout:
-            print "Timeout error!"
-            app.kill()
-            return self.timeout_is_fatal
-        except KeyboardInterrupt:
-            print "Interrupt!"
-            app.stop()
-            return True
+        if self.valgrind:
+            app = Application("valgrind", ["--leak-check=no", "--quiet", self.program] + args)
+            app.pipeStderr()
+            app.start()
+            try:
+                while app.wait(False):
+                    line = app.readline(timeout=None, stream="stderr")
+                    if line:
+                        if self.is_vuln(line):
+                            print line
+                            app.stop()
+                            return True
+            except KeyboardInterrupt:
+                print "Interrupt!"
+                app.stop()
+                return True
+        else:
+            app = Application(self.program, args)
+            app.start()
+            try:
+                limitedTime(self.timeout, app.wait)
+            except Timeout:
+                print "Timeout error!"
+                app.kill()
+                return self.timeout_is_fatal
+            except KeyboardInterrupt:
+                print "Interrupt!"
+                app.stop()
+                return True
         return app.exit_failure and app.exit_code is None
 
     def info(self, message):

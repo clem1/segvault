@@ -21,7 +21,6 @@ HEADER_404 = """HTTP/1.1 404 Not Found
 Server: FroxyWeb
 Connection: close
 
-coincoin
 """
 
 class URLCache:

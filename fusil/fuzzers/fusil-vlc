@@ -39,6 +39,7 @@ class Fuzzer(Application):
 
     def setupProject(self):
         project = self.project
+        project.config.use_cpu_probe = False
         # Command line
         minutes, seconds = divmod(self.options.seconds, 60)
         stop_time = "%02u:%02u" % (minutes, seconds)
@@ -63,13 +64,13 @@ class Fuzzer(Application):
         arguments.append('<movie>')
         if not has_run_time_opt:
             # Quit when done
-        arguments.append('vlc://quit')
+            arguments.append('vlc://quit')
 
 
 
         # Create buggy input file
         orig_filename = self.arguments[0]
-        mangle = AutoMangle(project, orig_filename)
+        mangle = AutoMangle(project, orig_filename, nb_file=1)
         mangle.max_size = self.options.filesize
         mangle.first_offset = 100
 
@@ -85,9 +86,12 @@ class Fuzzer(Application):
         process.max_memory = None
         WatchProcess(process, timeout_score=0)
         stdout = WatchStdout(process)
+        stdout.max_nb_line = None
         stdout.score_weight = 0.4
 #        stdout.ignoreRegex(r"libdvdread: Can't stat ")
         stdout.ignoreRegex(r'no access_demux module matching "file" could be loaded')
+        stdout.ignoreRegex(r'load')
+        stdout.ignoreRegex(r'main')
         stdout.addRegex(r'main input error: no suitable demux module', -0.50)
         #stdout.addRegex(r'main playlist: nothing to play', -0.50)
         stdout.addRegex(r'removing module "direct3d"', -0.50)

@@ -5,7 +5,7 @@
 #
 from random import randint, choice as random_choice
 
-MAX_STRING_SIZE = 0xFFFF
+MAX_STRING_SIZE = 0xFFFFF
 MAX_OPERATION = 4
 
 # some proto://
@@ -31,6 +31,37 @@ SPECIAL_VALUES = [
         5000000000000,
         0.50,
         ]
+
+REGEX_CHARS="\\^.$|*+?!:-"
+
+def regex():
+    occ = randint(5, 20)
+    r = "abc"
+    for o in xrange(occ):
+        w = randint(0, 10)
+        if w >= 0 and w <= 3:
+            r += random_choice(REGEX_CHARS)
+        elif w == 4:
+            r += "{%d, %d}" % (randint(0, 1024), randint(0, 1024))
+        elif w == 5:
+            r += "{%d,}" % randint(0, 1024)
+        elif w == 6:
+            l = randint(0, len(r)-1)
+            r1, r2 = r[:l], r[l:]
+            r = "(%s|%s)" % (r1, r2)
+        elif w == 7:
+            l = randint(0, len(r)-1)
+            r1, r2 = r[:l], r[l:]
+            r = "(%s)%s" % (r1, r2)
+        elif w == 8:
+            l = randint(0, len(r)-1)
+            r1, r2 = r[:l], r[l:]
+            r = "[%s]%s" % (r1, r2)
+        elif w == 9:
+            l = randint(0, len(r)-1)
+            r1, r2 = r[:l], r[l:]
+            r = "[^%s]%s" % (r1, r2)
+    return r
 
 def string():
     """return a random string"""
