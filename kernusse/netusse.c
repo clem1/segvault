@@ -32,6 +32,8 @@
 #include <sys/uio.h>
 #endif
 
+#include <sys/un.h>
+
 #if defined(__OpenBSD__)
 #include <util.h>
 #endif
@@ -427,14 +429,16 @@ void ioctlusse(int s)
 void getsocknamusse(int s)
 {
     char    buf[2048], pbuf[2048];
-    int     len = 0, ret;
+    int     len = 0, ret, i;
 
     memset(&buf, 'A', 2048);
     memset(&pbuf, 'A', 2048);
 
-    for ( len = 0 ; len < 50 ; len++ )
+    for ( i = 0 ; i < 20 ; i++ )
     {
-        int coin = len;
+        int coin;
+        len = rand() % 2048;
+        coin = len;
         ret = getsockname(s, (struct sockaddr *)&buf, &coin);
         if ( ret >= 0 )
         {
@@ -460,13 +464,14 @@ void getsocknamusse(int s)
 void getpeernamusse(int s)
 {
     char    buf[2048], pbuf[2048];
-    int     len = 0, ret;
+    int     len = 0, ret, i;
 
     memset(&buf, 'A', 2048);
     memset(&pbuf, 'A', 2048);
 
-    for ( len = 0 ; len < 50 ; len++ )
+    for ( i = 0 ; i < 20 ; i++ )
     {
+        len = rand() % 2048;
         ret = getpeername(s, (struct sockaddr *)&buf, &len);
         if ( ret >= 0 && memcmp(&buf, &pbuf, (len < 0 || len > 2048) ? 2048 : len) != 0 )
         {
@@ -568,46 +573,40 @@ void gsoptusse(int s)
 	return;
 }
 
-static void createpath(
-
 /* sockaddr fuzzer
  */
-void sockaddrfuzz(char *buf, size_t len)
+static void sockaddrfuzz(char *buf, size_t len)
 {
     struct sockaddr     *sa     = (struct sockaddr *)buf;
-    struct sockaddr_sun *sun    = (struct sockaddr_sun *)buf;
+    struct sockaddr_un  *sun    = (struct sockaddr_un *)buf;
 
     /* mangling
      */
     fuzzer(buf, len);
+
+    sa->sa_family = current_family;
+    sa->sa_len = len;
 
     /* patching
      */
     switch (rand() % 5)
     {
         case 0:
-        /* basic */
-        if (len > sizeof(struct sockaddr))
-        {
-            sa->sa_len = len;
-            sa->sa_family = current_family;
-        }
-        break;
         case 1:
+        case 3:
+        case 2:
         /* path */
-        if (len > sizeof(struct sockaddr_un))
+        if (len > 16)
         {
             char *f = getfile();
-            sun->sun_len = len;
-            sun->sun_family = current_family;
-            if (strlen(
-                        /* XXX foo foo foo */
-
+#define min(a, b) (a < b) ? a : b
+            strlcpy(sun->sun_path, f, min(strlen(f), len-12));
+            break;
         }
         default:
-
-
-
+        /* TODO */
+        break;
+    }
 }
 
 /**
@@ -622,18 +621,14 @@ void bindusse(int fd)
 
     do
     {
-        len = evilint();
+        len = evilint() % 4096;
         b = malloc(len);
-        if ( b != NULL && len < 0xFFFFF )
-            fuzzer(b, len);
+        if (!b)
+            continue;
+        sockaddrfuzz(b, len);
 #if defined(DEBUG) || defined(DEBUG_BIND)
         fprintf(dbg, "bind(%d, x, %u)\n", fd, len);
 #endif
-        if ( b != NULL && len >= sizeof(struct sockaddr) )
-        {
-            sa = (struct sockaddr *)b;
-            sa->sa_family = current_family;
-        }
         ret = bind(fd, (struct sockaddr *)&b, len);
         if (ret && (rand() % 2))
             listen(fd, rand());
@@ -651,15 +646,11 @@ void connectusse(int fd)
 
     do
     {
-        len = evilint();
+        len = evilint() % 4096;
         b = malloc(len);
-        if ( b != NULL && len < 0xFFFFF )
-            fuzzer(b, len);
-        if ( b != NULL && len >= sizeof(struct sockaddr) )
-        {
-            sa = (struct sockaddr *)b;
-            sa->sa_family = current_family;
-        }
+        if (!b)
+            continue;
+        sockaddrfuzz(b, len);
 #if defined(DEBUG) || defined(DEBUG_CONNECT)
         fprintf(dbg, "connect(%d, x, %u)\n", fd, len);
 #endif
@@ -676,15 +667,10 @@ void sendtousse(int fd)
     int     flags = 0;
     struct sockaddr *sa;
 
-    alen = evilint();
+    alen = evilint() % 4096;
     addr = malloc(alen);
-    if ( addr != NULL && alen < 0xFFFFF )
-        fuzzer(addr, alen);
-    if ( addr != NULL && alen >= sizeof(struct sockaddr) )
-    {
-        sa = (struct sockaddr *)addr;
-        sa->sa_family = current_family;
-    }
+    if (addr)
+        sockaddrfuzz(addr, alen);
 
     mlen = evilint();
     msg = malloc(mlen);
@@ -1482,6 +1468,13 @@ int main(int ac, char **av)
                 connectusse(s);
             else
                 bindusse(s);
+            if (rand() % 4)
+                connectusse(s);
+            else
+                bindusse(s);
+
+            if (rand() % 5)
+                listen(s, evilint());
         }
 		for (i = 0; i < opts; i++)
 		{
@@ -1491,8 +1484,8 @@ int main(int ac, char **av)
                 continue;
             }
 			ssoptusse(s);
-			gsoptusse(s);
             ioctlusse(s);
+			gsoptusse(s);
             sendmsgusse(s);
             recvmsgusse(s);
             sendtousse(s);
