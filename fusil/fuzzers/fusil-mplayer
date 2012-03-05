@@ -26,7 +26,7 @@ from fusil.terminal_echo import TerminalEcho
 class Fuzzer(Application):
     NAME = "mplayer"
     USAGE = "%prog [options] filename"
-    NB_ARGUMENTS = 1
+    NB_ARGUMENTS = (1, None)
 
     def createFuzzerOptions(self, parser):
         options = OptionGroup(parser, "Mplayer")
@@ -55,7 +55,7 @@ class Fuzzer(Application):
         arguments.append("<movie>")
 
         # Create buggy input file
-        orig_filename = self.arguments[0]
+        orig_filename = self.arguments
         mangle = AutoMangle(project, orig_filename, nb_file=1)
         mangle.max_size = self.options.filesize
 

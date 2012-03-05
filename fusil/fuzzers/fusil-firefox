@@ -8,7 +8,7 @@ from __future__ import with_statement
 
 HOST = '0.0.0.0'
 PORT = 8080
-NB_FILES = 32
+NB_FILES = 8
 ROWS = 4
 MAX_MEMORY = 0
 HTML_REFRESH_TIMEOUT = 1.0
@@ -102,6 +102,7 @@ class Fuzzer(Application):
         else:
             man = AutoMangle(project, orig_filename, nb_file=self.options.nb_files, ext=filename_ext, nofile=True)
             #man.aggressivity = 0.25
+        self.error('coin')
         FuzzyHttpServer(project, self.options, orig_filename, filename_ext, rows=self.options.rows)
         if self.options.win:
             FirefoxWindow(project, self.options.win)

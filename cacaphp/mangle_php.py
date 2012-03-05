@@ -67,6 +67,8 @@ def _phpvalue(names = [ "$CACAPHP" ]):
         return "emptyfile"
     elif what == 12:
         return mangle.regex()
+    elif what == 13:
+        return mangle.html()
     return mangle.string()
 
 def _args(nb):

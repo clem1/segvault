@@ -84,7 +84,7 @@ class FuzzParser:
 
 
 def is_vuln(line):
-    return line.find("Invalid read") >= 0 or line.find("Invalid write") >= 0
+    return line.find("Invalid write") >= 0
 
 def run(prog, args, valgrind):
     if valgrind:
@@ -121,7 +121,7 @@ def parse_opts():
     parser.add_option("-p", "--prog", dest="prog", default="clamscan", help="Program to fuzz", metavar="PROG")
     parser.add_option("-d", "--dstpath", dest="dstpath", default="/tmp/fuzz", help="Path where fuzzed files are created", metavar="DSTPATH")
     parser.add_option("-q", "--quiet", dest="quiet", default="False", action="store_true", help="No fucking print")
-    parser.add_option("-a", "--args", dest="args", default="", help="Program args")
+    parser.add_option("-a", "--args", dest="args", default=None, help="Program args")
     return parser.parse_args()
 
 
@@ -149,7 +149,11 @@ def main():
                 fp.fuzz(i).tofile(open("/%s/%s-fuzzy-%02d.%s" % (options.dstpath, fname, i, fext), "wb"))
 
         # dir or single file?
-        args = options.args.split(",")
+        if options.args is None:
+            args = []
+        else:
+            args = options.args.split(",")
+
         if options.occ == 1:
             args.append("/%s/%s-fuzzy-%02d.%s" % (options.dstpath, fname, 0, fext))
         else:

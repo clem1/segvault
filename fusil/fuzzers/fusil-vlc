@@ -19,7 +19,7 @@ from subprocess import STDOUT
 class Fuzzer(Application):
     NAME = "vlc"
     USAGE = "%prog [options] filename"
-    NB_ARGUMENTS = 1
+    NB_ARGUMENTS = (1, None)
 
     def createFuzzerOptions(self, parser):
         options = OptionGroup(parser, "VLC")
@@ -66,10 +66,8 @@ class Fuzzer(Application):
             # Quit when done
             arguments.append('vlc://quit')
 
-
-
         # Create buggy input file
-        orig_filename = self.arguments[0]
+        orig_filename = self.arguments
         mangle = AutoMangle(project, orig_filename, nb_file=1)
         mangle.max_size = self.options.filesize
         mangle.first_offset = 100

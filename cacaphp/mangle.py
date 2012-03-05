@@ -34,6 +34,25 @@ SPECIAL_VALUES = [
 
 REGEX_CHARS="\\^.$|*+?!:-"
 
+def html():
+    tags = ('html', 'head', 'body', 'b', 'h1', 'font', 'audio', 'embed')
+    occ = randint(5, 20)
+    s = ""
+    for o in xrange(occ):
+        w = randint(0, 4)
+        if w == 0:
+            s += "<%s>" % random_choice(tags)
+        elif w == 1:
+            s += "</%s>" % random_choice(tags)
+        elif w == 2:
+            s += regex()
+        elif w == 3:
+            s += "&#%u;" % randint() * randint()
+        elif w == 4:
+            s += "&"
+        # TODO: more elif.  
+        return s
+
 def regex():
     occ = randint(5, 20)
     r = "abc"

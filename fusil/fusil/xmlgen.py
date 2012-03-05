@@ -848,13 +848,16 @@ class XMLGen:
     xml_types = {}
     xml_types["svg11"] = {"header": """<?xml version="1.0" encoding="UTF-8"?>\n<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/TR/SVG/DTD/svg11.dtd">\n""", "root": """<svg xmlns="http://www.w3.org/2000/svg" version="1.1">\n""", "endroot": """</svg>\n""" }
     xml_types["svg10"] = {"header": """<?xml version="1.0" encoding="UTF-8"?>\n<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN" "http://www.w3.org/TR/SVG/DTD/svg10.dtd">\n""", "root": """<svg xmlns="http://www.w3.org/2000/svg" version="1.0">\n""", "endroot": """</svg>\n""" }
-    xml_types["xhtml1"] = {"header": """<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">""", "root": """<html><head><style type="text/css">%(css)s</style></head>""", "endroot": "</html>" }
+    #xml_types["xhtml1"] = {"header": """<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">""", "root": """<html><head><style type="text/css">%(css)s</style></head>""", "endroot": "</html>" }
+    xml_types["xhtml1"] = {"header": """<!DOCTYPE html>""", "root": """<html><head><style type="text/css">%(css)s</style></head>""", "endroot": "</html>" }
 
-    def __init__(self, dtd, xmltype="svg11"):
+
+    def __init__(self, dtds, xmltype="svg11"):
         self.elems = {}
         p = dtdparser.DTDParser()
         p.set_dtd_consumer(DTDConsume(self.elems))
-        p.parse_resource(dtd)
+        for dtd in dtds:
+            p.parse_resource(dtd)
         self.toend = []
         self.xmlt = xmltype
         if xmltype == "xhtml1":
@@ -866,7 +869,7 @@ class XMLGen:
         body = random.randint(0, 3)
         if self.xmlt != "xhtml1":
             body = 0
-        nelem = random.randint(1, 60)
+        nelem = random.randint(1, 20)
         elems = []
         data = ""
         if body:

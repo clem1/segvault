@@ -16,8 +16,8 @@ funcs       = []
 #
 # const
 #
-MAX_FUNCS = 100
-MAX_ARGS = 10
+MAX_FUNCS = 1000
+MAX_ARGS = 5
 
 #
 # init funcs

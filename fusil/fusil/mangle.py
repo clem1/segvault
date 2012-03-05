@@ -129,11 +129,11 @@ class MangleXML(MangleAgent):
     def __init__(self, nofile=False, xmltype="svg11"):
         self.nofile = nofile
         if xmltype == self.SVG11:
-            self.gen = XMLGen("dtds/svg11-flat.dtd", self.SVG11)
+            self.gen = XMLGen(["dtds/svg11-flat.dtd"], self.SVG11)
         elif xmltype == self.SVG10:
-            self.gen = XMLGen("dtds/svg10.dtd", self.SVG10)
+            self.gen = XMLGen(["dtds/svg10.dtd"], self.SVG10)
         elif xmltype == self.XHTML1:
-            self.gen = XMLGen("dtds/xhtml1-transitional.dtd", self.XHTML1)
+            self.gen = XMLGen(["dtds/xhtml1-transitional.dtd", "dtds/html5.dtd"], self.XHTML1)
             #self.gen = XMLGen("dtds/html5.dtd", self.XHTML1)
             #self.gen = XMLGen("dtds/loose.dtd", self.XHTML1)
             #self.gen = XMLGen("dtds/xhtml11.dtd", self.XHTML1)

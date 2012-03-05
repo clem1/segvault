@@ -40,7 +40,7 @@ class Fuzzer:
         #assert 1 <= len(self.data)
 
     def is_vuln(self, line):
-        return line.find("Invalid read") >= 0 or line.find("Invalid write") >= 0
+        return line.find("Invalid write") >= 0
 
     def fuzzFile(self, filenames):
         args = self.program_args + filenames

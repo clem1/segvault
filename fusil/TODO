@@ -1,6 +1,8 @@
 Fusil TODO list
 ===============
 
+ * Ptrace eip
+ * Multi file fuzzing (dir)
  * Factorize code responsible to rename the session on process exit
    (share code between Debugger and CreateProcess)
  * Protect the terminal using setsid(), or setpgrp(), or setpgid(), or ...

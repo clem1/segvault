@@ -1,11 +1,13 @@
 /*
- * netusse.c - fucking kernel net stacks fuzzer
+ * netusse.c - fucking kernel net stacks fuzzer.
  *
- * TODO:
- *  - recvfrom()
- *  - recvmsg()
+ * At least it successfully broke:
+ *  FreeBSD
+ *  NetBSD
+ *  OpenBSD
+ *  Solaris
  *
- * Copyright (c) Clément Lecigne, 2006-2009
+ * Copyright (c) Clément Lecigne, 2006-2012
  */
 #include <stdio.h>
 #include <sys/socket.h>
@@ -25,8 +27,8 @@
 #ifdef __linux__
 #include <sys/klog.h>
 #include <linux/atalk.h>
-#include <linux/in.h>
 #include <linux/can.h>
+#include <netinet/in.h>
 #else
 #include <netinet/in.h>
 #include <sys/uio.h>
@@ -38,6 +40,7 @@
 #include <util.h>
 #endif
 
+// printf special debug shits!
 //#define DEBUG 1
 //#define DEBUG_SOCKET 1
 //#define DEBUG_BIND 1
@@ -85,18 +88,23 @@ static int debug_socket(int domain, int type, int protocol)
     fprintf(dbg, "socket(%d, %d, %d)\n", domain, type, protocol);
 #endif
 
+    /* add exceptions here */
+
     current_proto = protocol;
     current_family = domain;
     return socket(domain, type, protocol);
 }
 
-
+/* create a random stream of mm_size bytes inside mm.
+ */
 static void fuzzer(char *mm, size_t mm_size)
 {
     size_t i;
 
     for ( i = 0 ; i < mm_size ; i++ )
     {
+        /* lame format string checker, evil values or random.
+         */
         if ( rand() % 40 == 0 && i < mm_size - 2 )
         {
             mm[i++] = '%';
@@ -113,10 +121,14 @@ static void fuzzer(char *mm, size_t mm_size)
                     break;
             }
         }
+        else if ( rand() % 40 == 0 )
+            mm[i] = 255;
+        else if ( rand() % 40 == 0 )
+            mm[i] = 0;
         else
         {
             mm[i] = rand() & 255;
-            if (rand() % 2)
+            if ( rand() % 10 == 0 )
                 mm[i] |= 0x80;
         }
     }
@@ -124,9 +136,23 @@ static void fuzzer(char *mm, size_t mm_size)
     return;
 }
 
+#ifdef __FreeBSD__
+static void fuzziovec(struct iovec *io, size_t len)
+{
+    size_t i;
+
+    for (i = 0; i < len; io++, i++)
+    {
+        io->iov_len = rand() & 255;
+        io->iov_base = malloc(io->iov_len);
+        if (io->iov_base != NULL)
+            fuzzer(io->iov_base, io->iov_len);
+    }
+}
+#endif
+
 #ifdef __linux__
-/**
- * see if linux kernel has oopsed :)
+/* lame piece of code to see if linux kernel has oopsed :)
  */
 static int linux_hasoopsed()
 {
@@ -146,9 +172,11 @@ static int linux_hasoopsed()
 }
 #endif
 
+/* do a random kernel operation, used to detect memory leak.
+ */
 static void kernop(int fd)
 {
-    /* from Jon Oberheide sploit
+    /* from Jon Oberheide sploits
     */
 #ifdef __LINUX__
     const int   randcalls[] = {
@@ -170,15 +198,14 @@ static void kernop(int fd)
     {
         switch ( rand() % 2 )
         {
-            case 55:
 #ifdef __LINUX__
+            case 0:
                 o = randcalls[rand() % sizeof(randcalls)/sizeof(randcalls[0])];
-#else
-                o = rand() % 64;
-#endif
                 ret = syscall(o);
                 break;
-            case 0:
+#else
+            case 0: /* TODO: to bored to enumerate unevil syscall on other sys. */
+#endif
             case 1:
                 len = (rand() % 2) ? sizeof(int) : sizeof(buf);
                 ret = getsockopt(fd, randsopts[rand() % sizeof(randsopts)/sizeof(randsopts[0])], rand() % 130, &buf, &len);
@@ -188,6 +215,8 @@ static void kernop(int fd)
     while ( ret < 0 );
 }
 
+/* return random file on the FS or not.
+ */
 static char *getfile(void)
 {
     switch (rand() % 5)
@@ -200,8 +229,10 @@ static char *getfile(void)
             return "/tmp/fusse";
         case 3:
             return "/tmp/";
+#ifdef __LINUX__
         case 4:
             return "/proc/self/maps";
+#endif
         default:
             return "/";
     }
@@ -209,15 +240,14 @@ static char *getfile(void)
 }
 
 
-/**
- * return a random file descriptor
+/* return a random file descriptor
  */
 static int getfd(void)
 {
     int fd, flags;
 
     do {
-        switch (rand() % 5)
+        switch (rand() % 7)
         {
             case 0:
                 fd = open("/etc/passwd", O_RDONLY);
@@ -235,16 +265,20 @@ static int getfd(void)
                 fd = debug_socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
                 break;
             default:
-                fd = open("/proc/self/maps", O_RDONLY);
+                fd = open(getfile(), rand());
                 break;
         }
     }
     while (fd < 0);
     flags = fcntl(fd, F_GETFL, 0);
+    /* force non blocking more on fd
+     */
     fcntl(fd, F_SETFL, flags | O_NONBLOCK);
     return fd;
 }
 
+/* ilja's stuff
+ */
 static int evilint(void)
 {
     int state;
@@ -269,9 +303,9 @@ static int evilint(void)
         case 12:
         case 13:
         case 14:
-                 return rand() & 32;
+                 return rand() & 256;
         default:
-                return rand() & 2048;
+                return rand();
 
     }
 }
@@ -349,7 +383,7 @@ void ssoptusse(int s)
 		else
 			optname = evilint();
 
-#if defined(__FreeBSD__)
+#if 0
         /*
 		 * anti well know FreeBSD mbufs exhaustion.
 		 */
@@ -530,7 +564,7 @@ void gsoptusse(int s)
             level = evilint();
             break;
 		}
-#if defined(__FreeBSD__)
+#if 0
         /*
 		 * anti well know FreeBSD mbufs exhaustion.
 		 */
@@ -549,9 +583,11 @@ void gsoptusse(int s)
 
     /* linux false positive
      */
+#if 0
 #if defined(__linux__)
     if ( len == 104 && optname == 11 )
         return;
+#endif
 #endif
 
     kernop(s);
@@ -577,15 +613,17 @@ void gsoptusse(int s)
  */
 static void sockaddrfuzz(char *buf, size_t len)
 {
-    struct sockaddr     *sa     = (struct sockaddr *)buf;
+    struct sockaddr  *sa     = (struct sockaddr *)buf;
     struct sockaddr_un  *sun    = (struct sockaddr_un *)buf;
 
     /* mangling
      */
     fuzzer(buf, len);
 
+    if (len < sizeof(struct sockaddr))
+        return;
+
     sa->sa_family = current_family;
-    sa->sa_len = len;
 
     /* patching
      */
@@ -600,7 +638,7 @@ static void sockaddrfuzz(char *buf, size_t len)
         {
             char *f = getfile();
 #define min(a, b) (a < b) ? a : b
-            strlcpy(sun->sun_path, f, min(strlen(f), len-12));
+            strncpy(sun->sun_path, f, min(strlen(f), len-12));
             break;
         }
         default:
@@ -725,6 +763,76 @@ void sendfilusse(int fd)
             close(ifd);
         if ( ofd != fd )
             close(ofd);
+    }
+}
+#elif defined(__FreeBSD__)
+void sendfilusse(int fd)
+{
+    int i;
+
+    for ( i = 0 ; i < 50 ; i++ )
+    {
+        off_t           offset;
+        size_t          size;
+        int             ifd, flags;
+        struct sf_hdtr  hdtr, *hdtrp;
+
+        offset = evilint();
+        size = evilint();
+        ifd = evilint();
+        flags = rand() % 5;
+        hdtrp = NULL;
+
+        /* ifd case
+         */
+        switch (rand() % 5)
+        {
+            case 0:
+                ifd = fd;
+                break;
+            case 1:
+                ifd = evilint();
+                break;
+            case 3:
+                ifd = fd;
+                break;
+            case 2:
+            case 4:
+                ifd = getfd();
+                break;
+        }
+
+        /* off
+         */
+        if ( rand() % 5 == 2 )
+            offset = 0;
+
+        /* size
+         */
+        if ( rand() % 5 == 2 )
+            size = rand() & 0xfff;
+
+        /* flags
+         */
+        if ( rand() % 5 == 2 )
+            flags = rand();
+
+        /* hdtr
+         */
+        if ( rand() % 5 == 2 )
+        {
+            hdtrp = &hdtr;
+            hdtr.hdr_cnt = rand() % 10;
+            hdtr.headers = malloc(hdtr.hdr_cnt * sizeof(struct iovec));
+            fuzziovec(hdtr.headers, hdtr.hdr_cnt);
+            hdtr.trl_cnt = rand() % 10;
+            hdtr.trailers = malloc(hdtr.trl_cnt * sizeof(struct iovec));
+            fuzziovec(hdtr.trailers, hdtr.trl_cnt);
+        }
+
+        sendfile(ifd, fd, offset, size, hdtrp, NULL, flags);
+        if ( ifd != fd )
+            close(ifd);
     }
 }
 #endif
@@ -897,35 +1005,6 @@ nocmsghdr:
         bb = NULL;
     }
 
-#if 0
-    for ( i = 0 ; i < 50 ; i++ )
-    {
-        fuzzer(name, 1024);
-        fuzzer(base, 1024);
-        fuzzer(ctrl, 1024);
-        fuzzer(iovb, sizeof(struct iovec));
-        msg.msg_name    = name;
-        msg.msg_namelen = evilint();
-        msg.msg_iovlen  = evilint();
-        msg.msg_iov     = iovb;
-        msg.msg_flags   = rand() & 255;
-        if ( rand() % 2 )
-        {
-            msg.msg_iov   = &iov;
-            iov.iov_base  = base;
-            iov.iov_len   = 1;
-        }
-        else if ( rand() % 5 == 0 )
-            msg.msg_iov = NULL;
-        msg.msg_control = ctrl;
-        msg.msg_controllen = evilint();
-#ifdef DEBUG_SENDMSG
-        printf("sendmsg(%d, {nl = %x, iol = %x, ctl = %x}, 0);\n", fd, msg.msg_namelen, msg.msg_iovlen, msg.msg_controllen);
-        getchar();
-#endif
-        sendmsg(fd, &msg, 0);
-    }
-#endif
     return;
 }
 #elif defined(__linux__)
@@ -1139,6 +1218,79 @@ int randfd(void)
 
     closedir(dip);
     return -1;
+}
+
+struct foo_ip_msfilter
+{
+   __u32 imsf_multiaddr;
+   __u32 imsf_interface;
+   __u32 imsf_fmode;
+   __u32 imsf_numsrc;
+   __u32 imsf_slist[1];
+};
+ 
+struct foo_ip_mreq_source
+{
+   __u32 imr_multiaddr;
+   __u32 imr_interface;
+   __u32 imr_sourceaddr;
+};
+
+/* do some interesting wellknown interesting operation on sock.
+ */
+void valid_op(int s)
+{
+    struct ip_mreqn mr;
+    struct foo_ip_msfilter msf;
+    struct foo_ip_mreq_source ms;
+    int    val=1;
+    socklen_t l;
+#ifdef __LINUX__
+    char   *dev = "eth0";
+#else
+    char   *dev = "lo0";
+#endif
+
+    /* multicast stuffs from Paul Starzetz sploits.
+     */
+    memset (&mr, 0, sizeof (mr));
+    mr.imr_multiaddr.s_addr = inet_addr ("224.0.0.199");
+    setsockopt (s, SOL_IP, IP_ADD_MEMBERSHIP, &mr, sizeof (mr));
+    memset (&ms, 0, sizeof (ms));
+    ms.imr_multiaddr = inet_addr ("224.0.0.199");
+    ms.imr_sourceaddr = inet_addr ("4.5.6.7");
+    setsockopt (s, SOL_IP, IP_BLOCK_SOURCE, &ms, sizeof (ms));
+    memset (&ms, 0, sizeof (ms));
+    ms.imr_multiaddr = inet_addr ("224.0.0.199");
+    ms.imr_sourceaddr = inet_addr ("4.5.6.7");
+    setsockopt (s, SOL_IP, IP_UNBLOCK_SOURCE, &ms, sizeof (ms));
+    memset (&ms, 0, sizeof (ms));
+    ms.imr_multiaddr = inet_addr ("224.0.0.199");
+    ms.imr_sourceaddr = inet_addr ("4.5.6.7");
+    setsockopt (s, SOL_IP, IP_UNBLOCK_SOURCE, &ms, sizeof (ms));
+    memset (&ms, 0, sizeof (ms));
+    ms.imr_multiaddr = inet_addr ("224.0.0.199");
+    ms.imr_sourceaddr = inet_addr ("4.5.6.7");
+    setsockopt (s, SOL_IP, IP_UNBLOCK_SOURCE, &ms, sizeof (ms));
+
+#if 0
+    /* sctp shits.
+     */
+    l = sizeof(sctp_initmsg);
+    getsockopt(s, SOL_SCTP, SCTP_INITMSG, &msg, &l);
+    msg.sinit_num_ostreams = evilint();
+    msg.sinit_max_instreams = evilint();
+    setsockopt(s, SOL_SCTP, SCTP_INITMSG, &msg, sizeof(struct sctp_initmsg));
+    setsockopt(s, SOL_SCTP, SCTP_NODELAY, (char*)&val, sizeof(val));
+#endif
+
+    /* f00 stuffs.
+     */
+    setsockopt(s, SOL_SOCKET, SO_REUSEADDR, (char *)&val, sizeof(val));
+    setsockopt(s, SOL_SOCKET, SO_BROADCAST, (char *)&val, sizeof(val));
+    setsockopt(s, SOL_SOCKET, SO_BINDTODEVICE, dev, 4);
+
+    return;
 }
 
 int main(int ac, char **av)
@@ -1382,16 +1534,8 @@ int main(int ac, char **av)
                 s = debug_socket(AF_IRDA, SOCK_DGRAM, 0);
                 break;
             case 7:
-            {
-                struct sockaddr_llc sllc;
                 s = debug_socket(AF_LLC, SOCK_DGRAM, 0);
-                memset(&sllc, 0, sizeof(sllc));
-                sllc.sllc_family = AF_LLC;
-                sllc.sllc_arphrd = ARPHRD_ETHER;
-                sllc.sllc_sap = LLC_SAP_NULL;
-                sendto(s, "COIN", 4, 0, (struct sockaddr *) &sllc, sizeof(sllc));
                 break;
-            }
 #endif
 #ifdef IPPROTO_SCTP
             case 8:
@@ -1459,6 +1603,9 @@ int main(int ac, char **av)
         }
 		if (s == -1) continue;
 
+        if (rand() % 2)
+            valid_op(s);
+
         flags = fcntl(s, F_GETFL, 0);
         fcntl(s, F_SETFL, flags | O_NONBLOCK);
 
@@ -1489,7 +1636,7 @@ int main(int ac, char **av)
             sendmsgusse(s);
             recvmsgusse(s);
             sendtousse(s);
-#if defined(__linux__)
+#if defined(__linux__) || defined(__FreeBSD__)
             sendfilusse(s);
 #endif
             //usleep(500);

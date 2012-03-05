@@ -9,8 +9,8 @@ Supported file formats:
  - HTML
 """
 
-NB_FILES = 10
-MAX_MUTATIONS = 100
+NB_FILES = 40
+MAX_MUTATIONS = 40
 MAX_MEMORY = 400*1024*1024
 
 from fusil.application import Application
@@ -25,7 +25,7 @@ from fusil.file_watch import FileWatch
 class Fuzzer(Application):
     NAME = "clamav"
     USAGE = "%prog [options] filename"
-    NB_ARGUMENTS = 1
+    NB_ARGUMENTS = (1, None)
 
     def createFuzzerOptions(self, parser):
         options = OptionGroup(parser, "ClamAV")
@@ -49,7 +49,7 @@ class Fuzzer(Application):
         else:
             PROGRAM = 'clamscan'
 
-        orig_filename = self.arguments[0]
+        orig_filename = self.arguments
 
         mangle = AutoMangle(project, orig_filename, nb_file=self.options.nb_files)
         mangle.config.max_op = self.options.max_mutations
