@@ -1,0 +1,1 @@
+export PYTHONPATH=`pwd`/pypcap/build/lib.linux-x86_64-2.7/:`pwd`/dpkt/

@@ -1,0 +1,31 @@
+pypcap-trunk:
+
+- honor 'immediate' flag to disable buffering under Windows - by Kosma Moczek
+
+- sendpacket() support - by Kosma Moczek
+
+- API CHANGE: require 'cnt' as first parameter to pcap.loop()
+  - by Bartosz Skowron
+
+- lookupnet() support - from Joao Medeiros
+
+- findalldevs() support - by Bartosz Skowron
+
+pypcap-1.1:
+
+- better lookupdev() on win32, as requested by Zack Payton
+  <zack@tek-pros.com>
+
+- add Linux SLL datalink type
+
+- better threading support from A. Nonymous
+
+pypcap-1.0:
+
+- API CHANGE: require 'cnt' as first parameter to pcap.dispatch(),
+  shadowing libpcap pcap_dispatch().
+	
+- add pcap.{get,set}nonblock(), to work around broken BPF select()
+  on certain platforms (MacOS X, older FreeBSD, etc.).
+
+# $Id: CHANGES 101 2010-07-16 08:20:16Z kosma@kosma.pl $

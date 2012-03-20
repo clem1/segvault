@@ -97,6 +97,7 @@ class Fuzzer(Application):
         stdout.addRegex(r'theora decoder error: this bitstream does not contain Theora video data', -0.10)
         stdout.addRegex(r'Trying to seek to far : EOF?', 0.20)
         stdout.addRegex(r'marker does not match f_code', 0.20)
+        stdout.addRegex(r'AddressSanitizer', 10.90)
         stdout.addRegex(r'vorbis decoder error: this bitstream does not contain Vorbis audio data', -0.10)
         stdout.addRegex(r'Error: No ogg data found in file', -0.50)
 #        stdout.addRegex(r'access_file access error: seeking too far', 0.10)
