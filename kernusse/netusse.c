@@ -1,13 +1,16 @@
 /*
  * netusse.c - fucking kernel net stacks fuzzer.
  *
+ * WARNING: this is a fucking crappy and intermediate version of netusse.
+ * The new one will be released soon on netusse.googlecode.com.
+ *
  * At least it successfully broke:
  *  FreeBSD
  *  NetBSD
  *  OpenBSD
  *  Solaris
  *
- * Copyright (c) Clément Lecigne, 2006-2012
+ * Copyright (c) Clément Lecigne, 2006-2011
  */
 #include <stdio.h>
 #include <sys/socket.h>
